@@ -2,133 +2,163 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gerador de Etiqueta - Elgin</title>
+    <title>Gerador de Etiqueta Dinâmico</title>
+    <!-- Biblioteca para gerar o código de barras real -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* Configuração de página para impressão */
-        @page { size: 100mm 150mm; margin: 0; }
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; display: flex; gap: 20px; }
+        
+        /* Painel de Controle (Esquerda) */
+        .painel-controle { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 350px; }
+        .painel-controle h2 { font-size: 18px; margin-top: 0; }
+        .campo { margin-bottom: 10px; }
+        label { display: block; font-size: 12px; color: #666; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Container Principal (Rotacionado para o formato da imagem) */
+        /* Estilo da Etiqueta (Baseado no modelo image_dbdb90.png) */
+        .etiqueta-preview { background: white; padding: 10px; }
+        
         .etiqueta-container {
-            width: 150mm;
-            height: 100mm;
+            width: 130mm;
+            height: 90mm;
             border: 2px solid #000;
             display: grid;
-            grid-template-columns: 80px 1fr 120px; /* Coluna Elgin | Conteúdo | Coluna Data/Selo */
-            transform: rotate(-90deg) translate(-100mm, 0);
+            grid-template-columns: 60px 1fr 100px; /* Logo | Info | Data */
             transform-origin: top left;
-            overflow: hidden;
+            background: #fff;
+            color: #000;
         }
 
-        /* Seções Verticais */
-        .col-logo-elgin {
-            border-right: 2px solid #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 24px;
+        .borda-v { border-right: 2px solid #000; }
+        .borda-v-left { border-left: 2px solid #000; }
+        .borda-h { border-bottom: 1px solid #000; }
+
+        .logo-lateral {
             writing-mode: vertical-rl;
             transform: rotate(180deg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: 900; letter-spacing: -2px;
         }
 
-        .conteudo-central {
-            display: flex;
-            flex-direction: column;
-        }
+        .conteudo-principal { display: flex; flex-direction: column; }
+        .secao-info { padding: 5px; font-size: 11px; line-height: 1.2; }
+        .barcode-container { text-align: center; padding: 5px 0; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .barcode-container span { font-size: 10px; font-weight: bold; }
+        canvas { max-width: 90%; height: auto; }
 
-        .secao {
-            border-bottom: 1px solid #000;
-            padding: 5px;
-            font-size: 10px;
-        }
+        .coluna-direita { display: grid; grid-template-rows: 1fr 80px; }
+        .selo-qualidade { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; padding: 5px; }
+        .circulo { border: 2px solid #000; border-radius: 50%; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .data-box { border-top: 2px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
 
-        .cnpj-header { font-weight: bold; font-size: 12px; }
-        
-        .barcode-box {
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .barcode-img { width: 80%; height: 40px; background: #eee; } /* Placeholder */
-
-        .col-info-final {
-            border-left: 2px solid #000;
-            display: grid;
-            grid-template-rows: 1fr 1fr;
-        }
-
-        .selo-qualidade {
-            border-bottom: 2px solid #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .data-producao {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+        /* Esconde o painel na hora de imprimir */
+        @media print {
+            .painel-controle { display: none; }
+            body { background: white; padding: 0; }
+            .etiqueta-preview { padding: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="etiqueta-container">
-        <!-- Lado Esquerdo: Logo Elgin -->
-        <div class="col-logo-elgin">
-            'elgin
+    <div class="painel-controle">
+        <h2>Editar Informações</h2>
+        <div class="campo">
+            <label>Nome do Produto</label>
+            <input type="text" id="in_nome" value="IMPRESSORA TERMICA BEMA MP4200 HS" oninput="atualizar()">
         </div>
-
-        <!-- Centro: Informações Técnicas e Barcodes -->
-        <div class="conteudo-central">
-            <div class="secao cnpj-header">CNPJ: 14.200.166/0005-90</div>
-            
-            <div class="secao">
-                <strong>IMPRESSORA TERMICA BEMA MP4200 HS</strong><br>
-                VERSÃO DO FIRMWARE: 7.010CR2N<br>
-                CÓDIGO DO PRODUTO ELGIN: 46B4200HS001<br>
-                QTD: 01 &nbsp;&nbsp; VOL: 01
-            </div>
-
-            <div class="secao barcode-box">
-                <div>CÓDIGO ELGIN</div>
-                <div class="barcode-img">|||||||||||||||||||||</div>
-                <div>46B4200HS001</div>
-            </div>
-
-            <div class="secao barcode-box">
-                <div>CÓDIGO EAN 13</div>
-                <div class="barcode-img">|||||||||||||||||||||</div>
-                <div>7 908412 525957</div>
-            </div>
-            
-            <div class="secao" style="border-bottom: none;">
-                NUMERO DE SERIE: #N/D
-            </div>
+        <div class="campo">
+            <label>Código Elgin</label>
+            <input type="text" id="in_cod_elgin" value="46B4200HS001" oninput="atualizar()">
         </div>
+        <div class="campo">
+            <label>EAN-13 (13 dígitos)</label>
+            <input type="text" id="in_ean" value="7908412525957" oninput="atualizar()">
+        </div>
+        <div class="campo">
+            <label>Versão Firmware / Lote</label>
+            <input type="text" id="in_firmware" value="7.010CR2N" oninput="atualizar()">
+        </div>
+        <div class="campo">
+            <label>Selo Responsável</label>
+            <input type="number" id="in_selo" value="21" oninput="atualizar()">
+        </div>
+        <button onclick="window.print()">IMPRIMIR ETIQUETA</button>
+    </div>
 
-        <!-- Lado Direito: Selo e Data -->
-        <div class="col-info-final">
-            <div class="selo-qualidade">
-                <div style="border: 2px solid #000; border-radius: 50%; width: 60px; height: 60px; padding: 5px;">
-                    <small>CONTROLE DE QUALIDADE</small><br>
-                    <strong>21</strong>
+    <div class="etiqueta-preview">
+        <div class="etiqueta-container">
+            <!-- Logo Lateral -->
+            <div class="logo-lateral borda-v">elgin</div>
+
+            <!-- Centro -->
+            <div class="conteudo-principal">
+                <div class="secao-info borda-h">
+                    <strong>CNPJ: 14.200.166/0005-90</strong>
+                </div>
+                <div class="secao-info borda-h">
+                    <span id="txt_nome" style="font-weight: bold;">IMPRESSORA TERMICA BEMA MP4200 HS</span><br>
+                    VERSÃO DO FIRMWARE: <span id="txt_firmware">7.010CR2N</span><br>
+                    CÓDIGO DO PRODUTO ELGIN: <span id="txt_cod_elgin_info">46B4200HS001</span><br>
+                    QTD: 01 &nbsp;&nbsp; VOL: 01
+                </div>
+                <!-- Código de Barras Elgin -->
+                <div class="barcode-container borda-h">
+                    <span>CÓDIGO ELGIN</span>
+                    <canvas id="barcode_elgin"></canvas>
+                </div>
+                <!-- Código de Barras EAN -->
+                <div class="barcode-container">
+                    <span>CÓDIGO EAN 13</span>
+                    <canvas id="barcode_ean"></canvas>
                 </div>
             </div>
-            <div class="data-producao">
-                <span>DATA</span>
-                <span style="font-size: 18px;">05/05/2026</span>
+
+            <!-- Direita -->
+            <div class="coluna-direita borda-v-left">
+                <div class="selo-qualidade">
+                    <div class="circulo">
+                        <small>QUALIDADE</small>
+                        <strong style="font-size: 20px;" id="txt_selo">21</strong>
+                        <small>APROVADO</small>
+                    </div>
+                </div>
+                <div class="data-box">
+                    <small>DATA</small>
+                    <span id="txt_data">05/05/2026</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Função para disparar a impressão automaticamente se desejar
-        // window.print();
+        function atualizar() {
+            // Pega valores dos inputs
+            const nome = document.getElementById('in_nome').value;
+            const firmware = document.getElementById('in_firmware').value;
+            const codElgin = document.getElementById('in_cod_elgin').value;
+            const ean = document.getElementById('in_ean').value;
+            const selo = document.getElementById('in_selo').value;
+
+            // Atualiza textos na etiqueta
+            document.getElementById('txt_nome').innerText = nome;
+            document.getElementById('txt_firmware').innerText = firmware;
+            document.getElementById('txt_cod_elgin_info').innerText = codElgin;
+            document.getElementById('txt_selo').innerText = selo;
+            document.getElementById('txt_data').innerText = new Date().toLocaleDateString('pt-BR');
+
+            // Gera os códigos de barras reais
+            try {
+                JsBarcode("#barcode_elgin", codElgin, { format: "CODE128", height: 30, displayValue: true, fontSize: 10 });
+                JsBarcode("#barcode_ean", ean, { format: "EAN13", height: 30, displayValue: true, fontSize: 10 });
+            } catch(e) {
+                console.log("Erro ao gerar barcode: ", e);
+            }
+        }
+
+        // Inicia a etiqueta ao carregar
+        atualizar();
     </script>
 </body>
 </html>
