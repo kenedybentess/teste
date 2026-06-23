@@ -148,6 +148,16 @@
                     <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
                     <input type="text" id="cod_produto" required>
                 </div>
+
+                <div class="form-group">
+                    <label for="codigo_peca">CÓDIGO PEÇA *</label>
+                    <input type="text" id="codigo_peca" name="codigo_peca" required placeholder="Digite o código e pressione TAB">
+                </div>
+                <div class="form-group">
+                    <label for="denominacao">DENOMINAÇÃO *</label>
+                    <input type="text" id="denominacao" name="denominacao" required readonly style="background:#f5f5f5;">
+                </div>
+
                 
                 <div class="form-group">
                     <label for="fornecedor">FORNECEDOR</label>
@@ -405,6 +415,11 @@
         <button type="button" onclick="exportarExcel()" style="background:#217346; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
             📊 Exportar RNCs para Excel
         </button>
+
+        <button type="button" onclick="exportarListaPecas()" style="background:#17a2b8; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
+            💾 Exportar Lista de Peças
+        </button>
+
         <button type="button" onclick="limparFormulario()" style="background:#6c757d; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
             Limpar Formulário
         </button>
@@ -413,6 +428,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let pecasDB = {};
+
+        // Carregar peças salvas ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('data').valueAsDate = new Date();
+            carregarTabela();
+            
+            // Carrega lista de peças do localStorage
+            const pecasSalvas = localStorage.getItem('pecasDB');
+            if (pecasSalvas) {
+                pecasDB = JSON.parse(pecasSalvas);
+                console.log(Object.keys(pecasDB).length + ' peças carregadas da memória');
+            }
+        });
+
+        // Função para salvar pecasDB no localStorage
+        function salvarPecasDB() {
+            localStorage.setItem('pecasDB', JSON.stringify(pecasDB));
+        }
+        
+        // Exportar lista de peças atual
+        function exportarListaPecas() {
+            if (Object.keys(pecasDB).length === 0) {
+                alert('Nenhuma peça cadastrada para exportar!');
+                return;
+            }
+            const dados = [['Código Peça', 'Denominação']];
+            for (let codigo in pecasDB) {
+                dados.push([codigo, pecasDB[codigo]]);
+            }
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
+            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+        }
+
         let rncsCadastradas = [];
 
         // Importar CSV/Excel de peças
@@ -442,7 +492,8 @@
                     opt.textContent = codigo + ' - ' + denom;
                     select.appendChild(opt);
                 });
-                alert(json.length - 1 + ' peças importadas com sucesso!');
+                salvarPecasDB();
+                alert(json.length - 1 + ' peças importadas com sucesso! Lista salva automaticamente.');
             };
             reader.readAsArrayBuffer(file);
         });
@@ -484,7 +535,8 @@
             document.getElementById('nova_peca_box').style.display = 'none';
             document.getElementById('nova_denominacao').value = '';
             
-            alert('Peça ' + codigo + ' cadastrada com sucesso! Agora ela está na sua lista.');
+            salvarPecasDB();
+            alert('Peça ' + codigo + ' cadastrada! Salva automaticamente na sua lista.');
         }
         
         function cancelarNovaPeca() {
