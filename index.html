@@ -142,27 +142,13 @@
 
 <div class="form-grid">
 
-        <div class="form-group">
-            <label for="codigo_peca">Código Peça *</label>
-            <select id="codigo_peca" name="codigo_peca" required><option value="">Selecione ou importe peças...</option></select>
-        </div>
-        <div class="form-group">
-            <label for="denominacao">Denominação *</label>
-            <input type="text" id="denominacao" name="denominacao" required>
-        </div>
+        
 
                 <div class="form-group">
                     <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
                     <input type="text" id="cod_produto" required>
                 </div>
-                <div class="form-group">
-                    <label for="cod_peca">CÓDIGO PEÇA *</label>
-                    <input type="text" id="cod_peca" required>
-                </div>
-                <div class="form-group">
-                    <label for="denominacao">DENOMINAÇÃO</label>
-                    <input type="text" id="denominacao">
-                </div>
+                
                 <div class="form-group">
                     <label for="fornecedor">FORNECEDOR</label>
                     <input type="text" id="fornecedor">
@@ -461,11 +447,70 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // Auto-preencher denominação ao selecionar código
-        document.getElementById('codigo_peca').addEventListener('change', function() {
-            const codigo = this.value;
-            document.getElementById('denominacao').value = pecasDB[codigo] || '';
+        
+        
+        // Busca denominação ao digitar código e sair do campo
+        document.getElementById('codigo_peca').addEventListener('blur', function() {
+            const codigo = this.value.trim().toUpperCase();
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            
+            if (pecasDB[codigo]) {
+                document.getElementById('denominacao').value = pecasDB[codigo];
+                document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+                novaPecaBox.style.display = 'none';
+            } else if (codigo !== '') {
+                document.getElementById('denominacao').value = '';
+                document.getElementById('denominacao').placeholder = 'Código não encontrado';
+                document.getElementById('denominacao').style.backgroundColor = '#fff3cd';
+                novaPecaBox.style.display = 'block'; // Mostra opção de cadastrar
+            } else {
+                document.getElementById('denominacao').style.backgroundColor = '#fff';
+                novaPecaBox.style.display = 'none';
+            }
         });
+        
+        function cadastrarNovaPeca() {
+            const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
+            const denom = document.getElementById('nova_denominacao').value.trim();
+            
+            if (!codigo || !denom) {
+                alert('Preencha o código e a denominação!');
+                return;
+            }
+            
+            pecasDB[codigo] = denom;
+            document.getElementById('denominacao').value = denom;
+            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('nova_denominacao').value = '';
+            
+            alert('Peça ' + codigo + ' cadastrada com sucesso! Agora ela está na sua lista.');
+        }
+        
+        function cancelarNovaPeca() {
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('codigo_peca').value = '';
+            document.getElementById('denominacao').value = '';
+            document.getElementById('denominacao').style.backgroundColor = '#fff';
+        }
+        
+        // Também busca ao pressionar Enter
+        document.getElementById('codigo_peca').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur();
+            }
+        });
+
+        
+        // Também busca ao pressionar Enter
+        document.getElementById('codigo_peca').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur();
+            }
+        });
+
 
         // Exportar RNCs para Excel
         function exportarExcel() {
