@@ -1,106 +1,490 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Etiqueta Elgin - Estoque Pro</title>
-    <!-- Importante: CDN para o código de barras -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema RNC - Elgin</title>
     <style>
-        @media print { .no-print { display: none; } body { padding: 0; background: white; } }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; display: flex; padding: 20px; gap: 20px; }
-        
-        /* Painel de Edição */
-        .painel { background: white; padding: 20px; border-radius: 8px; width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .painel input { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        
-        /* Layout da Etiqueta (Baseado na imagem_dbdb90.png) */
-        .etiqueta { 
-            width: 140mm; height: 100mm; background: white; border: 3px solid black;
-            display: grid; grid-template-columns: 70px 1fr 110px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            padding: 20px;
+            color: #333;
+        }
+       .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #333;
+            margin: 25px 0 15px 0;
+            font-size: 18px;
         }
 
-        .elgin-sidebar { 
-            border-right: 2px solid black; writing-mode: vertical-rl; 
-            transform: rotate(180deg); display: flex; align-items: center; 
-            justify-content: center; font-size: 35px; font-weight: 900; 
+        /* Formulário */
+       .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+       .form-group { display: flex; flex-direction: column; }
+       .form-group.full { grid-column: 1 / -1; }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        input, textarea, select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+        textarea { resize: vertical; }
+
+        /* Botões */
+       .botoes {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+       .btn-salvar { background: #28a745; color: white; }
+       .btn-salvar:hover { background: #218838; }
+       .btn-limpar { background: #6c757d; color: white; }
+       .btn-limpar:hover { background: #5a6268; }
+       .btn-imprimir { background: #0056b3; color: white; }
+       .btn-imprimir:hover { background: #004494; }
+       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+       .btn-excluir:hover { background: #c82333; }
+       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+       .btn-editar:hover { background: #e0a800; }
+
+        /* Tabela */
+       .tabela-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0056b3;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover { background: #f5f5f5; }
+       .status-aberta { color: #dc3545; font-weight: bold; }
+       .status-fechada { color: #28a745; font-weight: bold; }
+
+        /* Busca */
+       .busca {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+       .busca input {
+            flex: 1;
+            padding: 10px;
         }
 
-        .main-content { display: flex; flex-direction: column; }
-        .row { border-bottom: 2px solid black; padding: 5px; font-size: 11px; }
-        .barcode-section { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid black; }
-        
-        .right-sidebar { display: grid; grid-template-rows: 1fr 100px; border-left: 2px solid black; }
-        .qc-circle { 
-            display: flex; align-items: center; justify-content: center; 
+        @media (max-width: 768px) {
+           .form-grid { grid-template-columns: 1fr; }
         }
-        .circle { 
-            border: 2px solid black; border-radius: 50%; width: 70px; height: 70px; 
-            text-align: center; display: flex; flex-direction: column; justify-content: center; font-size: 10px;
-        }
-        .date-section { border-top: 2px solid black; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Sistema de Cadastro RNC - Elgin</h1>
 
-<div class="painel no-print">
-    <h3>Editar Etiqueta</h3>
-    <label>Produto:</label>
-    <input type="text" id="edit_nome" value="IMPRESSORA TERMICA BEMA MP4200 HS" oninput="atualizar()">
-    <label>Cód. Elgin:</label>
-    <input type="text" id="edit_elgin" value="46B4200HS001" oninput="atualizar()">
-    <label>EAN-13:</label>
-    <input type="text" id="edit_ean" value="7908412525957" oninput="atualizar()">
-    <label>Responsável:</label>
-    <input type="number" id="edit_qc" value="21" oninput="atualizar()">
-    <button onclick="window.print()" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">IMPRIMIR</button>
-</div>
+        <h2>Cadastrar/Editar RNC</h2>
+        <form id="formRNC">
+            <input type="hidden" id="editId">
 
-<div class="etiqueta">
-    <div class="elgin-sidebar">'elgin</div>
-    
-    <div class="main-content">
-        <div class="row"><strong>CNPJ: 14.200.166/0005-90</strong></div>
-        <div class="row" style="height: 60px;">
-            <b id="txt_nome">IMPRESSORA TERMICA BEMA MP4200 HS</b><br>
-            FIRMWARE: 7.010CR2N<br>
-            CÓDIGO: <span id="txt_elgin_info">46B4200HS001</span><br>
-            QTD: 01 | VOL: 01
+            
+        <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+            <label for="import_pecas"><strong>Importar Lista de Peças (CSV/Excel)</strong></label>
+            <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+            <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
         </div>
-        <div class="barcode-section">
-            <small>CÓDIGO ELGIN</small>
-            <svg id="bar_elgin"></svg>
-        </div>
-        <div class="barcode-section" style="border-bottom: none;">
-            <small>CÓDIGO EAN 13</small>
-            <svg id="bar_ean"></svg>
-        </div>
-    </div>
 
-    <div class="right-sidebar">
-        <div class="qc-circle">
-            <div class="circle">
-                CONTROLE<br><b>21</b><br>APROVADO
+<div class="form-grid">
+
+        <div class="form-group">
+            <label for="codigo_peca">Código Peça *</label>
+            <select id="codigo_peca" name="codigo_peca" required><option value="">Selecione ou importe peças...</option></select>
+        </div>
+        <div class="form-group">
+            <label for="denominacao">Denominação *</label>
+            <input type="text" id="denominacao" name="denominacao" required>
+        </div>
+
+                <div class="form-group">
+                    <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
+                    <input type="text" id="cod_produto" required>
+                </div>
+                <div class="form-group">
+                    <label for="cod_peca">CÓDIGO PEÇA *</label>
+                    <input type="text" id="cod_peca" required>
+                </div>
+                <div class="form-group">
+                    <label for="denominacao">DENOMINAÇÃO</label>
+                    <input type="text" id="denominacao">
+                </div>
+                <div class="form-group">
+                    <label for="fornecedor">FORNECEDOR</label>
+                    <input type="text" id="fornecedor">
+                </div>
+                <div class="form-group">
+                    <label for="lote">Nº LOTE</label>
+                    <input type="text" id="lote">
+                </div>
+                <div class="form-group">
+                    <label for="nf">Nº NF *</label>
+                    <input type="text" id="nf" required>
+                </div>
+                <div class="form-group">
+                    <label for="qtd">QTD *</label>
+                    <input type="number" id="qtd" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="reserva">Nº DA RESERVA</label>
+                    <input type="text" id="reserva">
+                </div>
+                <div class="form-group">
+                    <label for="data">DATA *</label>
+                    <input type="date" id="data" required>
+                </div>
+                <div class="form-group">
+                    <label for="visto">VISTO/INSPETOR *</label>
+                    <input type="text" id="visto" required>
+                </div>
+                <div class="form-group">
+                    <label for="gravidade">GRAVIDADE</label>
+                    <select id="gravidade">
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média">Média</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">STATUS</label>
+                    <select id="status">
+                        <option value="Aberta">Aberta</option>
+                        <option value="Fechada">Fechada</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label for="nao_conforme">NÃO CONFORMIDADE *</label>
+                    <textarea id="nao_conforme" rows="2" required></textarea>
+                </div>
+                <div class="form-group full">
+                    <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
+                    <textarea id="acao_corretiva" rows="2"></textarea>
+                </div>
             </div>
+
+            <div class="botoes">
+                <button type="submit" class="btn-salvar">SALVAR RNC</button>
+                <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                <button type="button" class="btn-imprimir" onclick="imprimirSelecionada()">IMPRIMIR ETIQUETA</button>
+            </div>
+        </form>
+
+        <h2>RNCs Cadastradas</h2>
+        <div class="busca">
+            <input type="text" id="buscaInput" placeholder="Buscar por código, peça, NF, fornecedor..." onkeyup="filtrarTabela()">
+            <button class="btn-limpar" onclick="exportarCSV()">EXPORTAR CSV</button>
         </div>
-        <div class="date-section">
-            DATA<br><span id="txt_data">05/05/2026</span>
+
+        <div class="tabela-container">
+            <table id="tabelaRNC">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Cód. Produto</th>
+                        <th>Cód. Peça</th>
+                        <th>NF</th>
+                        <th>QTD</th>
+                        <th>Não Conformidade</th>
+                        <th>Gravidade</th>
+                        <th>Status</th>
+                        <th>Visto</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaBody">
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
 
-<script>
-    function atualizar() {
-        // Sincroniza textos
-        document.getElementById('txt_nome').innerText = document.getElementById('edit_nome').value;
-        document.getElementById('txt_elgin_info').innerText = document.getElementById('edit_elgin.value');
-        document.getElementById('txt_data').innerText = new Date().toLocaleDateString('pt-BR');
+    <script>
+        let rncSelecionada = null;
 
-        // Gera códigos de barras
-        JsBarcode("#bar_elgin", document.getElementById('edit_elgin').value, { height: 30, fontSize: 12 });
-        JsBarcode("#bar_ean", document.getElementById('edit_ean').value, { format: "EAN13", height: 30, fontSize: 12 });
-    }
-    atualizar();
-</script>
+        // Carrega dados ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('data').valueAsDate = new Date();
+            carregarTabela();
+        });
+
+        // Salvar RNC
+        document.getElementById('formRNC').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('editId').value;
+            const rnc = {
+                id: editId || Date.now().toString(),
+                cod_produto: document.getElementById('cod_produto').value,
+                cod_peca: document.getElementById('cod_peca').value,
+                denominacao: document.getElementById('denominacao').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                lote: document.getElementById('lote').value,
+                nf: document.getElementById('nf').value,
+                qtd: document.getElementById('qtd').value,
+                reserva: document.getElementById('reserva').value,
+                data: document.getElementById('data').value,
+                visto: document.getElementById('visto').value,
+                gravidade: document.getElementById('gravidade').value,
+                status: document.getElementById('status').value,
+                nao_conforme: document.getElementById('nao_conforme').value,
+                acao_corretiva: document.getElementById('acao_corretiva').value,
+                data_cadastro: editId? undefined : new Date().toISOString()
+            };
+
+            let rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+
+            if (editId) {
+                const index = rncs.findIndex(r => r.id === editId);
+                rnc.data_cadastro = rncs[index].data_cadastro;
+                rncs[index] = rnc;
+                alert('RNC atualizada com sucesso!');
+            } else {
+                rncs.push(rnc);
+                alert('RNC cadastrada com sucesso!');
+            }
+
+            localStorage.setItem('rncs', JSON.stringify(rncs));
+            limparForm();
+            carregarTabela();
+        });
+
+        // Carregar tabela
+        function carregarTabela() {
+            const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            rncs.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(rnc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${formatarData(rnc.data)}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 30)}...</td>
+                    <td>${rnc.gravidade}</td>
+                    <td class="status-${rnc.status.toLowerCase()}">${rnc.status}</td>
+                    <td>${rnc.visto}</td>
+                    <td>
+                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                    </td>
+                `;
+                tr.onclick = () => selecionarRNC(rnc);
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editarRNC(id) {
+            const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+            const rnc = rncs.find(r => r.id === id);
+            if (rnc) {
+                document.getElementById('editId').value = rnc.id;
+                document.getElementById('cod_produto').value = rnc.cod_produto;
+                document.getElementById('cod_peca').value = rnc.cod_peca;
+                document.getElementById('denominacao').value = rnc.denominacao;
+                document.getElementById('fornecedor').value = rnc.fornecedor;
+                document.getElementById('lote').value = rnc.lote;
+                document.getElementById('nf').value = rnc.nf;
+                document.getElementById('qtd').value = rnc.qtd;
+                document.getElementById('reserva').value = rnc.reserva;
+                document.getElementById('data').value = rnc.data;
+                document.getElementById('visto').value = rnc.visto;
+                document.getElementById('gravidade').value = rnc.gravidade;
+                document.getElementById('status').value = rnc.status;
+                document.getElementById('nao_conforme').value = rnc.nao_conforme;
+                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function excluirRNC(id) {
+            if (confirm('Tem certeza que deseja excluir esta RNC?')) {
+                let rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+                rncs = rncs.filter(r => r.id!== id);
+                localStorage.setItem('rncs', JSON.stringify(rncs));
+                carregarTabela();
+            }
+        }
+
+        function selecionarRNC(rnc) {
+            rncSelecionada = rnc;
+        }
+
+        function imprimirSelecionada() {
+            if (!rncSelecionada) {
+                alert('Selecione uma RNC na tabela primeiro!');
+                return;
+            }
+            const params = new URLSearchParams(rncSelecionada).toString();
+            window.open('etiqueta-rnc.html?' + params, '_blank');
+        }
+
+        function limparForm() {
+            document.getElementById('formRNC').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            rncSelecionada = null;
+        }
+
+        function filtrarTabela() {
+            const filtro = document.getElementById('buscaInput').value.toLowerCase();
+            const linhas = document.getElementById('tabelaBody').getElementsByTagName('tr');
+
+            for (let linha of linhas) {
+                const texto = linha.textContent.toLowerCase();
+                linha.style.display = texto.includes(filtro)? '' : 'none';
+            }
+        }
+
+        function exportarCSV() {
+            const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+            let csv = 'ID,Data,Cod_Produto,Cod_Peca,Denominacao,Fornecedor,Lote,NF,QTD,Reserva,Nao_Conforme,Gravidade,Status,Visto,Acao_Corretiva\n';
+
+            rncs.forEach(r => {
+                csv += `"${r.id}","${r.data}","${r.cod_produto}","${r.cod_peca}","${r.denominacao}","${r.fornecedor}","${r.lote}","${r.nf}","${r.qtd}","${r.reserva}","${r.nao_conforme}","${r.gravidade}","${r.status}","${r.visto}","${r.acao_corretiva}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `RNCs_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        function formatarData(data) {
+            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+    </script>
+
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <button type="button" onclick="exportarExcel()" style="background:#217346; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
+            📊 Exportar RNCs para Excel
+        </button>
+        <button type="button" onclick="limparFormulario()" style="background:#6c757d; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
+            Limpar Formulário
+        </button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let pecasDB = {};
+        let rncsCadastradas = [];
+
+        // Importar CSV/Excel de peças
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                
+                const select = document.getElementById('codigo_peca');
+                select.innerHTML = '<option value="">Selecione a peça...</option>';
+                pecasDB = {};
+                
+                json.forEach((row, i) => {
+                    if (i === 0 || !row[0]) return; // pula header e linhas vazias
+                    const codigo = String(row[0]).trim();
+                    const denom = String(row[1] || '').trim();
+                    pecasDB[codigo] = denom;
+                    
+                    const opt = document.createElement('option');
+                    opt.value = codigo;
+                    opt.textContent = codigo + ' - ' + denom;
+                    select.appendChild(opt);
+                });
+                alert(json.length - 1 + ' peças importadas com sucesso!');
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Auto-preencher denominação ao selecionar código
+        document.getElementById('codigo_peca').addEventListener('change', function() {
+            const codigo = this.value;
+            document.getElementById('denominacao').value = pecasDB[codigo] || '';
+        });
+
+        // Exportar RNCs para Excel
+        function exportarExcel() {
+            if (rncsCadastradas.length === 0) {
+                alert('Nenhuma RNC cadastrada para exportar!');
+                return;
+            }
+            const ws = XLSX.utils.json_to_sheet(rncsCadastradas);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
+            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+        }
+
+        function limparFormulario() {
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.type !== 'file') el.value = '';
+            });
+        }
+    </script>
 
 </body>
 </html>
