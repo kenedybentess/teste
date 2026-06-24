@@ -3,47 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema RNC - Elgin</title>
+    <title>Sistema RNC - Elgin v6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-      .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #0056b3; margin-bottom: 20px; border-bottom: 3px solid #0056b3; padding-bottom: 10px; }
+   .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px solid #0056b3; padding-bottom: 10px; }
+        h1 { color: #0056b3; margin: 0; }
+   .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.4); transition: 0.3s; }
+   .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.6); }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-      .form-group { display: flex; flex-direction: column; }
-      .form-group.full { grid-column: 1 / -1; }
+   .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+   .form-group { display: flex; flex-direction: column; }
+   .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+   .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-      .btn-salvar { background: #28a745; color: white; }
-      .btn-salvar:hover:not(:disabled) { background: #218838; }
-      .btn-limpar { background: #6c757d; color: white; }
-      .btn-excel { background: #217346; color: #fff; }
-      .btn-export-pecas { background: #17a2b8; color: #fff; }
-      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-      .status-nao-salvo { color: #d32f2f; font-weight: bold; }
-      .status-salvo { color: #2e7d32; font-weight: bold; }
-      .tabela-container { overflow-x: auto; margin-top: 20px; }
+   .btn-salvar { background: #28a745; color: white; }
+   .btn-salvar:hover:not(:disabled) { background: #218838; }
+   .btn-limpar { background: #6c757d; color: white; }
+   .btn-excel { background: #217346; color: #fff; }
+   .btn-export-pecas { background: #17a2b8; color: #fff; }
+   .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+   .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+   .status-nao-salvo { color: #d32f2f; font-weight: bold; }
+   .status-salvo { color: #2e7d32; font-weight: bold; }
+   .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; } }
+   .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+   .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-top { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Sistema de Cadastro RNC - Elgin</h1>
+        <div class="header-top">
+            <h1>Sistema de Cadastro RNC - Elgin v6</h1>
+            <button class="btn-dashboard" onclick="abrirDashboard()">📊 Ver Dashboard</button>
+        </div>
 
         <div class="status-box">
             <span id="statusPecas">Peças na memória: 0 | Status: Nenhuma lista carregada</span>
@@ -164,18 +170,19 @@
         let pecasDB = {};
         let pecasTempDB = {};
         let listaPecasSalva = false;
-        let rncsCadastradas = [];
+
+        function abrirDashboard() {
+            window.open('dashboard.html', '_blank');
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('data').valueAsDate = new Date();
             carregarTabelaRNCs();
-
             const pecasSalvas = localStorage.getItem('pecasDB');
             if (pecasSalvas) {
                 pecasDB = JSON.parse(pecasSalvas);
                 listaPecasSalva = true;
                 atualizarStatusPecas();
-                console.log(Object.keys(pecasDB).length + ' peças carregadas da memória');
             }
         });
 
@@ -189,14 +196,12 @@
         document.getElementById('import_pecas').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-
                 pecasTempDB = {};
                 json.forEach((row, i) => {
                     if (i === 0 ||!row[0]) return;
@@ -204,7 +209,6 @@
                     const denom = String(row[1] || '').trim();
                     pecasTempDB[codigo] = denom;
                 });
-
                 listaPecasSalva = false;
                 atualizarStatusPecas();
                 alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para gravar.`);
@@ -222,10 +226,7 @@
         }
 
         function exportarListaPecas() {
-            if (Object.keys(pecasDB).length === 0) {
-                alert('Nenhuma peça cadastrada para exportar!');
-                return;
-            }
+            if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
             const dados = [['Código Peça', 'Denominação']];
             for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
             const ws = XLSX.utils.aoa_to_sheet(dados);
@@ -241,9 +242,7 @@
                 const novaPecaBox = document.getElementById('nova_peca_box');
                 const inputDenom = document.getElementById('denominacao');
                 const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
-
                 if (!inputDenom) return;
-
                 if (db[codigo]) {
                     inputDenom.value = db[codigo];
                     inputDenom.style.backgroundColor = '#e8f5e9';
@@ -258,7 +257,6 @@
                     if (novaPecaBox) novaPecaBox.style.display = 'none';
                 }
             });
-
             inputCodigoPeca.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
             });
@@ -269,23 +267,15 @@
             const inputNovaDenom = document.getElementById('nova_denominacao');
             const inputDenom = document.getElementById('denominacao');
             const novaPecaBox = document.getElementById('nova_peca_box');
-
             if (!inputCodigo ||!inputNovaDenom ||!inputDenom) return;
-
             const codigo = inputCodigo.value.trim().toUpperCase();
             const denom = inputNovaDenom.value.trim();
-
-            if (!codigo ||!denom) {
-                alert('Preencha o código e a denominação!');
-                return;
-            }
-
+            if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
             pecasDB[codigo] = denom;
             inputDenom.value = denom;
             inputDenom.style.backgroundColor = '#e8f5e9';
             if (novaPecaBox) novaPecaBox.style.display = 'none';
             inputNovaDenom.value = '';
-
             localStorage.setItem('pecasDB', JSON.stringify(pecasDB));
             listaPecasSalva = true;
             atualizarStatusPecas();
@@ -296,7 +286,6 @@
             const novaPecaBox = document.getElementById('nova_peca_box');
             const inputCodigo = document.getElementById('codigo_peca');
             const inputDenom = document.getElementById('denominacao');
-
             if (novaPecaBox) novaPecaBox.style.display = 'none';
             if (inputCodigo) inputCodigo.value = '';
             if (inputDenom) { inputDenom.value = ''; inputDenom.style.backgroundColor = '#fff'; }
@@ -322,7 +311,6 @@
                 nao_conforme: document.getElementById('nao_conforme').value,
                 acao_corretiva: document.getElementById('acao_corretiva').value
             };
-
             let rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
             if (editId) {
                 const index = rncs.findIndex(r => r.id === editId);
@@ -373,26 +361,19 @@
         }
 
         function gerarEtiqueta100x60(rnc) {
-            return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
-<style>
-@page { size: 100mm 60mm; margin: 0; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+<style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
 .etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
 .header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
-.linha { display: flex; margin-bottom: 0.8mm; }
-.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
-.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }
-.linha-dupla.valor { min-height: 6mm; }
+.linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
 .footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
 .nao-conf { font-size: 7pt; max-height: 9mm; overflow: hidden; }
 @media print {.no-print { display: none; } body { margin: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-</style></head><body>
-<button class="no-print" onclick="window.print()">🖨️ Imprimir</button>
-<div class="etiqueta">
-<div class="header">RNC - NÃO CONFORME</div>
+</style></head><body><button class="no-print" onclick="window.print()">🖨️ Imprimir</button>
+<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
 <div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
 <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
 <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
@@ -446,10 +427,7 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 
         function exportarExcelRNCs() {
             const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
-            if (rncs.length === 0) {
-                alert('Nenhuma RNC cadastrada para exportar!');
-                return;
-            }
+            if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
             const ws = XLSX.utils.json_to_sheet(rncs);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
