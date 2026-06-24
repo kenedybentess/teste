@@ -4,161 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema RNC - Elgin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
-            padding: 20px;
-            color: #333;
-        }
-       .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #0056b3;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #0056b3;
-            padding-bottom: 10px;
-        }
-        h2 {
-            color: #333;
-            margin: 25px 0 15px 0;
-            font-size: 18px;
-        }
-
-        /* Formulário */
-       .form-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+       .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; margin-bottom: 20px; border-bottom: 3px solid #0056b3; padding-bottom: 10px; }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
        .form-group { display: flex; flex-direction: column; }
        .form-group.full { grid-column: 1 / -1; }
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
-        input, textarea, select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #0056b3;
-        }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
+        input[readonly] { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-
-        /* Botões */
-       .botoes {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
+       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
        .btn-salvar { background: #28a745; color: white; }
-       .btn-salvar:hover { background: #218838; }
+       .btn-salvar:hover:not(:disabled) { background: #218838; }
        .btn-limpar { background: #6c757d; color: white; }
-       .btn-limpar:hover { background: #5a6268; }
-       .btn-imprimir { background: #0056b3; color: white; }
-       .btn-imprimir:hover { background: #004494; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-excluir:hover { background: #c82333; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-       .btn-editar:hover { background: #e0a800; }
-
-        /* Tabela */
-       .tabela-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #0056b3;
-            color: white;
-            position: sticky;
-            top: 0;
-        }
+       .btn-excel { background: #217346; color: #fff; }
+       .btn-export-pecas { background: #17a2b8; color: #fff; }
+       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+       .status-nao-salvo { color: #d32f2f; font-weight: bold; }
+       .status-salvo { color: #2e7d32; font-weight: bold; }
+       .tabela-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-       .status-aberta { color: #dc3545; font-weight: bold; }
-       .status-fechada { color: #28a745; font-weight: bold; }
-
-        /* Busca */
-       .busca {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-        }
-       .busca input {
-            flex: 1;
-            padding: 10px;
-        }
-
-        @media (max-width: 768px) {
-           .form-grid { grid-template-columns: 1fr; }
-        }
+       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Sistema de Cadastro RNC - Elgin</h1>
 
-        <h2>Cadastrar/Editar RNC</h2>
-        <form id="formRNC">
-            <input type="hidden" id="editId">
-
-            
-        <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
-            <label for="import_pecas"><strong>Importar Lista de Peças (CSV/Excel)</strong></label>
-            <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
-            <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+        <div class="status-box">
+            <span id="statusPecas">Peças na memória: 0 | Status: Nenhuma lista carregada</span>
         </div>
 
-<div class="form-grid">
+        <h2>1. Importar Lista de Peças</h2>
+        <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+            <label for="import_pecas"><strong>Arquivo CSV/Excel com Códigos</strong></label>
+            <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+            <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+            <div class="botoes" style="margin-top:10px;">
+                <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()" disabled>💾 Salvar Lista de Peças</button>
+                <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
+            </div>
+        </div>
 
-        
-
+        <h2>2. Cadastrar/Editar RNC</h2>
+        <form id="formRNC">
+            <input type="hidden" id="editId">
+            <div class="form-grid">
                 <div class="form-group">
                     <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
                     <input type="text" id="cod_produto" required>
                 </div>
-
                 <div class="form-group">
                     <label for="codigo_peca">CÓDIGO PEÇA *</label>
-                    <input type="text" id="codigo_peca" name="codigo_peca" required placeholder="Digite o código e pressione TAB">
+                    <input type="text" id="codigo_peca" required placeholder="Digite e pressione TAB">
                 </div>
                 <div class="form-group">
                     <label for="denominacao">DENOMINAÇÃO *</label>
-                    <input type="text" id="denominacao" name="denominacao" required readonly style="background:#f5f5f5;">
+                    <input type="text" id="denominacao" required readonly>
                 </div>
-
-                
+                <div id="nova_peca_box" style="display:none; grid-column: 1 / -1; background:#fff3cd; padding:15px; border-radius:5px; border:1px solid #ffc107;">
+                    <p style="margin:0 0 10px 0; font-weight:bold; color:#856404;">⚠️ Código não encontrado na lista</p>
+                    <div style="display:flex; gap:10px; align-items:end;">
+                        <div style="flex:1;">
+                            <label style="font-size:12px;">Denominação da nova peça:</label>
+                            <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
+                        </div>
+                        <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
+                        <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="fornecedor">FORNECEDOR</label>
                     <input type="text" id="fornecedor">
@@ -212,118 +139,222 @@
                     <textarea id="acao_corretiva" rows="2"></textarea>
                 </div>
             </div>
-
             <div class="botoes">
                 <button type="submit" class="btn-salvar">SALVAR RNC</button>
                 <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
-                <button type="button" class="btn-imprimir" onclick="imprimirSelecionada()">IMPRIMIR ETIQUETA</button>
+                <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
             </div>
         </form>
 
-        <h2>RNCs Cadastradas</h2>
-        <div class="busca">
-            <input type="text" id="buscaInput" placeholder="Buscar por código, peça, NF, fornecedor..." onkeyup="filtrarTabela()">
-            <button class="btn-limpar" onclick="exportarCSV()">EXPORTAR CSV</button>
-        </div>
-
+        <h2>3. RNCs Cadastradas</h2>
         <div class="tabela-container">
             <table id="tabelaRNC">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Data</th>
-                        <th>Cód. Produto</th>
-                        <th>Cód. Peça</th>
-                        <th>NF</th>
-                        <th>QTD</th>
-                        <th>Não Conformidade</th>
-                        <th>Gravidade</th>
-                        <th>Status</th>
-                        <th>Visto</th>
-                        <th>Ações</th>
+                        <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Status</th><th>Ações</th>
                     </tr>
                 </thead>
-                <tbody id="tabelaBody">
-                </tbody>
+                <tbody id="tabelaBody"></tbody>
             </table>
         </div>
     </div>
 
     <script>
-        let rncSelecionada = null;
+        let pecasDB = {};
+        let pecasTempDB = {};
+        let listaPecasSalva = false;
+        let rncsCadastradas = [];
 
-        // Carrega dados ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
-            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
-            carregarTabela();
+            document.getElementById('data').valueAsDate = new Date();
+            carregarTabelaRNCs();
+
+            const pecasSalvas = localStorage.getItem('pecasDB');
+            if (pecasSalvas) {
+                pecasDB = JSON.parse(pecasSalvas);
+                listaPecasSalva = true;
+                atualizarStatusPecas();
+                console.log(Object.keys(pecasDB).length + ' peças carregadas da memória');
+            }
         });
 
-        // Salvar RNC
+        function atualizarStatusPecas() {
+            const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
+            const status = listaPecasSalva? '<span class="status-salvo">Salvo</span>' : '<span class="status-nao-salvo">Não salvo</span>';
+            document.getElementById('statusPecas').innerHTML = `Peças na memória: ${qtd} | Status: ${status}`;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
+        }
+
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                pecasTempDB = {};
+                json.forEach((row, i) => {
+                    if (i === 0 ||!row[0]) return;
+                    const codigo = String(row[0]).trim().toUpperCase();
+                    const denom = String(row[1] || '').trim();
+                    pecasTempDB[codigo] = denom;
+                });
+
+                listaPecasSalva = false;
+                atualizarStatusPecas();
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para gravar.`);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function salvarListaPecas() {
+            if (Object.keys(pecasTempDB).length === 0) return;
+            pecasDB = {...pecasTempDB};
+            localStorage.setItem('pecasDB', JSON.stringify(pecasDB));
+            listaPecasSalva = true;
+            atualizarStatusPecas();
+            alert('Lista de peças salva com sucesso!');
+        }
+
+        function exportarListaPecas() {
+            if (Object.keys(pecasDB).length === 0) {
+                alert('Nenhuma peça cadastrada para exportar!');
+                return;
+            }
+            const dados = [['Código Peça', 'Denominação']];
+            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
+            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+        }
+
+        const inputCodigoPeca = document.getElementById('codigo_peca');
+        if (inputCodigoPeca) {
+            inputCodigoPeca.addEventListener('blur', function() {
+                const codigo = this.value.trim().toUpperCase();
+                const novaPecaBox = document.getElementById('nova_peca_box');
+                const inputDenom = document.getElementById('denominacao');
+                const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+
+                if (!inputDenom) return;
+
+                if (db[codigo]) {
+                    inputDenom.value = db[codigo];
+                    inputDenom.style.backgroundColor = '#e8f5e9';
+                    if (novaPecaBox) novaPecaBox.style.display = 'none';
+                } else if (codigo!== '') {
+                    inputDenom.value = '';
+                    inputDenom.placeholder = 'Código não encontrado';
+                    inputDenom.style.backgroundColor = '#fff3cd';
+                    if (novaPecaBox) novaPecaBox.style.display = 'block';
+                } else {
+                    inputDenom.style.backgroundColor = '#fff';
+                    if (novaPecaBox) novaPecaBox.style.display = 'none';
+                }
+            });
+
+            inputCodigoPeca.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+            });
+        }
+
+        function cadastrarNovaPeca() {
+            const inputCodigo = document.getElementById('codigo_peca');
+            const inputNovaDenom = document.getElementById('nova_denominacao');
+            const inputDenom = document.getElementById('denominacao');
+            const novaPecaBox = document.getElementById('nova_peca_box');
+
+            if (!inputCodigo ||!inputNovaDenom ||!inputDenom) return;
+
+            const codigo = inputCodigo.value.trim().toUpperCase();
+            const denom = inputNovaDenom.value.trim();
+
+            if (!codigo ||!denom) {
+                alert('Preencha o código e a denominação!');
+                return;
+            }
+
+            pecasDB[codigo] = denom;
+            inputDenom.value = denom;
+            inputDenom.style.backgroundColor = '#e8f5e9';
+            if (novaPecaBox) novaPecaBox.style.display = 'none';
+            inputNovaDenom.value = '';
+
+            localStorage.setItem('pecasDB', JSON.stringify(pecasDB));
+            listaPecasSalva = true;
+            atualizarStatusPecas();
+            alert('Peça ' + codigo + ' cadastrada e salva!');
+        }
+
+        function cancelarNovaPeca() {
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            const inputCodigo = document.getElementById('codigo_peca');
+            const inputDenom = document.getElementById('denominacao');
+
+            if (novaPecaBox) novaPecaBox.style.display = 'none';
+            if (inputCodigo) inputCodigo.value = '';
+            if (inputDenom) { inputDenom.value = ''; inputDenom.style.backgroundColor = '#fff'; }
+        }
+
         document.getElementById('formRNC').addEventListener('submit', function(e) {
             e.preventDefault();
-
-            const editId = const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value;
+            const editId = document.getElementById('editId').value;
             const rnc = {
                 id: editId || Date.now().toString(),
-                cod_produto: const el_cod_produto = document.getElementById('cod_produto'); if(el_cod_produto) el_cod_produto.value,
-                cod_peca: const el_cod_peca = document.getElementById('cod_peca'); if(el_cod_peca) el_cod_peca.value,
-                denominacao: const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value,
-                fornecedor: const el_fornecedor = document.getElementById('fornecedor'); if(el_fornecedor) el_fornecedor.value,
-                lote: const el_lote = document.getElementById('lote'); if(el_lote) el_lote.value,
-                nf: const el_nf = document.getElementById('nf'); if(el_nf) el_nf.value,
-                qtd: const el_qtd = document.getElementById('qtd'); if(el_qtd) el_qtd.value,
-                reserva: const el_reserva = document.getElementById('reserva'); if(el_reserva) el_reserva.value,
-                data: const el_data = document.getElementById('data'); if(el_data) el_data.value,
-                visto: const el_visto = document.getElementById('visto'); if(el_visto) el_visto.value,
-                gravidade: const el_gravidade = document.getElementById('gravidade'); if(el_gravidade) el_gravidade.value,
-                status: const el_status = document.getElementById('status'); if(el_status) el_status.value,
-                nao_conforme: const el_nao_conforme = document.getElementById('nao_conforme'); if(el_nao_conforme) el_nao_conforme.value,
-                acao_corretiva: const el_acao_corretiva = document.getElementById('acao_corretiva'); if(el_acao_corretiva) el_acao_corretiva.value,
-                data_cadastro: editId? undefined : new Date().toISOString()
+                cod_produto: document.getElementById('cod_produto').value,
+                cod_peca: document.getElementById('codigo_peca').value,
+                denominacao: document.getElementById('denominacao').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                lote: document.getElementById('lote').value,
+                nf: document.getElementById('nf').value,
+                qtd: document.getElementById('qtd').value,
+                reserva: document.getElementById('reserva').value,
+                data: document.getElementById('data').value,
+                visto: document.getElementById('visto').value,
+                gravidade: document.getElementById('gravidade').value,
+                status: document.getElementById('status').value,
+                nao_conforme: document.getElementById('nao_conforme').value,
+                acao_corretiva: document.getElementById('acao_corretiva').value
             };
 
             let rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
-
             if (editId) {
                 const index = rncs.findIndex(r => r.id === editId);
-                rnc.data_cadastro = rncs[index].data_cadastro;
                 rncs[index] = rnc;
-                alert('RNC atualizada com sucesso!');
             } else {
                 rncs.push(rnc);
-                alert('RNC cadastrada com sucesso!');
             }
-
             localStorage.setItem('rncs', JSON.stringify(rncs));
             limparForm();
-            carregarTabela();
+            carregarTabelaRNCs();
+            alert(editId? 'RNC atualizada!' : 'RNC cadastrada!');
         });
 
-        // Carregar tabela
-        function carregarTabela() {
+        function carregarTabelaRNCs() {
             const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '';
-
             rncs.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(rnc => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${rnc.id.slice(-6)}</td>
-                    <td>${formatarData(rnc.data)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                     <td>${rnc.cod_produto}</td>
                     <td>${rnc.cod_peca}</td>
                     <td>${rnc.nf}</td>
                     <td>${rnc.qtd}</td>
                     <td>${rnc.nao_conforme.substring(0, 30)}...</td>
-                    <td>${rnc.gravidade}</td>
-                    <td class="status-${rnc.status.toLowerCase()}">${rnc.status}</td>
-                    <td>${rnc.visto}</td>
+                    <td>${rnc.status}</td>
                     <td>
                         <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
                         <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
                     </td>
                 `;
-                tr.onclick = () => selecionarRNC(rnc);
                 tbody.appendChild(tr);
             });
         }
@@ -332,21 +363,21 @@
             const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
             const rnc = rncs.find(r => r.id === id);
             if (rnc) {
-                const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value = rnc.id;
-                const el_cod_produto = document.getElementById('cod_produto'); if(el_cod_produto) el_cod_produto.value = rnc.cod_produto;
-                const el_cod_peca = document.getElementById('cod_peca'); if(el_cod_peca) el_cod_peca.value = rnc.cod_peca;
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = rnc.denominacao;
-                const el_fornecedor = document.getElementById('fornecedor'); if(el_fornecedor) el_fornecedor.value = rnc.fornecedor;
-                const el_lote = document.getElementById('lote'); if(el_lote) el_lote.value = rnc.lote;
-                const el_nf = document.getElementById('nf'); if(el_nf) el_nf.value = rnc.nf;
-                const el_qtd = document.getElementById('qtd'); if(el_qtd) el_qtd.value = rnc.qtd;
-                const el_reserva = document.getElementById('reserva'); if(el_reserva) el_reserva.value = rnc.reserva;
-                const el_data = document.getElementById('data'); if(el_data) el_data.value = rnc.data;
-                const el_visto = document.getElementById('visto'); if(el_visto) el_visto.value = rnc.visto;
-                const el_gravidade = document.getElementById('gravidade'); if(el_gravidade) el_gravidade.value = rnc.gravidade;
-                const el_status = document.getElementById('status'); if(el_status) el_status.value = rnc.status;
-                const el_nao_conforme = document.getElementById('nao_conforme'); if(el_nao_conforme) el_nao_conforme.value = rnc.nao_conforme;
-                const el_acao_corretiva = document.getElementById('acao_corretiva'); if(el_acao_corretiva) el_acao_corretiva.value = rnc.acao_corretiva;
+                document.getElementById('editId').value = rnc.id;
+                document.getElementById('cod_produto').value = rnc.cod_produto;
+                document.getElementById('codigo_peca').value = rnc.cod_peca;
+                document.getElementById('denominacao').value = rnc.denominacao;
+                document.getElementById('fornecedor').value = rnc.fornecedor;
+                document.getElementById('lote').value = rnc.lote;
+                document.getElementById('nf').value = rnc.nf;
+                document.getElementById('qtd').value = rnc.qtd;
+                document.getElementById('reserva').value = rnc.reserva;
+                document.getElementById('data').value = rnc.data;
+                document.getElementById('visto').value = rnc.visto;
+                document.getElementById('gravidade').value = rnc.gravidade;
+                document.getElementById('status').value = rnc.status;
+                document.getElementById('nao_conforme').value = rnc.nao_conforme;
+                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
                 window.scrollTo(0, 0);
             }
         }
@@ -356,247 +387,30 @@
                 let rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
                 rncs = rncs.filter(r => r.id!== id);
                 localStorage.setItem('rncs', JSON.stringify(rncs));
-                carregarTabela();
+                carregarTabelaRNCs();
             }
-        }
-
-        function selecionarRNC(rnc) {
-            rncSelecionada = rnc;
-        }
-
-        function imprimirSelecionada() {
-            if (!rncSelecionada) {
-                alert('Selecione uma RNC na tabela primeiro!');
-                return;
-            }
-            const params = new URLSearchParams(rncSelecionada).toString();
-            window.open('etiqueta-rnc.html?' + params, '_blank');
         }
 
         function limparForm() {
             document.getElementById('formRNC').reset();
-            const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value = '';
-            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
-            rncSelecionada = null;
+            document.getElementById('editId').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            document.getElementById('denominacao').style.backgroundColor = '#f5f5f5';
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            if (novaPecaBox) novaPecaBox.style.display = 'none';
         }
 
-        function filtrarTabela() {
-            const filtro = const el_buscaInput = document.getElementById('buscaInput'); if(el_buscaInput) el_buscaInput.value.toLowerCase();
-            const linhas = document.getElementById('tabelaBody').getElementsByTagName('tr');
-
-            for (let linha of linhas) {
-                const texto = linha.textContent.toLowerCase();
-                linha.style.display = texto.includes(filtro)? '' : 'none';
-            }
-        }
-
-        function exportarCSV() {
+        function exportarExcelRNCs() {
             const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
-            let csv = 'ID,Data,Cod_Produto,Cod_Peca,Denominacao,Fornecedor,Lote,NF,QTD,Reserva,Nao_Conforme,Gravidade,Status,Visto,Acao_Corretiva\n';
-
-            rncs.forEach(r => {
-                csv += `"${r.id}","${r.data}","${r.cod_produto}","${r.cod_peca}","${r.denominacao}","${r.fornecedor}","${r.lote}","${r.nf}","${r.qtd}","${r.reserva}","${r.nao_conforme}","${r.gravidade}","${r.status}","${r.visto}","${r.acao_corretiva}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `RNCs_${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-        }
-
-        function formatarData(data) {
-            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
-        }
-    </script>
-
-    <div style="margin-top:20px; display:flex; gap:10px;">
-        <button type="button" onclick="exportarExcel()" style="background:#217346; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
-            📊 Exportar RNCs para Excel
-        </button>
-
-        <button type="button" onclick="exportarListaPecas()" style="background:#17a2b8; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
-            💾 Exportar Lista de Peças
-        </button>
-
-        <button type="button" onclick="limparFormulario()" style="background:#6c757d; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
-            Limpar Formulário
-        </button>
-    </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        let pecasDB = {};
-
-        // Carregar peças salvas ao iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
-            carregarTabela();
-            
-            // Carrega lista de peças do localStorage
-            const pecasSalvas = localStorage.getItem('pecasDB');
-            if (pecasSalvas) {
-                pecasDB = JSON.parse(pecasSalvas);
-                console.log(Object.keys(pecasDB).length + ' peças carregadas da memória');
-            }
-        });
-
-        // Função para salvar pecasDB no localStorage
-        function salvarPecasDB() {
-            localStorage.setItem('pecasDB', JSON.stringify(pecasDB));
-        }
-        
-        // Exportar lista de peças atual
-        function exportarListaPecas() {
-            if (Object.keys(pecasDB).length === 0) {
-                alert('Nenhuma peça cadastrada para exportar!');
-                return;
-            }
-            const dados = [['Código Peça', 'Denominação']];
-            for (let codigo in pecasDB) {
-                dados.push([codigo, pecasDB[codigo]]);
-            }
-            const ws = XLSX.utils.aoa_to_sheet(dados);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
-            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
-        }
-
-        let rncsCadastradas = [];
-
-        // Importar CSV/Excel de peças
-        document.getElementById('import_pecas').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                
-                const select = document.getElementById('codigo_peca');
-                select.innerHTML = '<option value="">Selecione a peça...</option>';
-                pecasDB = {};
-                
-                json.forEach((row, i) => {
-                    if (i === 0 || !row[0]) return; // pula header e linhas vazias
-                    const codigo = String(row[0]).trim();
-                    const denom = String(row[1] || '').trim();
-                    pecasDB[codigo] = denom;
-                    
-                    const opt = document.createElement('option');
-                    opt.value = codigo;
-                    opt.textContent = codigo + ' - ' + denom;
-                    select.appendChild(opt);
-                });
-                salvarPecasDB();
-                alert(json.length - 1 + ' peças importadas com sucesso! Lista salva automaticamente.');
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        
-        
-        // Busca denominação ao digitar código e sair do campo
-        document.getElementById('codigo_peca').addEventListener('blur', function() {
-            const codigo = this.value.trim().toUpperCase();
-            const novaPecaBox = document.getElementById('nova_peca_box');
-            
-            if (pecasDB[codigo]) {
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = pecasDB[codigo];
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#e8f5e9';
-                novaPecaBox.style.display = 'none';
-            } else if (codigo !== '') {
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = '';
-                document.getElementById('denominacao').placeholder = 'Código não encontrado';
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#fff3cd';
-                novaPecaBox.style.display = 'block'; // Mostra opção de cadastrar
-            } else {
-                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#fff';
-                novaPecaBox.style.display = 'none';
-            }
-        });
-        
-        
-        function cadastrarNovaPeca() {
-            const inputCodigo = document.getElementById('codigo_peca');
-            const inputNovaDenom = document.getElementById('nova_denominacao');
-            const inputDenom = document.getElementById('denominacao');
-            const novaPecaBox = document.getElementById('nova_peca_box');
-            
-            if (!inputCodigo || !inputNovaDenom || !inputDenom) return;
-            
-            const codigo = inputCodigo.value.trim().toUpperCase();
-            const denom = inputNovaDenom.value.trim();
-            
-            if (!codigo || !denom) {
-                alert('Preencha o código e a denominação!');
-                return;
-            }
-            
-            pecasDB[codigo] = denom;
-            inputDenom.value = denom;
-            inputDenom.style.backgroundColor = '#e8f5e9';
-            if (novaPecaBox) novaPecaBox.style.display = 'none';
-            inputNovaDenom.value = '';
-            
-            salvarPecasDB();
-            alert('Peça ' + codigo + ' cadastrada! Salva automaticamente na sua lista.');
-        }
-        
-        function cancelarNovaPeca() {
-            const novaPecaBox = document.getElementById('nova_peca_box');
-            const inputCodigo = document.getElementById('codigo_peca');
-            const inputDenom = document.getElementById('denominacao');
-            
-            if (novaPecaBox) novaPecaBox.style.display = 'none';
-            if (inputCodigo) inputCodigo.value = '';
-            if (inputDenom) {
-                inputDenom.value = '';
-                inputDenom.style.backgroundColor = '#fff';
-            }
-        }
-
-        
-        // Também busca ao pressionar Enter
-        document.getElementById('codigo_peca').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.blur();
-            }
-        });
-
-        
-        // Também busca ao pressionar Enter
-        document.getElementById('codigo_peca').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.blur();
-            }
-        });
-
-
-        // Exportar RNCs para Excel
-        function exportarExcel() {
-            if (rncsCadastradas.length === 0) {
+            if (rncs.length === 0) {
                 alert('Nenhuma RNC cadastrada para exportar!');
                 return;
             }
-            const ws = XLSX.utils.json_to_sheet(rncsCadastradas);
+            const ws = XLSX.utils.json_to_sheet(rncs);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
             XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
         }
-
-        function limparFormulario() {
-            document.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.type !== 'file') el.value = '';
-            });
-        }
     </script>
-
 </body>
 </html>
