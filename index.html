@@ -8,35 +8,36 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { color: #0056b3; margin-bottom: 20px; border-bottom: 3px solid #0056b3; padding-bottom: 10px; }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .form-group { display: flex; flex-direction: column; }
-       .form-group.full { grid-column: 1 / -1; }
+      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+      .form-group { display: flex; flex-direction: column; }
+      .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-       .btn-salvar { background: #28a745; color: white; }
-       .btn-salvar:hover:not(:disabled) { background: #218838; }
-       .btn-limpar { background: #6c757d; color: white; }
-       .btn-excel { background: #217346; color: #fff; }
-       .btn-export-pecas { background: #17a2b8; color: #fff; }
-       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-       .status-nao-salvo { color: #d32f2f; font-weight: bold; }
-       .status-salvo { color: #2e7d32; font-weight: bold; }
-       .tabela-container { overflow-x: auto; margin-top: 20px; }
+      .btn-salvar { background: #28a745; color: white; }
+      .btn-salvar:hover:not(:disabled) { background: #218838; }
+      .btn-limpar { background: #6c757d; color: white; }
+      .btn-excel { background: #217346; color: #fff; }
+      .btn-export-pecas { background: #17a2b8; color: #fff; }
+      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+      .status-nao-salvo { color: #d32f2f; font-weight: bold; }
+      .status-salvo { color: #2e7d32; font-weight: bold; }
+      .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -351,12 +352,55 @@
                     <td>${rnc.nao_conforme.substring(0, 30)}...</td>
                     <td>${rnc.status}</td>
                     <td>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷️ Etiqueta</button>
                         <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
                         <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function imprimirEtiqueta(id) {
+            const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+            const rnc = rncs.find(r => r.id === id);
+            if (rnc) {
+                const etiquetaHTML = gerarEtiqueta100x60(rnc);
+                const win = window.open('', '_blank', 'width=400,height=300');
+                win.document.write(etiquetaHTML);
+                win.document.close();
+            }
+        }
+
+        function gerarEtiqueta100x60(rnc) {
+            return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+<style>
+@page { size: 100mm 60mm; margin: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
+.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
+.linha { display: flex; margin-bottom: 0.8mm; }
+.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }
+.linha-dupla.valor { min-height: 6mm; }
+.footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
+.nao-conf { font-size: 7pt; max-height: 9mm; overflow: hidden; }
+@media print {.no-print { display: none; } body { margin: 0; } }
+.no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+</style></head><body>
+<button class="no-print" onclick="window.print()">🖨️ Imprimir</button>
+<div class="etiqueta">
+<div class="header">RNC - NÃO CONFORME</div>
+<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
+<div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
+<div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
+<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
+<div class="linha"><span class="label">Lote:</span><span class="valor">${rnc.lote || ''}</span><span class="label" style="width:15mm;margin-left:2mm;">Data:</span><span class="valor" style="width:25mm;">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
+<div class="footer"><span>Visto: <span style="border-bottom:1px solid #000;padding:0 10mm;">${rnc.visto}</span></span><span>ID: ${rnc.id.slice(-6)}</span></div>
+</div></body></html>`;
         }
 
         function editarRNC(id) {
