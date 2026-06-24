@@ -35,7 +35,7 @@
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
    .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        button:disabled { background: #ccc!important; cursor: not-allowed; opacity: 0.6; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
    .btn-salvar { background: #28a745; color: white; }
    .btn-limpar { background: #6c757d; color: white; }
    .btn-excel { background: #217346; color: #fff; }
@@ -206,15 +206,14 @@
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, getIdTokenResult } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+  // COLE SEU firebaseConfig AQUI
   const firebaseConfig = {
-    apiKey: "AIzaSyAlKpviJW_Q2gIF143wQewDujKt9EqHPCk",
-    authDomain: "checklist-injetoras.firebaseapp.com",
-    databaseURL: "https://checklist-injetoras-default-rtdb.firebaseio.com",
-    projectId: "checklist-injetoras",
-    storageBucket: "checklist-injetoras.firebasestorage.app",
-    messagingSenderId: "183975564720",
-    appId: "1:183975564720:web:f439b0bff1913962d63275",
-    measurementId: "G-WJSGKT9B30"
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJECT.firebaseapp.com",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_PROJECT.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -250,7 +249,6 @@
   function aplicarPermissoes() {
       if (userRole!== 'admin') {
           document.getElementById('secaoPecas').classList.add('sem-permissao');
-          document.getElementById('import_pecas').disabled = true;
       }
   }
 
@@ -348,12 +346,12 @@
       if (db[codigo]) {
           inputDenom.value = db[codigo];
           inputDenom.style.backgroundColor = '#e8f5e9';
-          novaPecaBox.style.display = 'none';
+          if (novaPecaBox) novaPecaBox.style.display = 'none';
       } else if (codigo!== '') {
           inputDenom.value = '';
           inputDenom.placeholder = 'Código não encontrado';
           inputDenom.style.backgroundColor = '#fff3cd';
-          novaPecaBox.style.display = userRole === 'admin'? 'block' : 'none';
+          if (novaPecaBox) novaPecaBox.style.display = userRole === 'admin'? 'block' : 'none';
       }
   });
 
@@ -513,9 +511,8 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 .etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
 .header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
 .linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
-.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }
 .footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
-.nao-conf { font-size: 7pt; max-height: 9mm; overflow: hidden; }
 @media print {.no-print { display: none; } body { margin: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
 </style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
@@ -525,8 +522,8 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
 <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
 <div class="linha"><span class="label">Lote:</span><span class="valor">${rnc.lote || ''}</span><span class="label" style="width:15mm;margin-left:2mm;">Data:</span><span class="valor" style="width:25mm;">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
-<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
-<div class="footer"><span>Visto: <span style="border-bottom:1px solid #000;padding:0 10mm;">${rnc.visto}</span></span><span>ID: ${rnc.id.slice(-6)}</span></div>
+<div class="linha"><span class="label">Não Conf.:</span><span class="valor">${rnc.nao_conforme}</span></div>
+<div class="footer"><span>Visto: ${rnc.visto}</span><span>ID: ${rnc.id.slice(-6)}</span></div>
 </div></body></html>`;
   }
 </script>
