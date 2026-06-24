@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema RNC - Elgin v7 Online</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Sistema RNC - Elgin v8 Online</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
@@ -34,7 +33,6 @@
       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
       .status-online { color: #2e7d32; font-weight: bold; }
-      .status-nao-salvo { color: #d32f2f; font-weight: bold; }
       .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
@@ -42,11 +40,6 @@
         tr:hover { background: #f5f5f5; }
       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-      .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-      .badge-critica { background: #dc3545; color: white; }
-      .badge-alta { background: #fd7e14; color: white; }
-      .badge-media { background: #ffc107; color: #000; }
-      .badge-baixa { background: #28a745; color: white; }
       .loading { text-align: center; padding: 20px; color: #666; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
     </style>
@@ -54,13 +47,13 @@
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>Sistema de Cadastro RNC - Elgin v7 Online</h1>
+            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
             <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
         </div>
 
         <div class="content">
             <div class="status-box">
-                <span id="statusPecas">Conectando ao Firebase...</span>
+                <span id="statusPecas">Carregando...</span>
                 <span class="status-online">● Online - Firebase</span>
             </div>
 
@@ -70,7 +63,7 @@
                 <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
                 <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
                 <div class="botoes" style="margin-top:10px;">
-                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()" disabled>💾 Salvar Lista no Firebase</button>
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no Firebase</button>
                     <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
                 </div>
             </div>
@@ -107,10 +100,6 @@
                         <input type="text" id="fornecedor">
                     </div>
                     <div class="form-group">
-                        <label for="lote">Nº LOTE</label>
-                        <input type="text" id="lote">
-                    </div>
-                    <div class="form-group">
                         <label for="nf">Nº NF *</label>
                         <input type="text" id="nf" required>
                     </div>
@@ -129,15 +118,6 @@
                     <div class="form-group">
                         <label for="visto">VISTO/INSPETOR *</label>
                         <input type="text" id="visto" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="gravidade">GRAVIDADE</label>
-                        <select id="gravidade">
-                            <option value="Baixa">Baixa</option>
-                            <option value="Média">Média</option>
-                            <option value="Alta">Alta</option>
-                            <option value="Crítica">Crítica</option>
-                        </select>
                     </div>
                     <div class="form-group">
                         <label for="status">STATUS</label>
@@ -178,9 +158,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
-        // SUA CONFIG DO FIREBASE
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
           authDomain: "rnc-elgin.firebaseapp.com",
@@ -196,28 +176,29 @@
 
         let pecasDB = {};
         let pecasTempDB = {};
-        let unsubscribeRNCs = null;
+        let listaPecasSalva = false;
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('data').valueAsDate = new Date();
             await carregarPecasDoFirebase();
-            escutarRNCs();
+            await carregarTabelaRNCs();
         });
 
         async function carregarPecasDoFirebase() {
             const querySnapshot = await getDocs(collection(db, "pecas"));
             pecasDB = {};
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                pecasDB[data.codigo] = data.denominacao;
+            querySnapshot.forEach((doc) => {
+                pecasDB[doc.data().codigo] = doc.data().denominacao;
             });
+            listaPecasSalva = Object.keys(pecasDB).length > 0;
             atualizarStatusPecas();
         }
 
         function atualizarStatusPecas() {
             const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
-            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd}`;
-            document.getElementById('btnSalvarLista').disabled = Object.keys(pecasTempDB).length === 0;
+            const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
+            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
         }
 
         document.getElementById('import_pecas').addEventListener('change', function(e) {
@@ -236,8 +217,9 @@
                     const denom = String(row[1] || '').trim();
                     pecasTempDB[codigo] = denom;
                 });
+                listaPecasSalva = false;
                 atualizarStatusPecas();
-                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista no Firebase' para gravar.`);
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar pro Firebase.`);
             };
             reader.readAsArrayBuffer(file);
         });
@@ -247,15 +229,15 @@
             document.getElementById('btnSalvarLista').disabled = true;
             document.getElementById('btnSalvarLista').innerText = 'Enviando...';
 
-            const batch = writeBatch(db);
             for (let codigo in pecasTempDB) {
-                const docRef = doc(collection(db, "pecas"));
-                batch.set(docRef, { codigo: codigo, denominacao: pecasTempDB[codigo] });
+                await addDoc(collection(db, "pecas"), {
+                    codigo: codigo,
+                    denominacao: pecasTempDB[codigo]
+                });
             }
-            await batch.commit();
-
             pecasDB = {...pecasDB,...pecasTempDB};
             pecasTempDB = {};
+            listaPecasSalva = true;
             atualizarStatusPecas();
             document.getElementById('btnSalvarLista').innerText = '💾 Salvar Lista no Firebase';
             alert('Lista de peças salva no Firebase!');
@@ -291,9 +273,6 @@
                 novaPecaBox.style.display = 'none';
             }
         });
-        inputCodigoPeca.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
-        });
 
         window.cadastrarNovaPeca = async function() {
             const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
@@ -325,13 +304,11 @@
                 cod_peca: document.getElementById('codigo_peca').value,
                 denominacao: document.getElementById('denominacao').value,
                 fornecedor: document.getElementById('fornecedor').value,
-                lote: document.getElementById('lote').value,
                 nf: document.getElementById('nf').value,
                 qtd: Number(document.getElementById('qtd').value),
                 reserva: document.getElementById('reserva').value,
                 data: document.getElementById('data').value,
                 visto: document.getElementById('visto').value,
-                gravidade: document.getElementById('gravidade').value,
                 status: document.getElementById('status').value,
                 nao_conforme: document.getElementById('nao_conforme').value,
                 acao_corretiva: document.getElementById('acao_corretiva').value,
@@ -346,59 +323,57 @@
                 alert('RNC cadastrada no Firebase!');
             }
             limparForm();
+            await carregarTabelaRNCs();
         });
 
-        function escutarRNCs() {
+        async function carregarTabelaRNCs() {
             const q = query(collection(db, "rncs"), orderBy("data", "desc"));
-            if (unsubscribeRNCs) unsubscribeRNCs();
-            unsubscribeRNCs = onSnapshot(q, (snapshot) => {
-                const tbody = document.getElementById('tabelaBody');
-                tbody.innerHTML = '';
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
-                    return;
-                }
-                snapshot.forEach((docSnap) => {
-                    const rnc = {id: docSnap.id,...docSnap.data()};
-                    const badgeGrav = rnc.gravidade === 'Crítica'? 'badge-critica' : rnc.gravidade === 'Alta'? 'badge-alta' : rnc.gravidade === 'Média'? 'badge-media' : 'badge-baixa';
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${rnc.id.slice(-6)}</td>
-                        <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                        <td>${rnc.cod_produto}</td>
-                        <td>${rnc.cod_peca}</td>
-                        <td>${rnc.nf}</td>
-                        <td>${rnc.qtd}</td>
-                        <td>${rnc.nao_conforme.substring(0, 30)}... <span class="badge ${badgeGrav}">${rnc.gravidade}</span></td>
-                        <td>${rnc.status}</td>
-                        <td>
-                            <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
-                            <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
-                            <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
+                    <td>${rnc.status}</td>
+                    <td>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
+                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
         window.editarRNC = async function(id) {
-            const docSnap = await getDocs(collection(db, "rncs"));
+            const querySnapshot = await getDocs(collection(db, "rncs"));
             let rnc = null;
-            docSnap.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
+            querySnapshot.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
             if (rnc) {
                 document.getElementById('editId').value = rnc.id;
                 document.getElementById('cod_produto').value = rnc.cod_produto;
                 document.getElementById('codigo_peca').value = rnc.cod_peca;
                 document.getElementById('denominacao').value = rnc.denominacao;
                 document.getElementById('fornecedor').value = rnc.fornecedor;
-                document.getElementById('lote').value = rnc.lote;
                 document.getElementById('nf').value = rnc.nf;
                 document.getElementById('qtd').value = rnc.qtd;
                 document.getElementById('reserva').value = rnc.reserva;
                 document.getElementById('data').value = rnc.data;
                 document.getElementById('visto').value = rnc.visto;
-                document.getElementById('gravidade').value = rnc.gravidade;
                 document.getElementById('status').value = rnc.status;
                 document.getElementById('nao_conforme').value = rnc.nao_conforme;
                 document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
@@ -409,6 +384,7 @@
         window.excluirRNC = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta RNC?')) {
                 await deleteDoc(doc(db, "rncs", id));
+                await carregarTabelaRNCs();
             }
         }
 
@@ -423,18 +399,18 @@
         window.exportarExcelRNCs = async function() {
             const querySnapshot = await getDocs(collection(db, "rncs"));
             const rncs = [];
-            querySnapshot.forEach((docSnap) => rncs.push(docSnap.data()));
+            querySnapshot.forEach((doc) => rncs.push(doc.data()));
             if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
             const ws = XLSX.utils.json_to_sheet(rncs);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
-            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+            XLSX.writeFile(wb, 'RNCs_Elgin_Firebase.xlsx');
         }
 
         window.imprimirEtiqueta = async function(id) {
-            const docSnap = await getDocs(collection(db, "rncs"));
+            const querySnapshot = await getDocs(collection(db, "rncs"));
             let rnc = null;
-            docSnap.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
+            querySnapshot.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
             if (rnc) {
                 const etiquetaHTML = gerarEtiqueta100x60(rnc);
                 const win = window.open('', '_blank', 'width=400,height=300');
@@ -461,7 +437,7 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
 <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
 <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
-<div class="linha"><span class="label">Lote:</span><span class="valor">${rnc.lote || ''}</span><span class="label" style="width:15mm;margin-left:2mm;">Data:</span><span class="valor" style="width:25mm;">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
 <div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
 <div class="footer"><span>Visto: <span style="border-bottom:1px solid #000;padding:0 10mm;">${rnc.visto}</span></span><span>ID: ${rnc.id.slice(-6)}</span></div>
 </div></body></html>`;
