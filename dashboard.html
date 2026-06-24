@@ -8,38 +8,73 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1600px; margin: 0 auto; }
-       .header { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+      .container { max-width: 1600px; margin: 0 auto; }
+      .header { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+      .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h1 { color: #0056b3; font-size: 24px; }
-       .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; }
-       .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-       .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .card h3 { font-size: 14px; color: #666; margin-bottom: 8px; }
-       .card.valor { font-size: 32px; font-weight: bold; color: #0056b3; }
-       .card.critica.valor { color: #dc3545; }
-       .card.aberta.valor { color: #fd7e14; }
-       .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-       .grafico-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .grafico-box h3 { margin-bottom: 15px; font-size: 16px; }
-       .tabela-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; }
+      .filtros { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+      .filtro-grupo { display: flex; flex-direction: column; }
+      .filtro-grupo label { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+      .filtro-grupo input,.filtro-grupo select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+      .btn-filtrar { background: #0056b3; color: white; padding: 7px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+      .btn-limpar-filtro { background: #6c757d; color: white; padding: 7px 15px; border: none; border-radius: 4px; cursor: pointer; }
+      .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+      .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .card h3 { font-size: 14px; color: #666; margin-bottom: 8px; }
+      .card.valor { font-size: 32px; font-weight: bold; color: #0056b3; }
+      .card.critica.valor { color: #dc3545; }
+      .card.aberta.valor { color: #fd7e14; }
+      .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+      .grafico-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .grafico-box h3 { margin-bottom: 15px; font-size: 16px; }
+      .tabela-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
-       .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-       .badge-critica { background: #dc3545; color: white; }
-       .badge-alta { background: #fd7e14; color: white; }
-       .badge-media { background: #ffc107; color: #000; }
-       .badge-baixa { background: #28a745; color: white; }
+      .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+      .badge-critica { background: #dc3545; color: white; }
+      .badge-alta { background: #fd7e14; color: white; }
+      .badge-media { background: #ffc107; color: #000; }
+      .badge-baixa { background: #28a745; color: white; }
+      .periodo-info { background: #e3f2fd; padding: 8px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; text-align: center; }
         @media (max-width: 1024px) {.cards { grid-template-columns: repeat(2, 1fr); }.graficos { grid-template-columns: 1fr; } }
-        @media (max-width: 600px) {.cards { grid-template-columns: 1fr; }.header { flex-direction: column; gap: 10px; } }
+        @media (max-width: 600px) {.cards { grid-template-columns: 1fr; }.header-top { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Dashboard RNC - Elgin</h1>
-            <a href="index.html" class="btn-voltar">← Voltar ao Cadastro</a>
+            <div class="header-top">
+                <h1>📊 Dashboard RNC - Elgin</h1>
+                <a href="index.html" class="btn-voltar">← Voltar ao Cadastro</a>
+            </div>
+            <div class="filtros">
+                <div class="filtro-grupo">
+                    <label>Período rápido</label>
+                    <select id="periodoRapido" onchange="aplicarPeriodoRapido()">
+                        <option value="todos">Todos</option>
+                        <option value="hoje">Hoje</option>
+                        <option value="7dias">Últimos 7 dias</option>
+                        <option value="30dias">Últimos 30 dias</option>
+                        <option value="mesAtual">Mês atual</option>
+                        <option value="mesPassado">Mês passado</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <label>Data inicial</label>
+                    <input type="date" id="dataInicio">
+                </div>
+                <div class="filtro-grupo">
+                    <label>Data final</label>
+                    <input type="date" id="dataFim">
+                </div>
+                <button class="btn-filtrar" onclick="aplicarFiltro()">🔍 Filtrar</button>
+                <button class="btn-limpar-filtro" onclick="limparFiltro()">Limpar</button>
+            </div>
         </div>
+
+        <div class="periodo-info" id="periodoInfo">Exibindo: Todas as RNCs</div>
 
         <div class="cards">
             <div class="card">
@@ -93,13 +128,99 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', carregarDashboard);
+        let chartGravidade, chartStatus, chartFornecedor, chartMes;
+        let todasRNCs = [];
 
-        function carregarDashboard() {
-            const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
+        document.addEventListener('DOMContentLoaded', function() {
+            todasRNCs = JSON.parse(localStorage.getItem('rncs') || '[]');
+            carregarDashboard(todasRNCs);
+        });
 
+        function aplicarPeriodoRapido() {
+            const tipo = document.getElementById('periodoRapido').value;
+            const hoje = new Date();
+            let inicio, fim;
+
+            switch(tipo) {
+                case 'hoje':
+                    inicio = fim = hoje;
+                    break;
+                case '7dias':
+                    inicio = new Date(hoje);
+                    inicio.setDate(hoje.getDate() - 7);
+                    fim = hoje;
+                    break;
+                case '30dias':
+                    inicio = new Date(hoje);
+                    inicio.setDate(hoje.getDate() - 30);
+                    fim = hoje;
+                    break;
+                case 'mesAtual':
+                    inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                    fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+                    break;
+                case 'mesPassado':
+                    inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+                    fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+                    break;
+                case 'todos':
+                    document.getElementById('dataInicio').value = '';
+                    document.getElementById('dataFim').value = '';
+                    aplicarFiltro();
+                    return;
+            }
+
+            document.getElementById('dataInicio').valueAsDate = inicio;
+            document.getElementById('dataFim').valueAsDate = fim;
+            aplicarFiltro();
+        }
+
+        function aplicarFiltro() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+
+            let rncsFiltradas = todasRNCs;
+
+            if(dataInicio && dataFim) {
+                rncsFiltradas = todasRNCs.filter(r => {
+                    return r.data >= dataInicio && r.data <= dataFim;
+                });
+                document.getElementById('periodoInfo').textContent = `Exibindo: ${formatarData(dataInicio)} até ${formatarData(dataFim)} | ${rncsFiltradas.length} RNCs`;
+            } else if (dataInicio) {
+                rncsFiltradas = todasRNCs.filter(r => r.data >= dataInicio);
+                document.getElementById('periodoInfo').textContent = `Exibindo: A partir de ${formatarData(dataInicio)} | ${rncsFiltradas.length} RNCs`;
+            } else if (dataFim) {
+                rncsFiltradas = todasRNCs.filter(r => r.data <= dataFim);
+                document.getElementById('periodoInfo').textContent = `Exibindo: Até ${formatarData(dataFim)} | ${rncsFiltradas.length} RNCs`;
+            } else {
+                document.getElementById('periodoInfo').textContent = `Exibindo: Todas as RNCs | ${rncsFiltradas.length} RNCs`;
+            }
+
+            carregarDashboard(rncsFiltradas);
+        }
+
+        function limparFiltro() {
+            document.getElementById('periodoRapido').value = 'todos';
+            document.getElementById('dataInicio').value = '';
+            document.getElementById('dataFim').value = '';
+            document.getElementById('periodoInfo').textContent = `Exibindo: Todas as RNCs`;
+            carregarDashboard(todasRNCs);
+        }
+
+        function formatarData(dataStr) {
+            return new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+
+        function carregarDashboard(rncs) {
             if(rncs.length === 0) {
-                document.querySelector('.container').innerHTML += '<div style="background:#fff3cd;padding:20px;border-radius:8px;text-align:center;">Nenhuma RNC cadastrada ainda. Cadastre a primeira no sistema.</div>';
+                document.getElementById('totalRNC').textContent = '0';
+                document.getElementById('totalAbertas').textContent = '0';
+                document.getElementById('totalCriticas').textContent = '0';
+                document.getElementById('totalQTD').textContent = '0';
+                document.getElementById('tabelaCriticas').innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhuma RNC no período selecionado</td></tr>';
+
+                // Destrói gráficos se existirem
+                [chartGravidade, chartStatus, chartFornecedor, chartMes].forEach(c => c && c.destroy());
                 return;
             }
 
@@ -115,8 +236,11 @@
             const porFornecedor = contarPor(rncs, 'fornecedor');
             const porMes = agruparPorMes(rncs);
 
+            // Destrói gráficos antigos antes de criar novos
+            [chartGravidade, chartStatus, chartFornecedor, chartMes].forEach(c => c && c.destroy());
+
             // Gráfico Gravidade
-            new Chart(document.getElementById('chartGravidade'), {
+            chartGravidade = new Chart(document.getElementById('chartGravidade'), {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(porGravidade),
@@ -129,7 +253,7 @@
             });
 
             // Gráfico Status
-            new Chart(document.getElementById('chartStatus'), {
+            chartStatus = new Chart(document.getElementById('chartStatus'), {
                 type: 'pie',
                 data: {
                     labels: Object.keys(porStatus),
@@ -143,7 +267,7 @@
 
             // Gráfico Fornecedor - Top 5
             const topFornecedores = Object.entries(porFornecedor).sort((a,b) => b[1] - a[1]).slice(0,5);
-            new Chart(document.getElementById('chartFornecedor'), {
+            chartFornecedor = new Chart(document.getElementById('chartFornecedor'), {
                 type: 'bar',
                 data: {
                     labels: topFornecedores.map(f => f[0] || 'Sem fornecedor'),
@@ -157,7 +281,7 @@
             });
 
             // Gráfico por Mês
-            new Chart(document.getElementById('chartMes'), {
+            chartMes = new Chart(document.getElementById('chartMes'), {
                 type: 'line',
                 data: {
                     labels: Object.keys(porMes),
@@ -175,14 +299,15 @@
 
             // Tabela críticas
             const criticas = rncs.filter(r => r.gravidade === 'Crítica' || r.gravidade === 'Alta')
-                                .sort((a,b) => new Date(b.data) - new Date(a.data))
-                                .slice(0,10);
+                               .sort((a,b) => new Date(b.data) - new Date(a.data))
+                               .slice(0,10);
             const tbody = document.getElementById('tabelaCriticas');
+            tbody.innerHTML = '';
             criticas.forEach(r => {
                 const badgeClass = r.gravidade === 'Crítica'? 'badge-critica' : 'badge-alta';
                 tbody.innerHTML += `
                     <tr>
-                        <td>${new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                        <td>${formatarData(r.data)}</td>
                         <td>${r.cod_peca}</td>
                         <td>${r.denominacao}</td>
                         <td>${r.nf}</td>
@@ -206,7 +331,7 @@
             const meses = {};
             rncs.forEach(r => {
                 const data = new Date(r.data + 'T00:00:00');
-                const chave = `${data.getMonth()+1}/${data.getFullYear()}`;
+                const chave = `${String(data.getMonth()+1).padStart(2,'0')}/${data.getFullYear()}`;
                 meses[chave] = (meses[chave] || 0) + 1;
             });
             return meses;
