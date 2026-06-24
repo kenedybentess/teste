@@ -29,7 +29,7 @@
      .btn-salvar:hover:not(:disabled) { background: #218838; }
      .btn-limpar { background: #6c757d; color: white; }
      .btn-excel { background: #217346; color: #fff; }
-     .btn-export-pecas { background: #17a2b8; color: #fff; }
+     .btn-export { background: #17a2b8; color: #fff; }
      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
      .status-online { color: #2e7d32; font-weight: bold; }
@@ -40,7 +40,6 @@
         tr:hover { background: #f5f5f5; }
      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-     .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; background: #17a2b8; color: white; }
      .loading { text-align: center; padding: 20px; color: #666; }
      .box-cadastro { background:#fff9e6; padding:15px; border-radius:5px; border:1px solid #ffc107; margin-bottom:15px; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
@@ -55,18 +54,28 @@
 
         <div class="content">
             <div class="status-box">
-                <span id="statusPecas">Carregando...</span>
+                <span id="statusGeral">Carregando...</span>
                 <span class="status-online">● Firebase Conectado</span>
             </div>
 
-            <h2>1. Importar Lista de Peças</h2>
+            <h2>1. Importar Listas</h2>
             <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
-                <label for="import_pecas"><strong>Arquivo CSV/Excel com Códigos</strong></label>
+                <label for="import_pecas"><strong>Arquivo CSV/Excel - Peças</strong></label>
                 <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
-                <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+                <small style="display:block; margin-top:5px; color:#555;">Coluna A = Código Peça | Coluna B = Denominação</small>
                 <div class="botoes" style="margin-top:10px;">
-                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Peças no Firebase</button>
-                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Peças</button>
+                    <button type="button" id="btnSalvarPecas" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Peças</button>
+                    <button type="button" class="btn-export" onclick="exportarListaPecas()">📊 Exportar Peças</button>
+                </div>
+            </div>
+
+            <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+                <label for="import_produtos"><strong>Arquivo CSV/Excel - Produtos</strong></label>
+                <input type="file" id="import_produtos" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+                <small style="display:block; margin-top:5px; color:#555;">Coluna A = Código Produto | Coluna B = Descrição</small>
+                <div class="botoes" style="margin-top:10px;">
+                    <button type="button" id="btnSalvarProdutos" class="btn-salvar" onclick="salvarListaProdutos()">💾 Salvar Produtos</button>
+                    <button type="button" class="btn-export" onclick="exportarListaProdutos()">📊 Exportar Produtos</button>
                 </div>
             </div>
 
@@ -76,7 +85,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
-                        <input type="text" id="cod_produto" required placeholder="Digite e pressione TAB">
+                        <input type="text" id="cod_produto" required placeholder="TAB pra buscar">
                     </div>
                     <div class="form-group">
                         <label for="desc_produto">DESCRIÇÃO DO PRODUTO *</label>
@@ -84,7 +93,7 @@
                     </div>
                     <div class="form-group">
                         <label for="codigo_peca">CÓDIGO PEÇA *</label>
-                        <input type="text" id="codigo_peca" required placeholder="Digite e pressione TAB">
+                        <input type="text" id="codigo_peca" required placeholder="TAB pra buscar">
                     </div>
                     <div class="form-group">
                         <label for="denominacao">DENOMINAÇÃO PEÇA *</label>
@@ -205,6 +214,7 @@
         let pecasDB = {};
         let produtosDB = {};
         let pecasTempDB = {};
+        let produtosTempDB = {};
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('data').valueAsDate = new Date();
@@ -219,7 +229,7 @@
             querySnapshot.forEach((doc) => {
                 pecasDB[doc.data().codigo] = doc.data().denominacao;
             });
-            atualizarStatusPecas();
+            atualizarStatus();
         }
 
         async function carregarProdutos() {
@@ -228,12 +238,15 @@
             querySnapshot.forEach((doc) => {
                 produtosDB[doc.data().codigo] = doc.data().descricao;
             });
-            atualizarStatusPecas();
+            atualizarStatus();
         }
 
-        function atualizarStatusPecas() {
-            document.getElementById('statusPecas').innerHTML = `Peças: ${Object.keys(pecasDB).length} | Produtos: ${Object.keys(produtosDB).length}`;
-            document.getElementById('btnSalvarLista').disabled = Object.keys(pecasTempDB).length === 0;
+        function atualizarStatus() {
+            const qtdPecas = Object.keys(pecasDB).length;
+            const qtdProd = Object.keys(produtosDB).length;
+            document.getElementById('statusGeral').innerHTML = `Peças: ${qtdPecas} | Produtos: ${qtdProd}`;
+            document.getElementById('btnSalvarPecas').disabled = Object.keys(pecasTempDB).length === 0;
+            document.getElementById('btnSalvarProdutos').disabled = Object.keys(produtosTempDB).length === 0;
         }
 
         document.getElementById('import_pecas').addEventListener('change', function(e) {
@@ -252,27 +265,66 @@
                     const denom = String(row[1] || '').trim();
                     pecasTempDB[codigo] = denom;
                 });
-                atualizarStatusPecas();
-                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Peças' para enviar pro Firebase.`);
+                atualizarStatus();
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Peças'.`);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('import_produtos').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                produtosTempDB = {};
+                json.forEach((row, i) => {
+                    if (i === 0 ||!row[0]) return;
+                    const codigo = String(row[0]).trim().toUpperCase();
+                    const desc = String(row[1] || '').trim();
+                    produtosTempDB[codigo] = desc;
+                });
+                atualizarStatus();
+                alert(`${Object.keys(produtosTempDB).length} produtos carregados. Clique em 'Salvar Produtos'.`);
             };
             reader.readAsArrayBuffer(file);
         });
 
         window.salvarListaPecas = async function() {
             if (Object.keys(pecasTempDB).length === 0) return;
-            document.getElementById('btnSalvarLista').disabled = true;
-            document.getElementById('btnSalvarLista').innerText = 'Enviando...';
+            document.getElementById('btnSalvarPecas').disabled = true;
+            document.getElementById('btnSalvarPecas').innerText = 'Enviando...';
             for (let codigo in pecasTempDB) {
                 await setDoc(doc(db, "pecas", codigo), {
                     codigo: codigo,
                     denominacao: pecasTempDB[codigo]
                 });
             }
-            await carregarPecas();
+            pecasDB = {...pecasDB,...pecasTempDB};
             pecasTempDB = {};
-            atualizarStatusPecas();
-            document.getElementById('btnSalvarLista').innerText = '💾 Salvar Peças no Firebase';
-            alert('Lista de peças salva no Firebase!');
+            atualizarStatus();
+            document.getElementById('btnSalvarPecas').innerText = '💾 Salvar Peças';
+            alert('Peças salvas no Firebase!');
+        }
+
+        window.salvarListaProdutos = async function() {
+            if (Object.keys(produtosTempDB).length === 0) return;
+            document.getElementById('btnSalvarProdutos').disabled = true;
+            document.getElementById('btnSalvarProdutos').innerText = 'Enviando...';
+            for (let codigo in produtosTempDB) {
+                await setDoc(doc(db, "produtos", codigo), {
+                    codigo: codigo,
+                    descricao: produtosTempDB[codigo]
+                });
+            }
+            produtosDB = {...produtosDB,...produtosTempDB};
+            produtosTempDB = {};
+            atualizarStatus();
+            document.getElementById('btnSalvarProdutos').innerText = '💾 Salvar Produtos';
+            alert('Produtos salvos no Firebase!');
         }
 
         window.exportarListaPecas = function() {
@@ -283,6 +335,16 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Peças');
             XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+        }
+
+        window.exportarListaProdutos = function() {
+            if (Object.keys(produtosDB).length === 0) { alert('Nenhum produto cadastrado!'); return; }
+            const dados = [['Código Produto', 'Descrição']];
+            for (let codigo in produtosDB) dados.push([codigo, produtosDB[codigo]]);
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
+            XLSX.writeFile(wb, 'Lista_Produtos_Elgin.xlsx');
         }
 
         // Auto-complete Produto
@@ -315,7 +377,7 @@
             document.getElementById('desc_produto').style.backgroundColor = '#e8f5e9';
             document.getElementById('box_novo_produto').style.display = 'none';
             document.getElementById('nova_desc_produto').value = '';
-            atualizarStatusPecas();
+            atualizarStatus();
             alert('Produto ' + codigo + ' cadastrado!');
         }
 
@@ -356,7 +418,7 @@
             document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
             document.getElementById('nova_peca_box').style.display = 'none';
             document.getElementById('nova_denominacao').value = '';
-            atualizarStatusPecas();
+            atualizarStatus();
             alert('Peça ' + codigo + ' cadastrada!');
         }
 
@@ -415,7 +477,7 @@
                     <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                     <td>${rnc.cod_produto}</td>
                     <td>${rnc.cod_peca}</td>
-                    <td><span class="badge">${rnc.origem_defeito || '-'}</span></td>
+                    <td>${rnc.origem_defeito || '-'}</td>
                     <td>${rnc.nf}</td>
                     <td>${rnc.qtd}</td>
                     <td>${rnc.nao_conforme.substring(0, 40)}...</td>
@@ -510,13 +572,4 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
 <div class="linha"><span class="label">Produto:</span><span class="valor">${rnc.cod_produto} - ${rnc.desc_produto}</span></div>
 <div class="linha"><span class="label">Peça:</span><span class="valor">${rnc.cod_peca} - ${rnc.denominacao}</span></div>
-<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito}</span></div>
-<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
-<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
-<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
-<div class="footer"><span>Visto: <span style="border-bottom:1px solid #000;padding:0 10mm;">${rnc.visto}</span></span><span>ID: ${rnc.id.slice(-6)}</span></div>
-</div></body></html>`;
-        }
-    </script>
-</body>
-</html>
+<div class="linha"><span class="label">
