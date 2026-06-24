@@ -254,7 +254,7 @@
 
         // Carrega dados ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('data').valueAsDate = new Date();
+            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
             carregarTabela();
         });
 
@@ -262,23 +262,23 @@
         document.getElementById('formRNC').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const editId = document.getElementById('editId').value;
+            const editId = const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value;
             const rnc = {
                 id: editId || Date.now().toString(),
-                cod_produto: document.getElementById('cod_produto').value,
-                cod_peca: document.getElementById('cod_peca').value,
-                denominacao: document.getElementById('denominacao').value,
-                fornecedor: document.getElementById('fornecedor').value,
-                lote: document.getElementById('lote').value,
-                nf: document.getElementById('nf').value,
-                qtd: document.getElementById('qtd').value,
-                reserva: document.getElementById('reserva').value,
-                data: document.getElementById('data').value,
-                visto: document.getElementById('visto').value,
-                gravidade: document.getElementById('gravidade').value,
-                status: document.getElementById('status').value,
-                nao_conforme: document.getElementById('nao_conforme').value,
-                acao_corretiva: document.getElementById('acao_corretiva').value,
+                cod_produto: const el_cod_produto = document.getElementById('cod_produto'); if(el_cod_produto) el_cod_produto.value,
+                cod_peca: const el_cod_peca = document.getElementById('cod_peca'); if(el_cod_peca) el_cod_peca.value,
+                denominacao: const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value,
+                fornecedor: const el_fornecedor = document.getElementById('fornecedor'); if(el_fornecedor) el_fornecedor.value,
+                lote: const el_lote = document.getElementById('lote'); if(el_lote) el_lote.value,
+                nf: const el_nf = document.getElementById('nf'); if(el_nf) el_nf.value,
+                qtd: const el_qtd = document.getElementById('qtd'); if(el_qtd) el_qtd.value,
+                reserva: const el_reserva = document.getElementById('reserva'); if(el_reserva) el_reserva.value,
+                data: const el_data = document.getElementById('data'); if(el_data) el_data.value,
+                visto: const el_visto = document.getElementById('visto'); if(el_visto) el_visto.value,
+                gravidade: const el_gravidade = document.getElementById('gravidade'); if(el_gravidade) el_gravidade.value,
+                status: const el_status = document.getElementById('status'); if(el_status) el_status.value,
+                nao_conforme: const el_nao_conforme = document.getElementById('nao_conforme'); if(el_nao_conforme) el_nao_conforme.value,
+                acao_corretiva: const el_acao_corretiva = document.getElementById('acao_corretiva'); if(el_acao_corretiva) el_acao_corretiva.value,
                 data_cadastro: editId? undefined : new Date().toISOString()
             };
 
@@ -332,21 +332,21 @@
             const rncs = JSON.parse(localStorage.getItem('rncs') || '[]');
             const rnc = rncs.find(r => r.id === id);
             if (rnc) {
-                document.getElementById('editId').value = rnc.id;
-                document.getElementById('cod_produto').value = rnc.cod_produto;
-                document.getElementById('cod_peca').value = rnc.cod_peca;
-                document.getElementById('denominacao').value = rnc.denominacao;
-                document.getElementById('fornecedor').value = rnc.fornecedor;
-                document.getElementById('lote').value = rnc.lote;
-                document.getElementById('nf').value = rnc.nf;
-                document.getElementById('qtd').value = rnc.qtd;
-                document.getElementById('reserva').value = rnc.reserva;
-                document.getElementById('data').value = rnc.data;
-                document.getElementById('visto').value = rnc.visto;
-                document.getElementById('gravidade').value = rnc.gravidade;
-                document.getElementById('status').value = rnc.status;
-                document.getElementById('nao_conforme').value = rnc.nao_conforme;
-                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
+                const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value = rnc.id;
+                const el_cod_produto = document.getElementById('cod_produto'); if(el_cod_produto) el_cod_produto.value = rnc.cod_produto;
+                const el_cod_peca = document.getElementById('cod_peca'); if(el_cod_peca) el_cod_peca.value = rnc.cod_peca;
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = rnc.denominacao;
+                const el_fornecedor = document.getElementById('fornecedor'); if(el_fornecedor) el_fornecedor.value = rnc.fornecedor;
+                const el_lote = document.getElementById('lote'); if(el_lote) el_lote.value = rnc.lote;
+                const el_nf = document.getElementById('nf'); if(el_nf) el_nf.value = rnc.nf;
+                const el_qtd = document.getElementById('qtd'); if(el_qtd) el_qtd.value = rnc.qtd;
+                const el_reserva = document.getElementById('reserva'); if(el_reserva) el_reserva.value = rnc.reserva;
+                const el_data = document.getElementById('data'); if(el_data) el_data.value = rnc.data;
+                const el_visto = document.getElementById('visto'); if(el_visto) el_visto.value = rnc.visto;
+                const el_gravidade = document.getElementById('gravidade'); if(el_gravidade) el_gravidade.value = rnc.gravidade;
+                const el_status = document.getElementById('status'); if(el_status) el_status.value = rnc.status;
+                const el_nao_conforme = document.getElementById('nao_conforme'); if(el_nao_conforme) el_nao_conforme.value = rnc.nao_conforme;
+                const el_acao_corretiva = document.getElementById('acao_corretiva'); if(el_acao_corretiva) el_acao_corretiva.value = rnc.acao_corretiva;
                 window.scrollTo(0, 0);
             }
         }
@@ -375,13 +375,13 @@
 
         function limparForm() {
             document.getElementById('formRNC').reset();
-            document.getElementById('editId').value = '';
-            document.getElementById('data').valueAsDate = new Date();
+            const el_editId = document.getElementById('editId'); if(el_editId) el_editId.value = '';
+            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
             rncSelecionada = null;
         }
 
         function filtrarTabela() {
-            const filtro = document.getElementById('buscaInput').value.toLowerCase();
+            const filtro = const el_buscaInput = document.getElementById('buscaInput'); if(el_buscaInput) el_buscaInput.value.toLowerCase();
             const linhas = document.getElementById('tabelaBody').getElementsByTagName('tr');
 
             for (let linha of linhas) {
@@ -431,7 +431,7 @@
 
         // Carregar peças salvas ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('data').valueAsDate = new Date();
+            const el_data = document.getElementById('data'); if(el_data) el_data.valueAsDate = new Date();
             carregarTabela();
             
             // Carrega lista de peças do localStorage
@@ -506,23 +506,31 @@
             const novaPecaBox = document.getElementById('nova_peca_box');
             
             if (pecasDB[codigo]) {
-                document.getElementById('denominacao').value = pecasDB[codigo];
-                document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = pecasDB[codigo];
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#e8f5e9';
                 novaPecaBox.style.display = 'none';
             } else if (codigo !== '') {
-                document.getElementById('denominacao').value = '';
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.value = '';
                 document.getElementById('denominacao').placeholder = 'Código não encontrado';
-                document.getElementById('denominacao').style.backgroundColor = '#fff3cd';
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#fff3cd';
                 novaPecaBox.style.display = 'block'; // Mostra opção de cadastrar
             } else {
-                document.getElementById('denominacao').style.backgroundColor = '#fff';
+                const el_denominacao = document.getElementById('denominacao'); if(el_denominacao) el_denominacao.style.backgroundColor = '#fff';
                 novaPecaBox.style.display = 'none';
             }
         });
         
+        
         function cadastrarNovaPeca() {
-            const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
-            const denom = document.getElementById('nova_denominacao').value.trim();
+            const inputCodigo = document.getElementById('codigo_peca');
+            const inputNovaDenom = document.getElementById('nova_denominacao');
+            const inputDenom = document.getElementById('denominacao');
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            
+            if (!inputCodigo || !inputNovaDenom || !inputDenom) return;
+            
+            const codigo = inputCodigo.value.trim().toUpperCase();
+            const denom = inputNovaDenom.value.trim();
             
             if (!codigo || !denom) {
                 alert('Preencha o código e a denominação!');
@@ -530,21 +538,28 @@
             }
             
             pecasDB[codigo] = denom;
-            document.getElementById('denominacao').value = denom;
-            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
-            document.getElementById('nova_peca_box').style.display = 'none';
-            document.getElementById('nova_denominacao').value = '';
+            inputDenom.value = denom;
+            inputDenom.style.backgroundColor = '#e8f5e9';
+            if (novaPecaBox) novaPecaBox.style.display = 'none';
+            inputNovaDenom.value = '';
             
             salvarPecasDB();
             alert('Peça ' + codigo + ' cadastrada! Salva automaticamente na sua lista.');
         }
         
         function cancelarNovaPeca() {
-            document.getElementById('nova_peca_box').style.display = 'none';
-            document.getElementById('codigo_peca').value = '';
-            document.getElementById('denominacao').value = '';
-            document.getElementById('denominacao').style.backgroundColor = '#fff';
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            const inputCodigo = document.getElementById('codigo_peca');
+            const inputDenom = document.getElementById('denominacao');
+            
+            if (novaPecaBox) novaPecaBox.style.display = 'none';
+            if (inputCodigo) inputCodigo.value = '';
+            if (inputDenom) {
+                inputDenom.value = '';
+                inputDenom.style.backgroundColor = '#fff';
+            }
         }
+
         
         // Também busca ao pressionar Enter
         document.getElementById('codigo_peca').addEventListener('keypress', function(e) {
