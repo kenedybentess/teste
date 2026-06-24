@@ -33,9 +33,8 @@
       .btn-export-pecas { background: #17a2b8; color: #fff; }
       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-      .status-salvo { color: #2e7d32; font-weight: bold; }
-      .status-nao-salvo { color: #d32f2f; font-weight: bold; }
       .status-online { color: #2e7d32; font-weight: bold; }
+      .status-nao-salvo { color: #d32f2f; font-weight: bold; }
       .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
@@ -62,7 +61,7 @@
         <div class="content">
             <div class="status-box">
                 <span id="statusPecas">Conectando ao Firebase...</span>
-                <span class="status-online">● Online</span>
+                <span class="status-online">● Online - Firebase</span>
             </div>
 
             <h2>1. Importar Lista de Peças</h2>
@@ -71,8 +70,8 @@
                 <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
                 <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
                 <div class="botoes" style="margin-top:10px;">
-                    <button type="button" id="btnSalvarLista" class="btn-salvar" disabled>💾 Salvar Lista no Firebase</button>
-                    <button type="button" class="btn-export-pecas">📊 Exportar Lista Atual</button>
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()" disabled>💾 Salvar Lista no Firebase</button>
+                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
                 </div>
             </div>
 
@@ -99,9 +98,10 @@
                                 <label style="font-size:12px;">Denominação da nova peça:</label>
                                 <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
                             </div>
-                            <button type="button" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
-                            <button type="button" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
+                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
                         </div>
+                    </div>
                     <div class="form-group">
                         <label for="fornecedor">FORNECEDOR</label>
                         <input type="text" id="fornecedor">
@@ -154,10 +154,11 @@
                         <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
                         <textarea id="acao_corretiva" rows="2"></textarea>
                     </div>
+                </div>
                 <div class="botoes">
                     <button type="submit" class="btn-salvar">SALVAR RNC</button>
-                    <button type="button" class="btn-limpar">LIMPAR</button>
-                    <button type="button" class="btn-excel">📊 Exportar RNCs para Excel</button>
+                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
                 </div>
             </form>
 
@@ -169,7 +170,7 @@
                             <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Status</th><th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelaBody"><tr><td colspan="9" class="loading">Carregando do Firebase...</td></tr></tbody>
+                    <tbody id="tabelaBody"><tr><td colspan="9" class="loading">Carregando RNCs do Firebase...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -177,8 +178,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, setDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // SUA CONFIG DO FIREBASE
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
           authDomain: "rnc-elgin.firebaseapp.com",
@@ -194,42 +196,31 @@
 
         let pecasDB = {};
         let pecasTempDB = {};
+        let unsubscribeRNCs = null;
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('data').valueAsDate = new Date();
             await carregarPecasDoFirebase();
             escutarRNCs();
-            bindEvents();
         });
 
-        function bindEvents() {
-            document.getElementById('btnSalvarLista').onclick = salvarListaPecas;
-            document.querySelector('.btn-export-pecas').onclick = exportarListaPecas;
-            document.getElementById('formRNC').onsubmit = salvarRNC;
-            document.querySelector('.btn-limpar').onclick = limparForm;
-            document.querySelector('.btn-excel').onclick = exportarExcelRNCs;
-            document.getElementById('import_pecas').onchange = importarPecas;
-            document.getElementById('codigo_peca').onblur = buscarPeca;
-            document.querySelector('#nova_peca_box button:nth-of-type(1)').onclick = cadastrarNovaPeca;
-            document.querySelector('#nova_peca_box button:nth-of-type(2)').onclick = cancelarNovaPeca;
-        }
-
         async function carregarPecasDoFirebase() {
-            const docRef = doc(db, "listas", "pecas");
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                pecasDB = docSnap.data().itens || {};
-            }
+            const querySnapshot = await getDocs(collection(db, "pecas"));
+            pecasDB = {};
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                pecasDB[data.codigo] = data.denominacao;
+            });
             atualizarStatusPecas();
         }
 
         function atualizarStatusPecas() {
-            const qtd = Object.keys(pecasDB).length;
+            const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
             document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd}`;
             document.getElementById('btnSalvarLista').disabled = Object.keys(pecasTempDB).length === 0;
         }
 
-        function importarPecas(e) {
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -246,25 +237,31 @@
                     pecasTempDB[codigo] = denom;
                 });
                 atualizarStatusPecas();
-                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista no Firebase'.`);
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista no Firebase' para gravar.`);
             };
             reader.readAsArrayBuffer(file);
-        }
+        });
 
-        async function salvarListaPecas() {
+        window.salvarListaPecas = async function() {
             if (Object.keys(pecasTempDB).length === 0) return;
-            const btn = document.getElementById('btnSalvarLista');
-            btn.disabled = true;
-            btn.innerText = 'Enviando...';
+            document.getElementById('btnSalvarLista').disabled = true;
+            document.getElementById('btnSalvarLista').innerText = 'Enviando...';
+
+            const batch = writeBatch(db);
+            for (let codigo in pecasTempDB) {
+                const docRef = doc(collection(db, "pecas"));
+                batch.set(docRef, { codigo: codigo, denominacao: pecasTempDB[codigo] });
+            }
+            await batch.commit();
+
             pecasDB = {...pecasDB,...pecasTempDB};
-            await setDoc(doc(db, "listas", "pecas"), { itens: pecasDB });
             pecasTempDB = {};
             atualizarStatusPecas();
-            btn.innerText = '💾 Salvar Lista no Firebase';
+            document.getElementById('btnSalvarLista').innerText = '💾 Salvar Lista no Firebase';
             alert('Lista de peças salva no Firebase!');
         }
 
-        function exportarListaPecas() {
+        window.exportarListaPecas = function() {
             if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
             const dados = [['Código Peça', 'Denominação']];
             for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
@@ -274,7 +271,8 @@
             XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
         }
 
-        function buscarPeca() {
+        const inputCodigoPeca = document.getElementById('codigo_peca');
+        inputCodigoPeca.addEventListener('blur', function() {
             const codigo = this.value.trim().toUpperCase();
             const novaPecaBox = document.getElementById('nova_peca_box');
             const inputDenom = document.getElementById('denominacao');
@@ -292,14 +290,18 @@
                 inputDenom.style.backgroundColor = '#fff';
                 novaPecaBox.style.display = 'none';
             }
-        }
+        });
+        inputCodigoPeca.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+        });
 
-        async function cadastrarNovaPeca() {
+        window.cadastrarNovaPeca = async function() {
             const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
             const denom = document.getElementById('nova_denominacao').value.trim();
             if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
+
+            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
             pecasDB[codigo] = denom;
-            await setDoc(doc(db, "listas", "pecas"), { itens: pecasDB });
             document.getElementById('denominacao').value = denom;
             document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
             document.getElementById('nova_peca_box').style.display = 'none';
@@ -308,14 +310,14 @@
             alert('Peça ' + codigo + ' cadastrada no Firebase!');
         }
 
-        function cancelarNovaPeca() {
+        window.cancelarNovaPeca = function() {
             document.getElementById('nova_peca_box').style.display = 'none';
             document.getElementById('codigo_peca').value = '';
             document.getElementById('denominacao').value = '';
             document.getElementById('denominacao').style.backgroundColor = '#fff';
         }
 
-        async function salvarRNC(e) {
+        document.getElementById('formRNC').addEventListener('submit', async function(e) {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             const rnc = {
@@ -344,11 +346,12 @@
                 alert('RNC cadastrada no Firebase!');
             }
             limparForm();
-        }
+        });
 
         function escutarRNCs() {
             const q = query(collection(db, "rncs"), orderBy("data", "desc"));
-            onSnapshot(q, (snapshot) => {
+            if (unsubscribeRNCs) unsubscribeRNCs();
+            unsubscribeRNCs = onSnapshot(q, (snapshot) => {
                 const tbody = document.getElementById('tabelaBody');
                 tbody.innerHTML = '';
                 if (snapshot.empty) {
@@ -380,10 +383,11 @@
         }
 
         window.editarRNC = async function(id) {
-            const docSnap = await getDoc(doc(db, "rncs", id));
-            if (docSnap.exists()) {
-                const rnc = docSnap.data();
-                document.getElementById('editId').value = id;
+            const docSnap = await getDocs(collection(db, "rncs"));
+            let rnc = null;
+            docSnap.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
+            if (rnc) {
+                document.getElementById('editId').value = rnc.id;
                 document.getElementById('cod_produto').value = rnc.cod_produto;
                 document.getElementById('codigo_peca').value = rnc.cod_peca;
                 document.getElementById('denominacao').value = rnc.denominacao;
@@ -408,7 +412,7 @@
             }
         }
 
-        function limparForm() {
+        window.limparForm = function() {
             document.getElementById('formRNC').reset();
             document.getElementById('editId').value = '';
             document.getElementById('data').valueAsDate = new Date();
@@ -416,21 +420,22 @@
             document.getElementById('nova_peca_box').style.display = 'none';
         }
 
-        async function exportarExcelRNCs() {
+        window.exportarExcelRNCs = async function() {
             const querySnapshot = await getDocs(collection(db, "rncs"));
             const rncs = [];
-            querySnapshot.forEach((doc) => rncs.push(doc.data()));
+            querySnapshot.forEach((docSnap) => rncs.push(docSnap.data()));
             if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
             const ws = XLSX.utils.json_to_sheet(rncs);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
-            XLSX.writeFile(wb, 'RNCs_Elgin_Firebase.xlsx');
+            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
         }
 
         window.imprimirEtiqueta = async function(id) {
-            const docSnap = await getDoc(doc(db, "rncs", id));
-            if (docSnap.exists()) {
-                const rnc = {id: docSnap.id,...docSnap.data()};
+            const docSnap = await getDocs(collection(db, "rncs"));
+            let rnc = null;
+            docSnap.forEach((d) => { if(d.id === id) rnc = {id: d.id,...d.data()}; });
+            if (rnc) {
                 const etiquetaHTML = gerarEtiqueta100x60(rnc);
                 const win = window.open('', '_blank', 'width=400,height=300');
                 win.document.write(etiquetaHTML);
