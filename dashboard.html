@@ -8,22 +8,36 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1600px; margin: 0 auto; }
+      .container { max-width: 1600px; margin: 0 auto; }
         h1 { color: #0056b3; margin-bottom: 20px; }
-       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
-       .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-       .card h3 { font-size: 14px; color: #666; margin-bottom: 8px; }
-       .card.valor { font-size: 32px; font-weight: bold; color: #0056b3; }
-       .card.aberta.valor { color: #dc3545; }
-       .card.fechada.valor { color: #28a745; }
-       .graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 25px; }
-       .grafico-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-       .grafico-box h2 { font-size: 16px; margin-bottom: 15px; color: #333; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+      .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+      .card h3 { font-size: 14px; color: #666; margin-bottom: 8px; }
+      .card.valor { font-size: 28px; font-weight: bold; color: #0056b3; }
+      .card.aberta.valor { color: #dc3545; }
+      .card.fechada.valor { color: #28a745; }
+
+      .graficos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; }
+      .grafico-box {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+       }
+      .grafico-box.linha-completa { grid-column: 1 / -1; height: 300px; }
+      .grafico-box h2 { font-size: 15px; margin-bottom: 10px; color: #333; }
+      .grafico-box canvas { max-height: 250px!important; }
+
         table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: 8px; overflow: hidden; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
-       .status-online { color: #2e7d32; font-weight: bold; float: right; }
-        @media (max-width: 768px) {.graficos { grid-template-columns: 1fr; } }
+      .status-online { color: #2e7d32; font-weight: bold; float: right; }
+
+        @media (max-width: 1024px) {.graficos { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {.grafico-box { height: 280px; } }
     </style>
 </head>
 <body>
@@ -58,13 +72,13 @@
                 <h2>Top 5 Peças com Mais RNCs</h2>
                 <canvas id="graficoTopPecas"></canvas>
             </div>
-            <div class="grafico-box" style="grid-column: 1 / -1;">
+            <div class="grafico-box linha-completa">
                 <h2>RNCs nos Últimos 30 Dias</h2>
                 <canvas id="graficoLinha"></canvas>
             </div>
         </div>
 
-        <div class="grafico-box">
+        <div class="grafico-box" style="height: auto;">
             <h2>Últimas RNCs Abertas</h2>
             <table>
                 <thead>
@@ -77,7 +91,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
@@ -123,23 +137,33 @@
                     labels: Object.keys(origemCount),
                     datasets: [{ data: Object.values(origemCount), backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#6c757d'] }]
                 },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+                }
             });
 
             // 3. Top 5 Peças
             const pecasCount = {};
             rncs.forEach(r => {
-                const key = `${r.cod_peca} - ${r.denominacao}`;
+                const key = `${r.cod_peca}`;
                 pecasCount[key] = (pecasCount[key] || 0) + 1;
             });
             const top5 = Object.entries(pecasCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
             new Chart(document.getElementById('graficoTopPecas'), {
                 type: 'bar',
                 data: {
-                    labels: top5.map(t => t[0].length > 25? t[0].substring(0,25) + '...' : t[0]),
+                    labels: top5.map(t => t[0]),
                     datasets: [{ label: 'Qtd RNCs', data: top5.map(t => t[1]), backgroundColor: '#0056b3' }]
                 },
-                options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { stepSize: 1 } } }
+                }
             });
 
             // 4. Gráfico Linha 30 dias
@@ -157,15 +181,28 @@
                 type: 'line',
                 data: {
                     labels: Object.keys(ultimos30dias).map(d => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})),
-                    datasets: [{ label: 'RNCs/Dia', data: Object.values(ultimos30dias), borderColor: '#28a745', tension: 0.3, fill: true, backgroundColor: 'rgba(40,167,69,0.1)' }]
+                    datasets: [{
+                        label: 'RNCs/Dia',
+                        data: Object.values(ultimos30dias),
+                        borderColor: '#28a745',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(40,167,69,0.1)',
+                        pointRadius: 2
+                    }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
             });
 
             // 5. Tabela Abertas
             const abertas = rncs.filter(r => r.status === 'Aberta')
-                              .sort((a,b) => new Date(b.data) - new Date(a.data))
-                              .slice(0, 10);
+                             .sort((a,b) => new Date(b.data) - new Date(a.data))
+                             .slice(0, 10);
             const tbody = document.getElementById('tabelaAbertas');
             tbody.innerHTML = abertas.map(r => `
                 <tr>
