@@ -8,84 +8,81 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: Arial, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh; 
+            background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
             display: flex; 
-            align-items: center; 
             justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
         }
-        .login-box {
-            background: #fff; 
-            padding: 40px; 
+       .login-box { 
+            background: white; 
+            padding: 40px 30px; 
             border-radius: 12px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 100%; 
-            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
+            width: 100%;
+            max-width: 380px; 
         }
-        h1 { 
-            color: #0056b3; 
-            text-align: center; 
-            margin-bottom: 30px; 
-            font-size: 22px; 
-        }
-        .form-group { margin-bottom: 20px; }
-        label { 
-            display: block; 
-            font-weight: bold; 
-            margin-bottom: 8px; 
-            font-size: 14px; 
-            color: #333; 
-        }
+       .logo { text-align: center; margin-bottom: 10px; }
+       .logo h1 { color: #0056b3; font-size: 28px; }
+       .logo p { color: #666; font-size: 14px; margin-top: 5px; }
+        h2 { color: #333; text-align: center; margin: 20px 0; font-size: 20px; }
+       .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #555; }
         input { 
             width: 100%; 
             padding: 12px; 
-            border: 1px solid #ccc; 
+            border: 1px solid #ddd; 
             border-radius: 6px; 
-            font-size: 15px; 
+            font-size: 14px;
+            transition: 0.2s;
         }
-        input:focus { outline: none; border-color: #0056b3; }
+        input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
         button { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px; 
             background: #0056b3; 
             color: white; 
             border: none; 
             border-radius: 6px; 
-            font-size: 16px; 
             font-weight: bold; 
+            font-size: 15px;
             cursor: pointer; 
-            margin-top: 10px; 
+            transition: 0.2s;
+            margin-top: 10px;
         }
-        button:hover { background: #004494; }
+        button:hover:not(:disabled) { background: #003d82; }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        .erro { 
-            background: #ffebee; 
-            color: #c62828; 
-            padding: 10px; 
-            border-radius: 4px; 
-            margin-bottom: 15px; 
-            font-size: 14px; 
-            display: none; 
+       .erro { 
+            color: #dc3545; 
+            font-size: 13px; 
+            text-align: center; 
+            margin-top: 12px; 
+            min-height: 18px;
+            font-weight: 500;
         }
-        .logo { text-align: center; font-size: 48px; margin-bottom: 10px; }
+       .footer { text-align: center; margin-top: 25px; font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <div class="logo">🔒</div>
-        <h1>Sistema RNC - Elgin</h1>
-        <div id="erro" class="erro"></div>
+        <div class="logo">
+            <h1>ELGIN</h1>
+            <p>Sistema de RNC Online</p>
+        </div>
+        <h2>Acesso ao Sistema</h2>
         <form id="formLogin">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" required placeholder="seu.email@elgin.com">
+                <input type="email" id="email" placeholder="seu@elgin.com" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" required placeholder="Digite sua senha">
+                <input type="password" id="senha" placeholder="Digite sua senha" required autocomplete="current-password">
             </div>
             <button type="submit" id="btnLogin">Entrar</button>
+            <div class="erro" id="msgErro"></div>
         </form>
+        <div class="footer">v8.0 - Firebase Auth</div>
     </div>
 
     <script type="module">
@@ -98,41 +95,43 @@
           projectId: "rnc-elgin",
           storageBucket: "rnc-elgin.firebasestorage.app",
           messagingSenderId: "75312642711",
-          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
-          measurementId: "G-3Z7JMC88KM"
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Se já estiver logado, manda direto pro sistema
+        // Se já tá logado, manda pro sistema
         onAuthStateChanged(auth, (user) => {
-            if (user) window.location.href = 'index.html';
+            if (user) {
+                window.location.href = 'index.html';
+            }
         });
 
         document.getElementById('formLogin').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
             const btn = document.getElementById('btnLogin');
-            const erroDiv = document.getElementById('erro');
+            const msgErro = document.getElementById('msgErro');
             
             btn.disabled = true;
             btn.innerText = 'Entrando...';
-            erroDiv.style.display = 'none';
+            msgErro.innerText = '';
 
             try {
                 await signInWithEmailAndPassword(auth, email, senha);
-                window.location.href = 'index.html';
+                // onAuthStateChanged vai redirecionar
             } catch (error) {
-                erroDiv.style.display = 'block';
-                if (error.code === 'auth/invalid-credential') {
-                    erroDiv.innerText = 'Email ou senha incorretos';
-                } else if (error.code === 'auth/too-many-requests') {
-                    erroDiv.innerText = 'Muitas tentativas. Tente mais tarde';
-                } else {
-                    erroDiv.innerText = 'Erro ao fazer login: ' + error.message;
-                }
+                console.log('Erro Firebase:', error.code);
+                let msg = 'Erro ao fazer login';
+                if (error.code === 'auth/invalid-credential') msg = 'Email ou senha incorretos';
+                if (error.code === 'auth/user-not-found') msg = 'Usuário não encontrado';
+                if (error.code === 'auth/wrong-password') msg = 'Senha incorreta';
+                if (error.code === 'auth/invalid-email') msg = 'Email inválido';
+                if (error.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde 1 min';
+                if (error.code === 'auth/network-request-failed') msg = 'Erro de rede. Verifique sua conexão';
+                msgErro.innerText = msg;
                 btn.disabled = false;
                 btn.innerText = 'Entrar';
             }
