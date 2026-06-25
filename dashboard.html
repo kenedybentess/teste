@@ -9,7 +9,18 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
       .container { max-width: 1600px; margin: 0 auto; }
-        h1 { color: #0056b3; margin-bottom: 20px; }
+        h1 { color: #0056b3; margin-bottom: 15px; }
+
+       /* FILTROS */
+      .filtros { background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+      .filtros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+      .filtro-grupo { display: flex; flex-direction: column; }
+      .filtro-grupo label { font-weight: bold; font-size: 12px; margin-bottom: 4px; color: #555; }
+      .filtro-grupo input,.filtro-grupo select { padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+      .btn-filtro { padding: 8px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+      .btn-aplicar { background: #0056b3; color: white; }
+      .btn-limpar { background: #6c757d; color: white; }
+
       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
       .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
       .card h3 { font-size: 14px; color: #666; margin-bottom: 8px; }
@@ -35,57 +46,101 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
       .status-online { color: #2e7d32; font-weight: bold; float: right; }
+      .loading-msg { text-align: center; padding: 40px; color: #666; font-size: 16px; }
 
         @media (max-width: 1024px) {.graficos { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) {.grafico-box { height: 280px; } }
+        @media (max-width: 768px) {.grafico-box { height: 280px; }.filtros-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Dashboard RNC - Elgin <span class="status-online">● Online - Firebase</span></h1>
 
-        <div class="cards">
-            <div class="card">
-                <h3>TOTAL RNCs</h3>
-                <div class="valor" id="totalRNCs">0</div>
-            </div>
-            <div class="card aberta">
-                <h3>RNCs ABERTAS</h3>
-                <div class="valor" id="rncAbertas">0</div>
-            </div>
-            <div class="card fechada">
-                <h3>RNCs FECHADAS</h3>
-                <div class="valor" id="rncFechadas">0</div>
-            </div>
-            <div class="card">
-                <h3>PEÇAS REPROVADAS NO MÊS</h3>
-                <div class="valor" id="qtdMes">0</div>
+        <!-- FILTROS -->
+        <div class="filtros">
+            <div class="filtros-grid">
+                <div class="filtro-grupo">
+                    <label>Data Início</label>
+                    <input type="date" id="filtroDataInicio">
+                </div>
+                <div class="filtro-grupo">
+                    <label>Data Fim</label>
+                    <input type="date" id="filtroDataFim">
+                </div>
+                <div class="filtro-grupo">
+                    <label>Status</label>
+                    <select id="filtroStatus">
+                        <option value="">Todas</option>
+                        <option value="Aberta">Aberta</option>
+                        <option value="Fechada">Fechada</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <label>Origem do Defeito</label>
+                    <select id="filtroOrigem">
+                        <option value="">Todas</option>
+                        <option value="Fornecedor">Fornecedor</option>
+                        <option value="Processo">Processo</option>
+                        <option value="Revisão">Revisão</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <button class="btn-filtro btn-aplicar" onclick="aplicarFiltros()">🔍 Aplicar</button>
+                </div>
+                <div class="filtro-grupo">
+                    <button class="btn-filtro btn-limpar" onclick="limparFiltros()">Limpar</button>
+                </div>
             </div>
         </div>
 
-        <div class="graficos">
-            <div class="grafico-box">
-                <h2>RNC por Origem do Defeito</h2>
-                <canvas id="graficoOrigem"></canvas>
-            </div>
-            <div class="grafico-box">
-                <h2>Top 5 Peças com Mais RNCs</h2>
-                <canvas id="graficoTopPecas"></canvas>
-            </div>
-            <div class="grafico-box linha-completa">
-                <h2>RNCs nos Últimos 30 Dias</h2>
-                <canvas id="graficoLinha"></canvas>
-            </div>
+        <div id="conteudoDashboard">
+            <div class="loading-msg">Carregando dados...</div>
         </div>
 
-        <div class="grafico-box" style="height: auto;">
-            <h2>Últimas RNCs Abertas</h2>
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Data</th><th>Cód. Peça</th><th>Denominação</th><th>QTD</th><th>Operador</th></tr>
-                </thead>
-                <tbody id="tabelaAbertas"></tbody>
-            </table>
+        <div id="dashboardReal" style="display:none;">
+            <div class="cards">
+                <div class="card">
+                    <h3>TOTAL RNCs</h3>
+                    <div class="valor" id="totalRNCs">0</div>
+                </div>
+                <div class="card aberta">
+                    <h3>RNCs ABERTAS</h3>
+                    <div class="valor" id="rncAbertas">0</div>
+                </div>
+                <div class="card fechada">
+                    <h3>RNCs FECHADAS</h3>
+                    <div class="valor" id="rncFechadas">0</div>
+                </div>
+                <div class="card">
+                    <h3>PEÇAS REPROVADAS</h3>
+                    <div class="valor" id="qtdFiltrada">0</div>
+                </div>
+            </div>
+
+            <div class="graficos">
+                <div class="grafico-box">
+                    <h2>RNC por Origem do Defeito</h2>
+                    <canvas id="graficoOrigem"></canvas>
+                </div>
+                <div class="grafico-box">
+                    <h2>Top 5 Peças com Mais RNCs</h2>
+                    <canvas id="graficoTopPecas"></canvas>
+                </div>
+                <div class="grafico-box linha-completa">
+                    <h2>RNCs por Dia</h2>
+                    <canvas id="graficoLinha"></canvas>
+                </div>
+            </div>
+
+            <div class="grafico-box" style="height:auto;">
+                <h2>RNCs Filtradas</h2>
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Data</th><th>Cód. Peça</th><th>Denominação</th><th>QTD</th><th>Origem</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="tabelaFiltradas"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -106,24 +161,65 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function carregarDashboard() {
-            const rncsSnapshot = await getDocs(collection(db, "rncs"));
-            const rncs = [];
-            rncsSnapshot.forEach(doc => rncs.push({id: doc.id,...doc.data()}));
+        let todasRNCs = [];
+        let charts = {}; // Guarda as instâncias dos gráficos pra destruir depois
+
+        // Carrega tudo uma vez
+        document.addEventListener('DOMContentLoaded', async function() {
+            const snapshot = await getDocs(collection(db, "rncs"));
+            todasRNCs = [];
+            snapshot.forEach(doc => todasRNCs.push({id: doc.id,...doc.data()}));
+
+            // Define data fim como hoje
+            document.getElementById('filtroDataFim').valueAsDate = new Date();
+
+            // Carrega dashboard sem filtro
+            carregarDashboard(todasRNCs);
+        });
+
+        function filtrarRNCs() {
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+            const status = document.getElementById('filtroStatus').value;
+            const origem = document.getElementById('filtroOrigem').value;
+
+            return todasRNCs.filter(r => {
+                if (dataInicio && r.data < dataInicio) return false;
+                if (dataFim && r.data > dataFim) return false;
+                if (status && r.status!== status) return false;
+                if (origem && r.origem_defeito!== origem) return false;
+                return true;
+            });
+        }
+
+        window.aplicarFiltros = function() {
+            const rncsFiltradas = filtrarRNCs();
+            carregarDashboard(rncsFiltradas);
+        }
+
+        window.limparFiltros = function() {
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').valueAsDate = new Date();
+            document.getElementById('filtroStatus').value = '';
+            document.getElementById('filtroOrigem').value = '';
+            carregarDashboard(todasRNCs);
+        }
+
+        function destruirCharts() {
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+        }
+
+        function carregarDashboard(rncs) {
+            destruirCharts();
+            document.getElementById('conteudoDashboard').style.display = 'none';
+            document.getElementById('dashboardReal').style.display = 'block';
 
             // 1. Cards
             document.getElementById('totalRNCs').innerText = rncs.length;
             document.getElementById('rncAbertas').innerText = rncs.filter(r => r.status === 'Aberta').length;
             document.getElementById('rncFechadas').innerText = rncs.filter(r => r.status === 'Fechada').length;
-
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
-            const qtdMes = rncs.filter(r => {
-                const dataRNC = new Date(r.data + 'T00:00:00');
-                return dataRNC.getMonth() === mesAtual && dataRNC.getFullYear() === anoAtual;
-            }).reduce((sum, r) => sum + (r.qtd || 0), 0);
-            document.getElementById('qtdMes').innerText = qtdMes;
+            document.getElementById('qtdFiltrada').innerText = rncs.reduce((sum, r) => sum + (r.qtd || 0), 0);
 
             // 2. Gráfico Origem
             const origemCount = {};
@@ -131,92 +227,61 @@
                 const origem = r.origem_defeito || 'Não informado';
                 origemCount[origem] = (origemCount[origem] || 0) + 1;
             });
-            new Chart(document.getElementById('graficoOrigem'), {
+            charts.origem = new Chart(document.getElementById('graficoOrigem'), {
                 type: 'pie',
                 data: {
                     labels: Object.keys(origemCount),
                     datasets: [{ data: Object.values(origemCount), backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#6c757d'] }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             // 3. Top 5 Peças
             const pecasCount = {};
             rncs.forEach(r => {
-                const key = `${r.cod_peca}`;
+                const key = `${r.cod_peca} - ${r.denominacao}`;
                 pecasCount[key] = (pecasCount[key] || 0) + 1;
             });
             const top5 = Object.entries(pecasCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            new Chart(document.getElementById('graficoTopPecas'), {
+            charts.topPecas = new Chart(document.getElementById('graficoTopPecas'), {
                 type: 'bar',
                 data: {
-                    labels: top5.map(t => t[0]),
+                    labels: top5.map(t => t[0].length > 25? t[0].substring(0,25) + '...' : t[0]),
                     datasets: [{ label: 'Qtd RNCs', data: top5.map(t => t[1]), backgroundColor: '#0056b3' }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { stepSize: 1 } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
             });
 
-            // 4. Gráfico Linha 30 dias
-            const ultimos30dias = {};
-            for(let i = 29; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const key = d.toISOString().split('T')[0];
-                ultimos30dias[key] = 0;
-            }
+            // 4. Gráfico Linha por dia
+            const porDia = {};
             rncs.forEach(r => {
-                if(ultimos30dias.hasOwnProperty(r.data)) ultimos30dias[r.data]++;
+                porDia[r.data] = (porDia[r.data] || 0) + 1;
             });
-            new Chart(document.getElementById('graficoLinha'), {
+            const diasOrdenados = Object.keys(porDia).sort();
+            charts.linha = new Chart(document.getElementById('graficoLinha'), {
                 type: 'line',
                 data: {
-                    labels: Object.keys(ultimos30dias).map(d => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})),
-                    datasets: [{
-                        label: 'RNCs/Dia',
-                        data: Object.values(ultimos30dias),
-                        borderColor: '#28a745',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(40,167,69,0.1)',
-                        pointRadius: 2
-                    }]
+                    labels: diasOrdenados.map(d => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})),
+                    datasets: [{ label: 'RNCs/Dia', data: diasOrdenados.map(d => porDia[d]), borderColor: '#28a745', tension: 0.3, fill: true, backgroundColor: 'rgba(40,167,69,0.1)' }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            // 5. Tabela Abertas
-            const abertas = rncs.filter(r => r.status === 'Aberta')
-                             .sort((a,b) => new Date(b.data) - new Date(a.data))
-                             .slice(0, 10);
-            const tbody = document.getElementById('tabelaAbertas');
-            tbody.innerHTML = abertas.map(r => `
+            // 5. Tabela
+            const tabela = document.getElementById('tabelaFiltradas');
+            const rncsOrdenadas = rncs.sort((a,b) => new Date(b.data) - new Date(a.data)).slice(0, 20);
+            tabela.innerHTML = rncsOrdenadas.map(r => `
                 <tr>
                     <td>${r.id.slice(-6)}</td>
                     <td>${new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                     <td>${r.cod_peca}</td>
                     <td>${r.denominacao}</td>
                     <td>${r.qtd}</td>
-                    <td>${r.visto_operador || '-'}</td>
+                    <td>${r.origem_defeito || '-'}</td>
+                    <td>${r.status}</td>
                 </tr>
-            `).join('') || '<tr><td colspan="6">Nenhuma RNC aberta</td></tr>';
+            `).join('') || '<tr><td colspan="7">Nenhuma RNC encontrada com esses filtros</td></tr>';
         }
-
-        carregarDashboard();
     </script>
 </body>
 </html>
