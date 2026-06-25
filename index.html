@@ -1,3 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema RNC - Elgin v8 Online</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+   .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+        h1 { color: #0056b3; margin: 0; font-size: 24px; }
+   .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.3); text-decoration: none; display: inline-block; }
+   .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+   .content { padding: 20px; }
+   .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+   .form-group { display: flex; flex-direction: column; }
+   .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
+        input[readonly] { background: #f5f5f5; cursor: not-allowed; }
+        textarea { resize: vertical; }
+   .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
+   .btn-salvar { background: #28a745; color: white; }
+   .btn-salvar:hover:not(:disabled) { background: #218838; }
+   .btn-limpar { background: #6c757d; color: white; }
+   .btn-excel { background: #217346; color: #fff; }
+   .btn-export-pecas { background: #17a2b8; color: #fff; }
+   .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+   .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+   .status-online { color: #2e7d32; font-weight: bold; }
+   .tabela-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        tr:hover { background: #f5f5f5; }
+   .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+   .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+   .loading { text-align: center; padding: 20px; color: #666; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
+            <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
+        </div>
+
+        <div class="content">
+            <div class="status-box">
+                <span id="statusPecas">Carregando...</span>
+                <span class="status-online">● Online - Firebase</span>
+            </div>
+
+            <h2>1. Importar Lista de Peças</h2>
+            <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+                <label for="import_pecas"><strong>Arquivo CSV/Excel com Códigos</strong></label>
+                <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+                <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+                <div class="botoes" style="margin-top:10px;">
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no Firebase</button>
+                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
+                </div>
+            </div>
+
+            <h2>2. Cadastrar/Editar RNC</h2>
+            <form id="formRNC">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
+                        <input type="text" id="cod_produto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo_peca">CÓDIGO PEÇA *</label>
+                        <input type="text" id="codigo_peca" required placeholder="Digite e pressione TAB">
+                    </div>
+                    <div class="form-group">
+                        <label for="denominacao">DENOMINAÇÃO *</label>
+                        <input type="text" id="denominacao" required readonly>
+                    </div>
+                    <div id="nova_peca_box" style="display:none; grid-column: 1 / -1; background:#fff3cd; padding:15px; border-radius:5px; border:1px solid #ffc107;">
+                        <p style="margin:0 0 10px 0; font-weight:bold; color:#856404;">⚠ Código não encontrado na lista</p>
+                        <div style="display:flex; gap:10px; align-items:end;">
+                            <div style="flex:1;">
+                                <label style="font-size:12px;">Denominação da nova peça:</label>
+                                <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
+                            </div>
+                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
+                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor">FORNECEDOR</label>
+                        <input type="text" id="fornecedor">
+                    </div>
+                    <div class="form-group">
+                        <label for="origem_defeito">ORIGEM DO DEFEITO *</label>
+                        <select id="origem_defeito" required>
+                            <option value="">Selecione...</option>
+                            <option value="Fornecedor">Fornecedor</option>
+                            <option value="Processo">Processo</option>
+                            <option value="Revisão">Revisão</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nf">Nº NF *</label>
+                        <input type="text" id="nf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qtd">QTD *</label>
+                        <input type="number" id="qtd" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reserva">Nº DA RESERVA</label>
+                        <input type="text" id="reserva">
+                    </div>
+                    <div class="form-group">
+                        <label for="data">DATA *</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto">VISTO/INSPETOR *</label>
+                        <input type="text" id="visto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto_operador">VISTO/OPERADOR *</label>
+                        <input type="text" id="visto_operador" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">STATUS</label>
+                        <select id="status">
+                            <option value="Aberta">Aberta</option>
+                            <option value="Fechada">Fechada</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="nao_conforme">NÃO CONFORMIDADE *</label>
+                        <textarea id="nao_conforme" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
+                        <textarea id="acao_corretiva" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="botoes">
+                    <button type="submit" class="btn-salvar">SALVAR RNC</button>
+                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
+                </div>
+            </form>
+
+            <h2>3. RNCs Cadastradas</h2>
+            <div class="tabela-container">
+                <table id="tabelaRNC">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Operador</th><th>Status</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaBody"><tr><td colspan="11" class="loading">Carregando RNCs do Firebase...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
+          authDomain: "rnc-elgin.firebaseapp.com",
+          projectId: "rnc-elgin",
+          storageBucket: "rnc-elgin.firebasestorage.app",
+          messagingSenderId: "75312642711",
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
+          measurementId: "G-3Z7JMC88KM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let pecasDB = {};
+        let pecasTempDB = {};
+        let listaPecasSalva = false;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('data').valueAsDate = new Date();
+            await carregarPecasDoFirebase();
+            await carregarTabelaRNCs();
+        });
+
+        async function carregarPecasDoFirebase() {
+            const querySnapshot = await getDocs(collection(db, "pecas"));
+            pecasDB = {};
+            querySnapshot.forEach((doc) => {
+                pecasDB[doc.data().codigo] = doc.data().denominacao;
+            });
+            listaPecasSalva = Object.keys(pecasDB).length > 0;
+            atualizarStatusPecas();
+        }
+
+        function atualizarStatusPecas() {
+            const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
+            const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
+            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
+        }
+
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                pecasTempDB = {};
+                json.forEach((row, i) => {
+                    if (i === 0 ||!row[0]) return;
+                    const codigo = String(row[0]).trim().toUpperCase();
+                    const denom = String(row[1] || '').trim();
+                    pecasTempDB[codigo] = denom;
+                });
+                listaPecasSalva = false;
+                atualizarStatusPecas();
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar pro Firebase.`);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        window.salvarListaPecas = async function() {
+            if (Object.keys(pecasTempDB).length === 0) return;
+            const btn = document.getElementById('btnSalvarLista');
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+
+            const batch = writeBatch(db);
+            const pecasRef = collection(db, "pecas");
+
+            for (let codigo in pecasTempDB) {
+                const newDocRef = doc(pecasRef);
+                batch.set(newDocRef, {
+                    codigo: codigo,
+                    denominacao: pecasTempDB[codigo],
+                    criado_em: new Date().toISOString()
+                });
+            }
+
+            await batch.commit();
+            pecasDB = {...pecasDB,...pecasTempDB};
+            pecasTempDB = {};
+            listaPecasSalva = true;
+            atualizarStatusPecas();
+            btn.innerText = '💾 Salvar Lista no Firebase';
+            alert('Lista de peças salva no Firebase!');
+        }
+
+        window.exportarListaPecas = function() {
+            if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
+            const dados = [['Código Peça', 'Denominação']];
+            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
+            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+        }
+
+        const inputCodigoPeca = document.getElementById('codigo_peca');
+        inputCodigoPeca.addEventListener('blur', function() {
+            const codigo = this.value.trim().toUpperCase();
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            const inputDenom = document.getElementById('denominacao');
+            const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+            if (db[codigo]) {
+                inputDenom.value = db[codigo];
+                inputDenom.style.backgroundColor = '#e8f5e9';
+                novaPecaBox.style.display = 'none';
+            } else if (codigo!== '') {
+                inputDenom.value = '';
+                inputDenom.placeholder = 'Código não encontrado';
+                inputDenom.style.backgroundColor = '#fff3cd';
+                novaPecaBox.style.display = 'block';
+            } else {
+                inputDenom.style.backgroundColor = '#fff';
+                novaPecaBox.style.display = 'none';
+            }
+        });
+
+        window.cadastrarNovaPeca = async function() {
+            const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
+            const denom = document.getElementById('nova_denominacao').value.trim();
+            if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
+
+            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
+            pecasDB[codigo] = denom;
+            document.getElementById('denominacao').value = denom;
+            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('nova_denominacao').value = '';
+            atualizarStatusPecas();
+            alert('Peça ' + codigo + ' cadastrada no Firebase!');
+        }
+
+        window.cancelarNovaPeca = function() {
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('codigo_peca').value = '';
+            document.getElementById('denominacao').value = '';
+            document.getElementById('denominacao').style.backgroundColor = '#fff';
+        }
+
+        document.getElementById('formRNC').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const rnc = {
+                cod_produto: document.getElementById('cod_produto').value,
+                cod_peca: document.getElementById('codigo_peca').value,
+                denominacao: document.getElementById('denominacao').value,
+                origem_defeito: document.getElementById('origem_defeito').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                nf: document.getElementById('nf').value,
+                qtd: Number(document.getElementById('qtd').value),
+                reserva: document.getElementById('reserva').value,
+                data: document.getElementById('data').value,
+                visto: document.getElementById('visto').value,
+                visto_operador: document.getElementById('visto_operador').value,
+                status: document.getElementById('status').value,
+                nao_conforme: document.getElementById('nao_conforme').value,
+                acao_corretiva: document.getElementById('acao_corretiva').value,
+                criado_em: new Date().toISOString()
+            };
+
+            if (editId) {
+                await updateDoc(doc(db, "rncs", editId), rnc);
+                alert('RNC atualizada no Firebase!');
+            } else {
+                await addDoc(collection(db, "rncs"), rnc);
+                alert('RNC cadastrada no Firebase!');
+            }
+            limparForm();
+            await carregarTabelaRNCs();
+        });
+
+        async function carregarTabelaRNCs() {
+            const q = query(collection(db, "rncs"), orderBy("data", "desc"));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.origem_defeito || '-'}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
+                    <td>${rnc.visto_operador || '-'}</td>
+                    <td>${rnc.status}</td>
+                    <td>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
+                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.editarRNC = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                document.getElementById('editId').value = rnc.id;
+                document.getElementById('cod_produto').value = rnc.cod_produto;
+                document.getElementById('codigo_peca').value = rnc.cod_peca;
+                document.getElementById('denominacao').value = rnc.denominacao;
+                document.getElementById('origem_defeito').value = rnc.origem_defeito || '';
+                document.getElementById('fornecedor').value = rnc.fornecedor;
+                document.getElementById('nf').value = rnc.nf;
+                document.getElementById('qtd').value = rnc.qtd;
+                document.getElementById('reserva').value = rnc.reserva;
+                document.getElementById('data').value = rnc.data;
+                document.getElementById('visto').value = rnc.visto;
+                document.getElementById('visto_operador').value = rnc.visto_operador || '';
+                document.getElementById('status').value = rnc.status;
+                document.getElementById('nao_conforme').value = rnc.nao_conforme;
+                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
+                window.scrollTo(0, 0);
+            }
+        }
+
+        window.excluirRNC = async function(id) {
+            if (confirm('Tem certeza que deseja excluir esta RNC?')) {
+                await deleteDoc(doc(db, "rncs", id));
+                await carregarTabelaRNCs();
+            }
+        }
+
+        window.limparForm = function() {
+            document.getElementById('formRNC').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            document.getElementById('denominacao').style.backgroundColor = '#f5f5f5';
+            document.getElementById('nova_peca_box').style.display = 'none';
+        }
+
+        window.exportarExcelRNCs = async function() {
+            const querySnapshot = await getDocs(collection(db, "rncs"));
+            const rncs = [];
+            querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
+            if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
+            const ws = XLSX.utils.json_to_sheet(rncs);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
+            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+        }
+
+        window.imprimirEtiqueta = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const etiquetaHTML = gerarEtiqueta100x60(rnc);
+                const win = window.open('', '_blank', 'width=400,height=300');
+                win.document.write(etiquetaHTML);
+                win.document.close();
+            }
+        }
+
+        function gerarEtiqueta100x60(rnc) {
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+<style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
+.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
+.linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
+.footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
+.nao-conf { font-size: 7pt; max-height: 7mm; overflow: hidden; }
+@media print {.no-print { display: none; } body { margin: 0; } }
+.no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+</style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
+<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
+<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
 <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
 <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
 <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || ''}</span></div>
