@@ -25,6 +25,8 @@
       .btn-adicionar:hover:not(:disabled) { background: #218838; }
       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; margin-right: 5px; }
       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-salvar { background: #007bff; color: white; }
+      .btn-cancelar { background: #6c757d; color: white; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
@@ -35,7 +37,17 @@
       .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
       .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
       .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; margin: 10px 0; }
-        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }}
+      
+      /* Modal */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+      .modal-content { background: #fff; margin: 10% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+      .modal-header h2 { color: #0056b3; margin: 0; }
+      .close { font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+      .close:hover { color: #000; }
+      .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+      
+      @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }}
     </style>
 </head>
 <body>
@@ -90,6 +102,40 @@
         </div>
     </div>
 
+    <!-- Modal de Edição -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Usuário</h2>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <form id="formEditar">
+                <input type="hidden" id="editUid">
+                <div class="form-group">
+                    <label for="editNome">Nome completo *</label>
+                    <input type="text" id="editNome" required>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" disabled style="background: #e9ecef;">
+                    <small style="color: #666; font-size: 11px;">Email não pode ser alterado</small>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="editNivel">Nível de acesso *</label>
+                    <select id="editNivel" required>
+                        <option value="operador">Operador - Só visualiza</option>
+                        <option value="inspetor">Inspetor - Cadastra e edita RNC</option>
+                        <option value="admin">Admin - Acesso total</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-salvar">Salvar Alterações</button>
+                    <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -108,7 +154,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // App secundário pra criar usuários sem deslogar o admin
         const secondaryApp = initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = getAuth(secondaryApp);
 
@@ -158,32 +203,20 @@
                 });
 
                 msg.innerHTML = '<div class="sucesso">Usuário cadastrado com sucesso!</div>';
-                
-                // LIMPA TUDO
                 form.reset();
                 document.getElementById('nivel').value = 'operador';
                 document.getElementById('email').focus();
-                
-                // Some com a msg depois de 3s
                 setTimeout(() => { msg.innerHTML = ''; }, 3000);
-                
                 carregarUsuarios();
             } catch (error) {
                 console.error('Erro completo:', error);
                 let erroMsg = 'Erro ao cadastrar: ';
-                if (error.code === 'auth/email-already-in-use') {
-                    erroMsg += 'Este email já está cadastrado';
-                } else if (error.code === 'auth/weak-password') {
-                    erroMsg += 'Senha muito fraca. Use mínimo 6 caracteres';
-                } else if (error.code === 'auth/invalid-email') {
-                    erroMsg += 'Email inválido';
-                } else if (error.code === 'auth/operation-not-allowed') {
-                    erroMsg += 'Email/Senha não ativado. Vá em Firebase Console > Authentication > Sign-in method e ative';
-                } else if (error.code === 'permission-denied') {
-                    erroMsg += 'Sem permissão no Firestore. Ajuste as regras';
-                } else {
-                    erroMsg += error.message;
-                }
+                if (error.code === 'auth/email-already-in-use') erroMsg += 'Este email já está cadastrado';
+                else if (error.code === 'auth/weak-password') erroMsg += 'Senha fraca. Mínimo 6 caracteres';
+                else if (error.code === 'auth/invalid-email') erroMsg += 'Email inválido';
+                else if (error.code === 'auth/operation-not-allowed') erroMsg += 'Email/Senha não ativado no Firebase';
+                else if (error.code === 'permission-denied') erroMsg += 'Sem permissão no Firestore';
+                else erroMsg += error.message;
                 msg.innerHTML = `<div class="erro">${erroMsg}</div>`;
             } finally {
                 btn.disabled = false;
@@ -213,6 +246,7 @@
                     <td>${user.email}</td>
                     <td>${badge}</td>
                     <td>
+                        <button class="btn-editar" onclick="abrirModalEditar('${docSnap.id}', '${user.nome}', '${user.email}', '${user.nivel}')">Editar</button>
                         ${docSnap.id !== usuarioAdminAtual.uid ? 
                           `<button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}', '${user.email}')">Excluir</button>` : 
                           '<span style="color:#999;font-size:11px;">Você</span>'
@@ -222,6 +256,43 @@
                 tbody.appendChild(tr);
             });
         }
+
+        window.abrirModalEditar = function(uid, nome, email, nivel) {
+            document.getElementById('editUid').value = uid;
+            document.getElementById('editNome').value = nome;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editNivel').value = nivel;
+            document.getElementById('modalEditar').style.display = 'block';
+        }
+
+        window.fecharModal = function() {
+            document.getElementById('modalEditar').style.display = 'none';
+        }
+
+        document.getElementById('formEditar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('msg');
+            const uid = document.getElementById('editUid').value;
+            const nome = document.getElementById('editNome').value.trim();
+            const nivel = document.getElementById('editNivel').value;
+
+            try {
+                await updateDoc(doc(db, "usuarios", uid), {
+                    nome: nome,
+                    nivel: nivel,
+                    editado_em: new Date().toISOString(),
+                    editado_por: usuarioAdminAtual.email
+                });
+
+                msg.innerHTML = '<div class="sucesso">Usuário atualizado com sucesso!</div>';
+                fecharModal();
+                setTimeout(() => { msg.innerHTML = ''; }, 3000);
+                carregarUsuarios();
+            } catch (error) {
+                msg.innerHTML = `<div class="erro">Erro ao atualizar: ${error.message}</div>`;
+                console.error(error);
+            }
+        });
 
         window.excluirUsuario = async function(uid, email) {
             if (uid === usuarioAdminAtual.uid) {
@@ -236,6 +307,14 @@
                 carregarUsuarios();
             } catch (error) {
                 alert('Erro ao excluir: ' + error.message);
+            }
+        }
+
+        // Fecha modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditar');
+            if (event.target == modal) {
+                fecharModal();
             }
         }
     </script>
