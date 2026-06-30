@@ -1,914 +1,483 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema RNC - Elgin | v8 Online</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<style>
-    :root {
-        --elgin-blue: #0056b3;
-        --elgin-blue-dark: #003d82;
-        --elgin-blue-light: #e8f1fb;
-    }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .elgin-gradient { background: linear-gradient(135deg, var(--elgin-blue) 0%, var(--elgin-blue-dark) 100%); }
-    .input-focus:focus { box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2); border-color: var(--elgin-blue); }
-    .card-hover { transition: all 0.3s ease; }
-    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 86, 179, 0.12); }
-    .fade-in { animation: fadeIn 0.4s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .btn-primary { background: var(--elgin-blue); color: white; }
-    .btn-primary:hover { background: var(--elgin-blue-dark); }
-    .text-elgin { color: var(--elgin-blue); }
-    .bg-elgin { background: var(--elgin-blue); }
-    .border-elgin { border-color: var(--elgin-blue); }
-    @media print {
-        body * { visibility: hidden; }
-        #printArea, #printArea * { visibility: visible; }
-        #printArea { position: absolute; left: 0; top: 0; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema RNC - Elgin v8 Online</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+   .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+        h1 { color: #0056b3; margin: 0; font-size: 24px; }
+   .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.3); text-decoration: none; display: inline-block; }
+   .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+   .content { padding: 20px; }
+   .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+   .form-group { display: flex; flex-direction: column; }
+   .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
+        input[readonly] { background: #f5f5f5; cursor: not-allowed; }
+        textarea { resize: vertical; }
+   .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
+   .btn-salvar { background: #28a745; color: white; }
+   .btn-salvar:hover:not(:disabled) { background: #218838; }
+   .btn-limpar { background: #6c757d; color: white; }
+   .btn-excel { background: #217346; color: #fff; }
+   .btn-export-pecas { background: #17a2b8; color: #fff; }
+   .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+   .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+   .status-online { color: #2e7d32; font-weight: bold; }
+   .tabela-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        tr:hover { background: #f5f5f5; }
+   .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+   .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+   .loading { text-align: center; padding: 20px; color: #666; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
+    </style>
 </head>
-<body class="bg-gray-50">
-
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="min-h-screen flex items-center justify-center p-4 elgin-gradient">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden fade-in">
-            <div class="elgin-gradient p-8 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4 shadow-lg">
-                    <i class="fa-solid fa-clipboard-check text-3xl text-elgin"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-white mb-1">Sistema RNC</h1>
-                <p class="text-blue-100 text-sm">Relatório de Não Conformidade - Elgin v8</p>
-            </div>
-            
-            <div class="p-8">
-                <form id="loginForm" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fa-solid fa-user mr-2 text-gray-400"></i>Usuário
-                        </label>
-                        <input type="text" id="username" required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none transition" placeholder="Digite seu usuário" autocomplete="username">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fa-solid fa-lock mr-2 text-gray-400"></i>Senha
-                        </label>
-                        <div class="relative">
-                            <input type="password" id="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none transition pr-12" placeholder="Digite sua senha" autocomplete="current-password">
-                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
-                        <span>Usuário ou senha inválidos</span>
-                    </div>
-
-                    <button type="submit" class="w-full elgin-gradient text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:opacity-95">
-                        <i class="fa-solid fa-right-to-bracket mr-2"></i>Entrar no Sistema
-                    </button>
-                </form>
-
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-xs text-gray-500 text-center mb-3">Usuários de demonstração:</p>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <button onclick="fillLogin('admin','admin123')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user-shield block mb-1"></i>Admin
-                        </button>
-                        <button onclick="fillLogin('gestor','gestor123')" class="bg-green-50 hover:bg-green-100 text-green-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user-tie block mb-1"></i>Gestor
-                        </button>
-                        <button onclick="fillLogin('operador','operador123')" class="bg-orange-50 hover:bg-orange-100 text-orange-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user block mb-1"></i>Operador
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <p class="text-center text-white text-xs mt-6 opacity-80">© 2024 Elgin S.A. - Todos os direitos reservados</p>
-    </div>
-</div>
-
-<!-- MAIN APP -->
-<div id="mainApp" class="hidden min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="elgin-gradient shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md">
-                        <i class="fa-solid fa-clipboard-check text-xl text-elgin"></i>
-                    </div>
-                    <div class="hidden sm:block">
-                        <h1 class="text-white font-bold text-lg">Sistema RNC v8</h1>
-                        <p class="text-blue-100 text-xs">Elgin S.A.</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                    <div class="hidden md:flex items-center space-x-3 bg-white/10 px-4 py-2 rounded-lg backdrop-blur">
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                            <i id="userIcon" class="fa-solid fa-user text-sm text-elgin"></i>
-                        </div>
-                        <div class="text-white text-sm">
-                            <p class="font-semibold leading-tight" id="userNameDisplay">--</p>
-                            <p class="text-xs text-blue-100 leading-tight" id="userRoleDisplay">--</p>
-                        </div>
-                    </div>
-                    <button onclick="logout()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition backdrop-blur">
-                        <i class="fa-solid fa-right-from-bracket mr-0 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Sair</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Tabs -->
-    <div class="bg-white border-b shadow-sm sticky top-16 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex space-x-1 overflow-x-auto">
-                <button id="tabCadastro" onclick="showTab('cadastro')" class="px-4 py-3 font-medium text-sm border-b-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-file-circle-plus mr-2"></i>Cadastrar RNC
-                </button>
-                <button id="tabRegistros" onclick="showTab('registros')" class="px-4 py-3 font-medium text-sm border-b-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-table-list mr-2"></i>Registros
-                </button>
-                <button id="tabImportar" onclick="showTab('importar')" class="px-4 py-3 font-medium text-sm border-b-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-file-import mr-2"></i>Importar Peças
-                </button>
-                <button id="tabUsuarios" onclick="showTab('usuarios')" class="px-4 py-3 font-medium text-sm border-b-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-users-gear mr-2"></i>Usuários
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- Tab: Cadastro -->
-        <div id="viewCadastro" class="fade-in">
-            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fa-solid fa-file-circle-plus mr-2 text-elgin"></i>Nova RNC
-                </h2>
-                
-                <form id="rncForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Número RNC *</label>
-                            <input type="text" id="rncNumero" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none" placeholder="Auto">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Data *</label>
-                            <input type="date" id="rncData" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Setor *</label>
-                            <select id="rncSetor" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
-                                <option value="">Selecione</option>
-                                <option>Produção</option>
-                                <option>Qualidade</option>
-                                <option>Logística</option>
-                                <option>Manutenção</option>
-                                <option>Engenharia</option>
-                                <option>Comercial</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Código Peça *</label>
-                            <input type="text" id="rncCodigoPeca" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none" placeholder="Ex: 12345">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição Peça *</label>
-                            <input type="text" id="rncDescricaoPeca" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none" placeholder="Descrição da peça">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantidade *</label>
-                            <input type="number" id="rncQtd" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none" placeholder="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo NC *</label>
-                            <select id="rncTipo" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
-                                <option value="">Selecione</option>
-                                <option>Produto</option>
-                                <option>Processo</option>
-                                <option>Fornecedor</option>
-                                <option>Cliente</option>
-                                <option>Documentação</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Prioridade *</label>
-                            <select id="rncPrioridade" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
-                                <option value="">Selecione</option>
-                                <option>Baixa</option>
-                                <option>Média</option>
-                                <option>Alta</option>
-                                <option>Crítica</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição da Não Conformidade *</label>
-                        <textarea id="rncDescricao" required rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none resize-none" placeholder="Descreva detalhadamente a não conformidade..."></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Ação Imediata</label>
-                        <textarea id="rncAcao" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none resize-none" placeholder="Ações tomadas para conter o problema..."></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Responsável *</label>
-                            <input type="text" id="rncResponsavel" required class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none" placeholder="Nome do responsável">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Prazo</label>
-                            <input type="date" id="rncPrazo" class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                        <button type="submit" class="btn-primary font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition">
-                            <i class="fa-solid fa-floppy-disk mr-2"></i>Salvar RNC
-                        </button>
-                        <button type="reset" class="bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition">
-                            <i class="fa-solid fa-eraser mr-2"></i>Limpar
-                        </button>
-                        <button type="button" onclick="gerarEtiquetaPreview()" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition">
-                            <i class="fa-solid fa-tag mr-2"></i>Preview Etiqueta
-                        </button>
-                    </div>
-                </form>
-            </div>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
+            <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
         </div>
 
-        <!-- Tab: Registros -->
-        <div id="viewRegistros" class="hidden fade-in">
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">
-                        <i class="fa-solid fa-table-list mr-2 text-elgin"></i>Registros de RNC
-                    </h2>
-                    <div class="flex gap-2 flex-wrap">
-                        <button onclick="exportarExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm">
-                            <i class="fa-solid fa-file-excel mr-2"></i>Exportar Excel
-                        </button>
-                        <button onclick="carregarRNCs()" class="btn-primary px-4 py-2 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-rotate mr-2"></i>Atualizar
-                        </button>
+        <div class="content">
+            <div class="status-box">
+                <span id="statusPecas">Carregando...</span>
+                <span class="status-online">● Online - Firebase</span>
+            </div>
+
+            <h2>1. Importar Lista de Peças</h2>
+            <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+                <label for="import_pecas"><strong>Arquivo CSV/Excel com Códigos</strong></label>
+                <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+                <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+                <div class="botoes" style="margin-top:10px;">
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no Firebase</button>
+                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
+                </div>
+            </div>
+
+            <h2>2. Cadastrar/Editar RNC</h2>
+            <form id="formRNC">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
+                        <input type="text" id="cod_produto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo_peca">CÓDIGO PEÇA *</label>
+                        <input type="text" id="codigo_peca" required placeholder="Digite e pressione TAB">
+                    </div>
+                    <div class="form-group">
+                        <label for="denominacao">DENOMINAÇÃO *</label>
+                        <input type="text" id="denominacao" required readonly>
+                    </div>
+                    <div id="nova_peca_box" style="display:none; grid-column: 1 / -1; background:#fff3cd; padding:15px; border-radius:5px; border:1px solid #ffc107;">
+                        <p style="margin:0 0 10px 0; font-weight:bold; color:#856404;">⚠ Código não encontrado na lista</p>
+                        <div style="display:flex; gap:10px; align-items:end;">
+                            <div style="flex:1;">
+                                <label style="font-size:12px;">Denominação da nova peça:</label>
+                                <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
+                            </div>
+                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
+                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor">FORNECEDOR</label>
+                        <input type="text" id="fornecedor">
+                    </div>
+                    <div class="form-group">
+                        <label for="origem_defeito">ORIGEM DO DEFEITO *</label>
+                        <select id="origem_defeito" required>
+                            <option value="">Selecione...</option>
+                            <option value="Fornecedor">Fornecedor</option>
+                            <option value="Processo">Processo</option>
+                            <option value="Revisão">Revisão</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nf">Nº NF *</label>
+                        <input type="text" id="nf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qtd">QTD *</label>
+                        <input type="number" id="qtd" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reserva">Nº DA RESERVA</label>
+                        <input type="text" id="reserva">
+                    </div>
+                    <div class="form-group">
+                        <label for="data">DATA *</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto">VISTO/INSPETOR *</label>
+                        <input type="text" id="visto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto_operador">VISTO/OPERADOR *</label>
+                        <input type="text" id="visto_operador" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">STATUS</label>
+                        <select id="status">
+                            <option value="Aberta">Aberta</option>
+                            <option value="Fechada">Fechada</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="nao_conforme">NÃO CONFORMIDADE *</label>
+                        <textarea id="nao_conforme" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
+                        <textarea id="acao_corretiva" rows="2"></textarea>
                     </div>
                 </div>
-
-                <div class="mb-4">
-                    <input type="text" id="searchRNC" placeholder="Buscar por número, peça, setor..." class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus outline-none">
+                <div class="botoes">
+                    <button type="submit" class="btn-salvar">SALVAR RNC</button>
+                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
                 </div>
+            </form>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50 border-b-2 border-gray-200">
-                            <tr class="text-gray-700 text-left">
-                                <th class="px-4 py-3 font-semibold">N° RNC</th>
-                                <th class="px-4 py-3 font-semibold">Data</th>
-                                <th class="px-4 py-3 font-semibold">Setor</th>
-                                <th class="px-4 py-3 font-semibold">Peça</th>
-                                <th class="px-4 py-3 font-semibold">Qtd</th>
-                                <th class="px-4 py-3 font-semibold">Prioridade</th>
-                                <th class="px-4 py-3 font-semibold">Status</th>
-                                <th class="px-4 py-3 font-semibold">Criado por</th>
-                                <th class="px-4 py-3 font-semibold text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rncTableBody" class="text-gray-700">
-                            <tr><td colspan="9" class="text-center py-8 text-gray-500">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="totalRNCs" class="mt-4 text-sm text-gray-600 text-right"></div>
-            </div>
-        </div>
-
-        <!-- Tab: Importar -->
-        <div id="viewImportar" class="hidden fade-in">
-            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fa-solid fa-file-import mr-2 text-elgin"></i>Importar Peças via Excel
-                </h2>
-                
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h3 class="font-semibold text-blue-900 mb-2"><i class="fa-solid fa-circle-info mr-2"></i>Formato do Arquivo</h3>
-                    <p class="text-sm text-blue-800">O arquivo Excel deve conter as colunas: <b>Código</b>, <b>Descrição</b>, <b>Setor</b>, <b>Quantidade</b></p>
-                </div>
-
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
-                    <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-600 mb-4">Arraste o arquivo Excel ou clique para selecionar</p>
-                    <input type="file" id="fileImport" accept=".xlsx,.xls" class="hidden">
-                    <button onclick="document.getElementById('fileImport').click()" class="btn-primary px-6 py-3 rounded-lg">
-                        <i class="fa-solid fa-folder-open mr-2"></i>Selecionar Arquivo
-                    </button>
-                    <p id="fileName" class="text-sm text-gray-500 mt-3"></p>
-                </div>
-
-                <div id="previewImport" class="hidden">
-                    <h3 class="font-semibold text-gray-800 mb-3">Preview dos Dados:</h3>
-                    <div class="overflow-x-auto max-h-96 border rounded-lg">
-                        <table class="w-full text-sm">
-                            <thead id="previewHead" class="bg-gray-50 sticky top-0"></thead>
-                            <tbody id="previewBody" class="text-gray-700"></tbody>
-                        </table>
-                    </div>
-                    <button onclick="confirmarImportacao()" class="btn-primary w-full mt-4 py-3 rounded-lg">
-                        <i class="fa-solid fa-check mr-2"></i>Confirmar Importação
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Usuários -->
-        <div id="viewUsuarios" class="hidden fade-in">
-            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fa-solid fa-users-gear mr-2 text-elgin"></i>Gerenciar Usuários
-                </h2>
-                <div id="usuariosContent"></div>
-            </div>
-        </div>
-    </main>
-</div>
-
-<!-- Print Area for Labels -->
-<div id="printArea" class="hidden"></div>
-
-<!-- Modal Etiqueta -->
-<div id="modalEtiqueta" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="elgin-gradient p-4 flex justify-between items-center rounded-t-xl">
-            <h3 class="text-white font-bold text-lg"><i class="fa-solid fa-tag mr-2"></i>Etiqueta RNC</h3>
-            <button onclick="fecharModalEtiqueta()" class="text-white hover:text-gray-200">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
-        <div class="p-6" id="etiquetaContent"></div>
-        <div class="p-4 border-t flex gap-2">
-            <button onclick="imprimirEtiqueta()" class="btn-primary flex-1 py-2 rounded-lg">
-                <i class="fa-solid fa-print mr-2"></i>Imprimir
-            </button>
-            <button onclick="fecharModalEtiqueta()" class="bg-gray-200 text-gray-700 flex-1 py-2 rounded-lg">
-                Fechar
-            </button>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    // Firebase Config - Substitua com suas credenciais
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDemo-Key-Replace-With-Yours",
-        authDomain: "rnc-elgin.firebaseapp.com",
-        projectId: "rnc-elgin",
-        storageBucket: "rnc-elgin.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef123456"
-    };
-
-    // Comentar linha abaixo e descomentar a de cima quando configurar Firebase real
-    const app = null; // initializeApp(firebaseConfig);
-    const db = null; // getFirestore(app);
-
-    // Fallback para localStorage se Firebase não configurado
-    const useLocalStorage = true;
-
-    window.appState = {
-        rncs: [],
-        importData: []
-    };
-
-    // Sistema de Usuários e Permissões
-    const USERS_DB = {
-        'admin': { password: 'admin123', name: 'Administrador', role: 'Admin', level: 3 },
-        'gestor': { password: 'gestor123', name: 'Carlos Silva', role: 'Gestor', level: 2 },
-        'operador': { password: 'operador123', name: 'João Santos', role: 'Operador', level: 1 }
-    };
-
-    const PERMISSIONS = {
-        1: { cadastro: true, registros: false, importar: true, usuarios: false, delete: false },
-        2: { cadastro: true, registros: true, importar: true, usuarios: false, delete: false },
-        3: { cadastro: true, registros: true, importar: true, usuarios: true, delete: true }
-    };
-
-    let currentUser = null;
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-        checkSession();
-        setupEventListeners();
-        document.getElementById('rncData').valueAsDate = new Date();
-        gerarProximoNumeroRNC();
-    });
-
-    function checkSession() {
-        const session = localStorage.getItem('rnc_session');
-        if (session) {
-            try {
-                const userData = JSON.parse(session);
-                if (USERS_DB[userData.username]) {
-                    currentUser = userData;
-                    showMainApp();
-                    return;
-                }
-            } catch (e) {
-                localStorage.removeItem('rnc_session');
-            }
-        }
-        showLogin();
-    }
-
-    function setupEventListeners() {
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
-        document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
-        document.getElementById('rncForm').addEventListener('submit', handleSalvarRNC);
-        document.getElementById('fileImport').addEventListener('change', handleFileImport);
-        document.getElementById('searchRNC').addEventListener('input', filtrarRNCs);
-    }
-
-    function handleLogin(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value.trim().toLowerCase();
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('loginError');
-
-        if (USERS_DB[username] && USERS_DB[username].password === password) {
-            const user = USERS_DB[username];
-            currentUser = {
-                username: username,
-                name: user.name,
-                role: user.role,
-                level: user.level,
-                loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('rnc_session', JSON.stringify(currentUser));
-            errorDiv.classList.add('hidden');
-            showMainApp();
-        } else {
-            errorDiv.classList.remove('hidden');
-            document.getElementById('password').value = '';
-            setTimeout(() => errorDiv.classList.add('hidden'), 4000);
-        }
-    }
-
-    function showLogin() {
-        document.getElementById('loginPage').classList.remove('hidden');
-        document.getElementById('mainApp').classList.add('hidden');
-    }
-
-    function showMainApp() {
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        updateUserHeader();
-        applyPermissions();
-        carregarRNCs();
-        
-        // Operador vai direto para cadastro
-        if (currentUser.level === 1) {
-            showTab('cadastro');
-        } else {
-            showTab('registros');
-        }
-    }
-
-    function updateUserHeader() {
-        document.getElementById('userNameDisplay').textContent = currentUser.name;
-        document.getElementById('userRoleDisplay').textContent = currentUser.role;
-        const icons = { 1: 'fa-user', 2: 'fa-user-tie', 3: 'fa-user-shield' };
-        document.getElementById('userIcon').className = `fa-solid ${icons[currentUser.level]} text-sm text-elgin`;
-    }
-
-    function applyPermissions() {
-        const perms = PERMISSIONS[currentUser.level];
-        document.getElementById('tabCadastro').style.display = perms.cadastro ? 'block' : 'none';
-        document.getElementById('tabRegistros').style.display = perms.registros ? 'block' : 'none';
-        document.getElementById('tabImportar').style.display = perms.importar ? 'block' : 'none';
-        document.getElementById('tabUsuarios').style.display = perms.usuarios ? 'block' : 'none';
-    }
-
-    window.logout = function() {
-        localStorage.removeItem('rnc_session');
-        currentUser = null;
-        document.getElementById('loginForm').reset();
-        showLogin();
-    }
-
-    window.showTab = function(tab) {
-        const perms = PERMISSIONS[currentUser.level];
-        if (!perms[tab]) {
-            alert('Você não tem permissão para acessar esta área.');
-            return;
-        }
-
-        document.querySelectorAll('[id^="view"]').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('[id^="tab"]').forEach(el => {
-            el.classList.remove('border-elgin', 'text-elgin');
-            el.classList.add('border-transparent', 'text-gray-600');
-        });
-
-        document.getElementById('view' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
-        const tabBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
-        tabBtn.classList.add('border-elgin', 'text-elgin');
-        tabBtn.classList.remove('border-transparent', 'text-gray-600');
-
-        if (tab === 'usuarios' && currentUser.level === 3) {
-            renderUsuarios();
-        }
-    }
-
-    function togglePasswordVisibility() {
-        const input = document.getElementById('password');
-        const icon = document.querySelector('#togglePassword i');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
-    }
-
-    window.fillLogin = function(user, pass) {
-        document.getElementById('username').value = user;
-        document.getElementById('password').value = pass;
-    }
-
-    // CRUD RNC
-    async function gerarProximoNumeroRNC() {
-        let maxNum = 0;
-        if (useLocalStorage) {
-            const stored = JSON.parse(localStorage.getItem('rnc_list') || '[]');
-            stored.forEach(rnc => {
-                const num = parseInt(rnc.numero.replace(/[^0-9]/g, ''));
-                if (num > maxNum) maxNum = num;
-            });
-        }
-        const proximo = (maxNum + 1).toString().padStart(4, '0');
-        document.getElementById('rncNumero').value = `RNC-${new Date().getFullYear()}-${proximo}`;
-    }
-
-    async function handleSalvarRNC(e) {
-        e.preventDefault();
-        
-        const rncData = {
-            numero: document.getElementById('rncNumero').value,
-            data: document.getElementById('rncData').value,
-            setor: document.getElementById('rncSetor').value,
-            codigoPeca: document.getElementById('rncCodigoPeca').value,
-            descricaoPeca: document.getElementById('rncDescricaoPeca').value,
-            quantidade: parseInt(document.getElementById('rncQtd').value),
-            tipo: document.getElementById('rncTipo').value,
-            prioridade: document.getElementById('rncPrioridade').value,
-            descricao: document.getElementById('rncDescricao').value,
-            acao: document.getElementById('rncAcao').value,
-            responsavel: document.getElementById('rncResponsavel').value,
-            prazo: document.getElementById('rncPrazo').value,
-            status: 'Aberta',
-            criadoPor: currentUser.name,
-            criadoPorId: currentUser.username,
-            criadoEm: new Date().toISOString()
-        };
-
-        try {
-            if (useLocalStorage) {
-                const stored = JSON.parse(localStorage.getItem('rnc_list') || '[]');
-                rncData.id = Date.now().toString();
-                stored.push(rncData);
-                localStorage.setItem('rnc_list', JSON.stringify(stored));
-            } else {
-                await addDoc(collection(db, 'rncs'), rncData);
-            }
-            
-            alert('RNC salva com sucesso!');
-            document.getElementById('rncForm').reset();
-            document.getElementById('rncData').valueAsDate = new Date();
-            gerarProximoNumeroRNC();
-            carregarRNCs();
-        } catch (error) {
-            console.error('Erro ao salvar:', error);
-            alert('Erro ao salvar RNC');
-        }
-    }
-
-    async function carregarRNCs() {
-        try {
-            if (useLocalStorage) {
-                window.appState.rncs = JSON.parse(localStorage.getItem('rnc_list') || '[]');
-            } else {
-                const q = query(collection(db, 'rncs'), orderBy('criadoEm', 'desc'));
-                const snapshot = await getDocs(q);
-                window.appState.rncs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            }
-            renderTabelaRNCs();
-        } catch (error) {
-            console.error('Erro ao carregar:', error);
-        }
-    }
-
-    function renderTabelaRNCs() {
-        const tbody = document.getElementById('rncTableBody');
-        const search = document.getElementById('searchRNC').value.toLowerCase();
-        
-        let rncs = window.appState.rncs;
-        if (search) {
-            rncs = rncs.filter(r => 
-                r.numero.toLowerCase().includes(search) ||
-                r.codigoPeca.toLowerCase().includes(search) ||
-                r.setor.toLowerCase().includes(search) ||
-                r.descricaoPeca.toLowerCase().includes(search)
-            );
-        }
-
-        if (rncs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">Nenhum registro encontrado</td></tr>';
-            document.getElementById('totalRNCs').textContent = '';
-            return;
-        }
-
-        const prioridadeColors = {
-            'Baixa': 'bg-blue-100 text-blue-700',
-            'Média': 'bg-yellow-100 text-yellow-700',
-            'Alta': 'bg-orange-100 text-orange-700',
-            'Crítica': 'bg-red-100 text-red-700'
-        };
-
-        tbody.innerHTML = rncs.map(rnc => `
-            <tr class="border-b border-gray-100 hover:bg-gray-50">
-                <td class="px-4 py-3 font-semibold">${rnc.numero}</td>
-                <td class="px-4 py-3">${new Date(rnc.data).toLocaleDateString('pt-BR')}</td>
-                <td class="px-4 py-3">${rnc.setor}</td>
-                <td class="px-4 py-3">${rnc.codigoPeca}<br><span class="text-xs text-gray-500">${rnc.descricaoPeca}</span></td>
-                <td class="px-4 py-3 text-center">${rnc.quantidade}</td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-semibold ${prioridadeColors[rnc.prioridade]}">${rnc.prioridade}</span></td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700">${rnc.status}</span></td>
-                <td class="px-4 py-3 text-xs">${rnc.criadoPor}</td>
-                <td class="px-4 py-3 text-center">
-                    <button onclick='verEtiqueta(${JSON.stringify(rnc).replace(/'/g, "&apos;")})' class="text-elgin hover:text-blue-800 mx-1" title="Ver Etiqueta">
-                        <i class="fa-solid fa-tag"></i>
-                    </button>
-                    ${PERMISSIONS[currentUser.level].delete ? `
-                    <button onclick="excluirRNC('${rnc.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Excluir">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>` : ''}
-                </td>
-            </tr>
-        `).join('');
-
-        document.getElementById('totalRNCs').textContent = `Total: ${rncs.length} registro(s)`;
-    }
-
-    window.filtrarRNCs = function() {
-        renderTabelaRNCs();
-    }
-
-    window.excluirRNC = async function(id) {
-        if (!confirm('Deseja realmente excluir esta RNC?')) return;
-        
-        try {
-            if (useLocalStorage) {
-                const stored = JSON.parse(localStorage.getItem('rnc_list') || '[]');
-                const filtered = stored.filter(r => r.id !== id);
-                localStorage.setItem('rnc_list', JSON.stringify(filtered));
-            } else {
-                await deleteDoc(doc(db, 'rncs', id));
-            }
-            carregarRNCs();
-            alert('RNC excluída com sucesso!');
-        } catch (error) {
-            console.error('Erro ao excluir:', error);
-            alert('Erro ao excluir RNC');
-        }
-    }
-
-    window.exportarExcel = function() {
-        const ws = XLSX.utils.json_to_sheet(window.appState.rncs);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
-        XLSX.writeFile(wb, `RNCs_${new Date().toISOString().split('T')[0]}.xlsx`);
-    }
-
-    // Importação Excel
-    function handleFileImport(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        document.getElementById('fileName').textContent = file.name;
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            
-            window.appState.importData = json;
-            renderPreviewImport(json);
-        };
-        
-        reader.readAsArrayBuffer(file);
-    }
-
-    function renderPreviewImport(data) {
-        if (data.length === 0) return;
-        
-        const preview = document.getElementById('previewImport');
-        const head = document.getElementById('previewHead');
-        const body = document.getElementById('previewBody');
-        
-        const cols = Object.keys(data[0]);
-        head.innerHTML = `<tr class="text-gray-700 text-left">${cols.map(c => `<th class="px-4 py-2 font-semibold">${c}</th>`).join('')}</tr>`;
-        body.innerHTML = data.map(row => 
-            `<tr class="border-b">${cols.map(c => `<td class="px-4 py-2">${row[c] || ''}</td>`).join('')}</tr>`
-        ).join('');
-        
-        preview.classList.remove('hidden');
-    }
-
-    window.confirmarImportacao = async function() {
-        const data = window.appState.importData;
-        if (data.length === 0) return;
-        
-        try {
-            const rncs = data.map((row, idx) => ({
-                id: Date.now() + idx + '',
-                numero: `RNC-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`,
-                data: new Date().toISOString().split('T')[0],
-                setor: row.Setor || row.setor || 'Produção',
-                codigoPeca: row.Código || row.codigo || '',
-                descricaoPeca: row.Descrição || row.descricao || '',
-                quantidade: parseInt(row.Quantidade || row.quantidade || 1),
-                tipo: 'Produto',
-                prioridade: 'Média',
-                descricao: 'Importado via Excel',
-                acao: '',
-                responsavel: currentUser.name,
-                prazo: '',
-                status: 'Aberta',
-                criadoPor: currentUser.name,
-                criadoPorId: currentUser.username,
-                criadoEm: new Date().toISOString()
-            }));
-
-            if (useLocalStorage) {
-                const stored = JSON.parse(localStorage.getItem('rnc_list') || '[]');
-                localStorage.setItem('rnc_list', JSON.stringify([...stored, ...rncs]));
-            }
-            
-            alert(`${rncs.length} peças importadas com sucesso!`);
-            document.getElementById('fileImport').value = '';
-            document.getElementById('previewImport').classList.add('hidden');
-            document.getElementById('fileName').textContent = '';
-            carregarRNCs();
-        } catch (error) {
-            console.error('Erro na importação:', error);
-            alert('Erro ao importar dados');
-        }
-    }
-
-    // Etiquetas
-    window.gerarEtiquetaPreview = function() {
-        const rncData = {
-            numero: document.getElementById('rncNumero').value,
-            data: document.getElementById('rncData').value,
-            setor: document.getElementById('rncSetor').value,
-            codigoPeca: document.getElementById('rncCodigoPeca').value,
-            descricaoPeca: document.getElementById('rncDescricaoPeca').value,
-            quantidade: document.getElementById('rncQtd').value,
-            prioridade: document.getElementById('rncPrioridade').value,
-            responsavel: document.getElementById('rncResponsavel').value
-        };
-        
-        if (!rncData.numero || !rncData.codigoPeca) {
-            alert('Preencha pelo menos Número RNC e Código da Peça');
-            return;
-        }
-        
-        verEtiqueta(rncData);
-    }
-
-    window.verEtiqueta = function(rnc) {
-        const content = document.getElementById('etiquetaContent');
-        content.innerHTML = `
-            <div id="etiqueta" class="border-4 border-elgin p-4" style="width: 10cm; min-height: 5cm;">
-                <div class="text-center mb-3 pb-2 border-b-2 border-elgin">
-                    <h2 class="text-xl font-bold text-elgin">ELGIN S.A.</h2>
-                    <p class="text-sm font-semibold">RELATÓRIO DE NÃO CONFORMIDADE</p>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
-                    <div><b>N° RNC:</b> ${rnc.numero}</div>
-                    <div><b>Data:</b> ${rnc.data ? new Date(rnc.data).toLocaleDateString('pt-BR') : ''}</div>
-                    <div><b>Setor:</b> ${rnc.setor}</div>
-                    <div><b>Prioridade:</b> ${rnc.prioridade || ''}</div>
-                </div>
-                <div class="mb-3 pb-2 border-b">
-                    <div class="text-sm"><b>Código:</b> ${rnc.codigoPeca}</div>
-                    <div class="text-sm"><b>Descrição:</b> ${rnc.descricaoPeca}</div>
-                    <div class="text-sm"><b>Qtd:</b> ${rnc.quantidade}</div>
-                </div>
-                <div class="text-xs mb-3"><b>Resp:</b> ${rnc.responsavel || rnc.criadoPor || ''}</div>
-                <div class="flex justify-center">
-                    <svg id="barcode"></svg>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('modalEtiqueta').classList.remove('hidden');
-        setTimeout(() => {
-            JsBarcode("#barcode", rnc.numero || rnc.codigoPeca, {
-                format: "CODE128",
-                width: 2,
-                height: 40,
-                displayValue: true,
-                fontSize: 12
-            });
-        }, 100);
-    }
-
-    window.fecharModalEtiqueta = function() {
-        document.getElementById('modalEtiqueta').classList.add('hidden');
-    }
-
-    window.imprimirEtiqueta = function() {
-        const etiqueta = document.getElementById('etiqueta').outerHTML;
-        document.getElementById('printArea').innerHTML = etiqueta;
-        window.print();
-    }
-
-    // Gerenciamento de Usuários
-    function renderUsuarios() {
-        const content = document.getElementById('usuariosContent');
-        if (currentUser.level !== 3) {
-            content.innerHTML = '<p class="text-center text-gray-500 py-8">Acesso negado. Apenas administradores.</p>';
-            return;
-        }
-
-        const users = Object.entries(USERS_DB).map(([username, data]) => ({
-            username,
-            ...data
-        }));
-
-        const levelColors = { 1: 'bg-orange-100 text-orange-700', 2: 'bg-green-100 text-green-700', 3: 'bg-blue-100 text-blue-700' };
-        
-        content.innerHTML = `
-            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p class="text-sm text-yellow-800"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Em produção, use Firebase Authentication para gerenciar usuários com segurança.</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b-2">
-                        <tr class="text-gray-700 text-left">
-                            <th class="px-4 py-3 font-semibold">Usuário</th>
-                            <th class="px-4 py-3 font-semibold">Nome</th>
-                            <th class="px-4 py-3 font-semibold">Perfil</th>
-                            <th class="px-4 py-3 font-semibold">Nível</th>
+            <h2>3. RNCs Cadastradas</h2>
+            <div class="tabela-container">
+                <table id="tabelaRNC">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Operador</th><th>Status</th><th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-700">
-                        ${users.map(u => `
-                            <tr class="border-b border-gray-100">
-                                <td class="px-4 py-3 font-semibold">${u.username}</td>
-                                <td class="px-4 py-3">${u.name}</td>
-                                <td class="px-4 py-3">${u.role}</td>
-                                <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-semibold ${levelColors[u.level]}">Nível ${u.level}</span></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
+                    <tbody id="tabelaBody"><tr><td colspan="11" class="loading">Carregando RNCs do Firebase...</td></tr></tbody>
                 </table>
             </div>
-        `;
-    }
+        </div>
+    </div>
 
-    // Expor funções globais
-    window.carregarRNCs = carregarRNCs;
-</script>
-<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
+          authDomain: "rnc-elgin.firebaseapp.com",
+          projectId: "rnc-elgin",
+          storageBucket: "rnc-elgin.firebasestorage.app",
+          messagingSenderId: "75312642711",
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
+          measurementId: "G-3Z7JMC88KM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let pecasDB = {};
+        let pecasTempDB = {};
+        let listaPecasSalva = false;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('data').valueAsDate = new Date();
+            await carregarPecasDoFirebase();
+            await carregarTabelaRNCs();
+        });
+
+        async function carregarPecasDoFirebase() {
+            const querySnapshot = await getDocs(collection(db, "pecas"));
+            pecasDB = {};
+            querySnapshot.forEach((doc) => {
+                pecasDB[doc.data().codigo] = doc.data().denominacao;
+            });
+            listaPecasSalva = Object.keys(pecasDB).length > 0;
+            atualizarStatusPecas();
+        }
+
+        function atualizarStatusPecas() {
+            const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
+            const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
+            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
+        }
+
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                pecasTempDB = {};
+                json.forEach((row, i) => {
+                    if (i === 0 ||!row[0]) return;
+                    const codigo = String(row[0]).trim().toUpperCase();
+                    const denom = String(row[1] || '').trim();
+                    pecasTempDB[codigo] = denom;
+                });
+                listaPecasSalva = false;
+                atualizarStatusPecas();
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar pro Firebase.`);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        window.salvarListaPecas = async function() {
+            if (Object.keys(pecasTempDB).length === 0) return;
+            const btn = document.getElementById('btnSalvarLista');
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+
+            const batch = writeBatch(db);
+            const pecasRef = collection(db, "pecas");
+
+            for (let codigo in pecasTempDB) {
+                const newDocRef = doc(pecasRef);
+                batch.set(newDocRef, {
+                    codigo: codigo,
+                    denominacao: pecasTempDB[codigo],
+                    criado_em: new Date().toISOString()
+                });
+            }
+
+            await batch.commit();
+            pecasDB = {...pecasDB,...pecasTempDB};
+            pecasTempDB = {};
+            listaPecasSalva = true;
+            atualizarStatusPecas();
+            btn.innerText = '💾 Salvar Lista no Firebase';
+            alert('Lista de peças salva no Firebase!');
+        }
+
+        window.exportarListaPecas = function() {
+            if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
+            const dados = [['Código Peça', 'Denominação']];
+            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
+            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+        }
+
+        const inputCodigoPeca = document.getElementById('codigo_peca');
+        inputCodigoPeca.addEventListener('blur', function() {
+            const codigo = this.value.trim().toUpperCase();
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            const inputDenom = document.getElementById('denominacao');
+            const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+            if (db[codigo]) {
+                inputDenom.value = db[codigo];
+                inputDenom.style.backgroundColor = '#e8f5e9';
+                novaPecaBox.style.display = 'none';
+            } else if (codigo!== '') {
+                inputDenom.value = '';
+                inputDenom.placeholder = 'Código não encontrado';
+                inputDenom.style.backgroundColor = '#fff3cd';
+                novaPecaBox.style.display = 'block';
+            } else {
+                inputDenom.style.backgroundColor = '#fff';
+                novaPecaBox.style.display = 'none';
+            }
+        });
+
+        window.cadastrarNovaPeca = async function() {
+            const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
+            const denom = document.getElementById('nova_denominacao').value.trim();
+            if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
+
+            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
+            pecasDB[codigo] = denom;
+            document.getElementById('denominacao').value = denom;
+            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('nova_denominacao').value = '';
+            atualizarStatusPecas();
+            alert('Peça ' + codigo + ' cadastrada no Firebase!');
+        }
+
+        window.cancelarNovaPeca = function() {
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('codigo_peca').value = '';
+            document.getElementById('denominacao').value = '';
+            document.getElementById('denominacao').style.backgroundColor = '#fff';
+        }
+
+        document.getElementById('formRNC').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const rnc = {
+                cod_produto: document.getElementById('cod_produto').value,
+                cod_peca: document.getElementById('codigo_peca').value,
+                denominacao: document.getElementById('denominacao').value,
+                origem_defeito: document.getElementById('origem_defeito').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                nf: document.getElementById('nf').value,
+                qtd: Number(document.getElementById('qtd').value),
+                reserva: document.getElementById('reserva').value,
+                data: document.getElementById('data').value,
+                visto: document.getElementById('visto').value,
+                visto_operador: document.getElementById('visto_operador').value,
+                status: document.getElementById('status').value,
+                nao_conforme: document.getElementById('nao_conforme').value,
+                acao_corretiva: document.getElementById('acao_corretiva').value,
+                criado_em: new Date().toISOString()
+            };
+
+            if (editId) {
+                await updateDoc(doc(db, "rncs", editId), rnc);
+                alert('RNC atualizada no Firebase!');
+            } else {
+                await addDoc(collection(db, "rncs"), rnc);
+                alert('RNC cadastrada no Firebase!');
+            }
+            limparForm();
+            await carregarTabelaRNCs();
+        });
+
+        async function carregarTabelaRNCs() {
+            const q = query(collection(db, "rncs"), orderBy("data", "desc"));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.origem_defeito || '-'}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
+                    <td>${rnc.visto_operador || '-'}</td>
+                    <td>${rnc.status}</td>
+                    <td>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
+                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.editarRNC = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                document.getElementById('editId').value = rnc.id;
+                document.getElementById('cod_produto').value = rnc.cod_produto;
+                document.getElementById('codigo_peca').value = rnc.cod_peca;
+                document.getElementById('denominacao').value = rnc.denominacao;
+                document.getElementById('origem_defeito').value = rnc.origem_defeito || '';
+                document.getElementById('fornecedor').value = rnc.fornecedor;
+                document.getElementById('nf').value = rnc.nf;
+                document.getElementById('qtd').value = rnc.qtd;
+                document.getElementById('reserva').value = rnc.reserva;
+                document.getElementById('data').value = rnc.data;
+                document.getElementById('visto').value = rnc.visto;
+                document.getElementById('visto_operador').value = rnc.visto_operador || '';
+                document.getElementById('status').value = rnc.status;
+                document.getElementById('nao_conforme').value = rnc.nao_conforme;
+                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
+                window.scrollTo(0, 0);
+            }
+        }
+
+        window.excluirRNC = async function(id) {
+            if (confirm('Tem certeza que deseja excluir esta RNC?')) {
+                await deleteDoc(doc(db, "rncs", id));
+                await carregarTabelaRNCs();
+            }
+        }
+
+        window.limparForm = function() {
+            document.getElementById('formRNC').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            document.getElementById('denominacao').style.backgroundColor = '#f5f5f5';
+            document.getElementById('nova_peca_box').style.display = 'none';
+        }
+
+        window.exportarExcelRNCs = async function() {
+            const querySnapshot = await getDocs(collection(db, "rncs"));
+            const rncs = [];
+            querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
+            if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
+            const ws = XLSX.utils.json_to_sheet(rncs);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
+            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+        }
+
+        window.imprimirEtiqueta = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const etiquetaHTML = gerarEtiqueta100x60(rnc);
+                const win = window.open('', '_blank', 'width=400,height=300');
+                win.document.write(etiquetaHTML);
+                win.document.close();
+            }
+        }
+
+        function gerarEtiqueta100x60(rnc) {
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+<style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
+.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
+.linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
+.footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
+.nao-conf { font-size: 7pt; max-height: 7mm; overflow: hidden; }
+@media print {.no-print { display: none; } body { margin: 0; } }
+.no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+</style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
+<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
+<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
+<div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
+<div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
+<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || ''}</span></div>
+<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
+<div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
+<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
+<div class="footer">
+    <div style="display:flex; justify-content:space-between;">
+        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
+        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
+    </div>
+    <div style="text-align:right;">ID: ${rnc.id.slice(-6)}</div>
+</div>
+</div></body></html>`;
+        }
+    </script>
 </body>
 </html>
