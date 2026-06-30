@@ -3,143 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Usuários - RNC Elgin</title>
+    <title>Gerenciar Usuários - Sistema RNC</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-      .container { max-width: 1000px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-      .user-info { display: flex; align-items: center; gap: 15px; }
-      .user-name { font-weight: bold; color: #333; }
-      .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
-      .content { padding: 20px; }
-      .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-      .form-group { display: flex; flex-direction: column; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-name { font-weight: bold; color: #333; }
+        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-sair { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .content { padding: 20px; }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, select:focus { outline: none; border-color: #0056b3; }
+        .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
-        button:disabled { background: #ccc!important; cursor: not-allowed; }
-      .btn-adicionar { background: #28a745; color: white; }
-      .btn-adicionar:hover:not(:disabled) { background: #218838; }
-      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; margin-right: 5px; }
-      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-      .btn-salvar { background: #007bff; color: white; }
-      .btn-cancelar { background: #6c757d; color: white; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
+        .btn-salvar { background: #28a745; color: white; }
+        .btn-salvar:hover { background: #218838; }
+        .btn-limpar { background: #6c757d; color: white; }
+        .tabela-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #0056b3; color: white; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-      .badge-admin { background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-      .badge-operador { background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-      .badge-inspetor { background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-      .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
-      .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
-      .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; margin: 10px 0; }
-      
-      /* Modal */
-      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-      .modal-content { background: #fff; margin: 10% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
-      .modal-header h2 { color: #0056b3; margin: 0; }
-      .close { font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
-      .close:hover { color: #000; }
-      .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-      
-      @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }}
+        .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge-admin { background: #dc3545; color: white; }
+        .badge-inspetor { background: #0056b3; color: white; }
+        .badge-operador { background: #28a745; color: white; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>Gerenciar Usuários</h1>
+            <h1>Gerenciar Usuários - RNC Elgin</h1>
             <div class="user-info">
                 <span class="user-name" id="nomeUsuario">Carregando...</span>
-                <a href="index.html" class="btn-voltar">← Voltar</a>
+                <a href="index.html" class="btn-voltar">← Voltar RNC</a>
+                <button onclick="fazerLogout()" class="btn-sair">Sair</button>
             </div>
         </div>
 
         <div class="content">
-            <div id="msg"></div>
-
-            <h2>Adicionar Novo Usuário</h2>
-            <form id="formUsuario">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="email">Email do usuário *</label>
-                        <input type="email" id="email" required placeholder="usuario@elgin.com" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="nome">Nome completo *</label>
-                        <input type="text" id="nome" required placeholder="João Silva" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="senha">Senha *</label>
-                        <input type="password" id="senha" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-                    </div>
-                    <div class="form-group">
-                        <label for="nivel">Nível de acesso *</label>
-                        <select id="nivel" required>
-                            <option value="operador">Operador - Só visualiza</option>
-                            <option value="inspetor">Inspetor - Cadastra e edita RNC</option>
-                            <option value="admin">Admin - Acesso total</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn-adicionar" id="btnAdicionar">+ Adicionar Usuário</button>
-            </form>
-
-            <h2 style="margin-top: 30px;">Usuários Cadastrados</h2>
-            <table id="tabelaUsuarios">
-                <thead>
-                    <tr>
-                        <th>Nome</th><th>Email</th><th>Nível</th><th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaBody"><tr><td colspan="4">Carregando...</td></tr></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Modal de Edição -->
-    <div id="modalEditar" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Editar Usuário</h2>
-                <span class="close" onclick="fecharModal()">&times;</span>
+            <div id="alertaPermissao" class="alert alert-danger" style="display:none;">
+                <strong>Acesso Negado:</strong> Apenas administradores podem gerenciar usuários.
             </div>
-            <form id="formEditar">
-                <input type="hidden" id="editUid">
-                <div class="form-group">
-                    <label for="editNome">Nome completo *</label>
-                    <input type="text" id="editNome" required>
+
+            <div id="conteudoAdmin" style="display:none;">
+                <h2>1. Cadastrar/Editar Usuário</h2>
+                <form id="formUsuario">
+                    <input type="hidden" id="editUid">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo *</label>
+                            <input type="text" id="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="senha">Senha *</label>
+                            <input type="password" id="senha" placeholder="Mínimo 6 caracteres">
+                            <small style="color:#666;font-size:11px;">Deixe em branco ao editar para manter a senha atual</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="nivel">Nível de Permissão *</label>
+                            <select id="nivel" required>
+                                <option value="">Selecione...</option>
+                                <option value="operador">Operador - Cadastra RNC, não altera Status nem Visto/Inspetor</option>
+                                <option value="inspetor">Inspetor - Cadastra e edita RNC, não exclui</option>
+                                <option value="admin">Admin - Acesso total ao sistema</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="botoes">
+                        <button type="submit" class="btn-salvar">SALVAR USUÁRIO</button>
+                        <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    </div>
+                </form>
+
+                <h2>2. Usuários Cadastrados</h2>
+                <div class="tabela-container">
+                    <table id="tabelaUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Nível</th>
+                                <th>Criado em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaBody"><tr><td colspan="5" class="loading">Carregando...</td></tr></tbody>
+                    </table>
                 </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label for="editEmail">Email</label>
-                    <input type="email" id="editEmail" disabled style="background: #e9ecef;">
-                    <small style="color: #666; font-size: 11px;">Email não pode ser alterado</small>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label for="editNivel">Nível de acesso *</label>
-                    <select id="editNivel" required>
-                        <option value="operador">Operador - Só visualiza</option>
-                        <option value="inspetor">Inspetor - Cadastra e edita RNC</option>
-                        <option value="admin">Admin - Acesso total</option>
-                    </select>
-                </div>
-                <div class="modal-buttons">
-                    <button type="submit" class="btn-salvar">Salvar Alterações</button>
-                    <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, setDoc, getDocs, doc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
@@ -147,79 +124,98 @@
           projectId: "rnc-elgin",
           storageBucket: "rnc-elgin.firebasestorage.app",
           messagingSenderId: "75312642711",
-          appId: "1:75312642711:web:ae55732315738ca6ac87d2"
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
+          measurementId: "G-3Z7JMC88KM"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const secondaryApp = initializeApp(firebaseConfig, "Secondary");
-        const secondaryAuth = getAuth(secondaryApp);
-
-        let usuarioAdminAtual = null;
+        let usuarioAtual = null;
+        let permissaoUsuario = 'operador';
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
+
+            usuarioAtual = user;
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-            if (!userDoc.exists() || userDoc.data().nivel !== 'admin') {
-                alert('Apenas administradores podem acessar esta página');
-                window.location.href = 'index.html';
+
+            if (userDoc.exists()) {
+                permissaoUsuario = userDoc.data().nivel || 'operador';
+                document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (' + permissaoUsuario + ')';
+            } else {
+                document.getElementById('nomeUsuario').innerText = user.email;
+                alert('Usuário sem permissão cadastrada. Contate o administrador.');
+                signOut(auth);
                 return;
             }
-            usuarioAdminAtual = user;
-            document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (ADMIN)';
-            carregarUsuarios();
+
+            if (permissaoUsuario !== 'admin') {
+                document.getElementById('alertaPermissao').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('conteudoAdmin').style.display = 'block';
+            await carregarUsuarios();
         });
 
-        document.getElementById('formUsuario').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('msg');
-            const btn = document.getElementById('btnAdicionar');
-            const form = document.getElementById('formUsuario');
-            
-            msg.innerHTML = '<div class="info">Criando usuário...</div>';
-            btn.disabled = true;
+        window.fazerLogout = function() {
+            signOut(auth);
+        }
 
+        document.getElementById('formUsuario').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const editUid = document.getElementById('editUid').value;
             const nome = document.getElementById('nome').value.trim();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
             const nivel = document.getElementById('nivel').value;
 
+            if (!editUid && senha.length < 6) {
+                alert('Senha deve ter no mínimo 6 caracteres');
+                return;
+            }
+
             try {
-                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
-                const uid = userCredential.user.uid;
-                await signOut(secondaryAuth);
-
-                await setDoc(doc(db, "usuarios", uid), {
-                    nome: nome,
-                    email: email,
-                    nivel: nivel,
-                    criado_em: new Date().toISOString(),
-                    criado_por: usuarioAdminAtual.email
-                });
-
-                msg.innerHTML = '<div class="sucesso">Usuário cadastrado com sucesso!</div>';
-                form.reset();
-                document.getElementById('nivel').value = 'operador';
-                document.getElementById('email').focus();
-                setTimeout(() => { msg.innerHTML = ''; }, 3000);
-                carregarUsuarios();
+                if (editUid) {
+                    // Editando usuário existente
+                    await updateDoc(doc(db, "usuarios", editUid), {
+                        nome: nome,
+                        email: email,
+                        nivel: nivel,
+                        atualizado_em: new Date().toISOString()
+                    });
+                    alert('Usuário atualizado com sucesso!');
+                } else {
+                    // Criando novo usuário
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                    await setDoc(doc(db, "usuarios", userCredential.user.uid), {
+                        nome: nome,
+                        email: email,
+                        nivel: nivel,
+                        criado_em: new Date().toISOString(),
+                        criado_por: usuarioAtual.email
+                    });
+                    alert('Usuário criado com sucesso!');
+                }
+                limparForm();
+                await carregarUsuarios();
             } catch (error) {
-                console.error('Erro completo:', error);
-                let erroMsg = 'Erro ao cadastrar: ';
-                if (error.code === 'auth/email-already-in-use') erroMsg += 'Este email já está cadastrado';
-                else if (error.code === 'auth/weak-password') erroMsg += 'Senha fraca. Mínimo 6 caracteres';
-                else if (error.code === 'auth/invalid-email') erroMsg += 'Email inválido';
-                else if (error.code === 'auth/operation-not-allowed') erroMsg += 'Email/Senha não ativado no Firebase';
-                else if (error.code === 'permission-denied') erroMsg += 'Sem permissão no Firestore';
-                else erroMsg += error.message;
-                msg.innerHTML = `<div class="erro">${erroMsg}</div>`;
-            } finally {
-                btn.disabled = false;
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('Este e-mail já está cadastrado');
+                } else if (error.code === 'auth/invalid-email') {
+                    alert('E-mail inválido');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('Senha muito fraca');
+                } else {
+                    alert('Erro ao salvar usuário: ' + error.message);
+                }
             }
         });
 
@@ -229,93 +225,68 @@
             tbody.innerHTML = '';
 
             if (querySnapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="4">Nenhum usuário cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">Nenhum usuário cadastrado.</td></tr>';
                 return;
             }
 
             querySnapshot.forEach((docSnap) => {
-                const user = docSnap.data();
-                let badge = '';
-                if (user.nivel === 'admin') badge = '<span class="badge-admin">ADMIN</span>';
-                else if (user.nivel === 'inspetor') badge = '<span class="badge-inspetor">INSPETOR</span>';
-                else badge = '<span class="badge-operador">OPERADOR</span>';
-
+                const user = {uid: docSnap.id, ...docSnap.data()};
                 const tr = document.createElement('tr');
+                
+                let badgeClass = 'badge-operador';
+                if (user.nivel === 'admin') badgeClass = 'badge-admin';
+                if (user.nivel === 'inspetor') badgeClass = 'badge-inspetor';
+                
+                const criadoEm = user.criado_em ? new Date(user.criado_em).toLocaleDateString('pt-BR') : '-';
+                
                 tr.innerHTML = `
                     <td>${user.nome}</td>
                     <td>${user.email}</td>
-                    <td>${badge}</td>
+                    <td><span class="badge ${badgeClass}">${user.nivel}</span></td>
+                    <td>${criadoEm}</td>
                     <td>
-                        <button class="btn-editar" onclick="abrirModalEditar('${docSnap.id}', '${user.nome}', '${user.email}', '${user.nivel}')">Editar</button>
-                        ${docSnap.id !== usuarioAdminAtual.uid ? 
-                          `<button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}', '${user.email}')">Excluir</button>` : 
-                          '<span style="color:#999;font-size:11px;">Você</span>'
-                        }
+                        <button class="btn-editar" onclick="editarUsuario('${user.uid}')">Editar</button>
+                        ${user.uid !== usuarioAtual.uid ? `<button class="btn-excluir" onclick="excluirUsuario('${user.uid}', '${user.email}')">Excluir</button>` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.abrirModalEditar = function(uid, nome, email, nivel) {
-            document.getElementById('editUid').value = uid;
-            document.getElementById('editNome').value = nome;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editNivel').value = nivel;
-            document.getElementById('modalEditar').style.display = 'block';
-        }
+        window.editarUsuario = async function(uid) {
+            const docRef = doc(db, "usuarios", uid);
+            const docSnap = await getDoc(docRef);
 
-        window.fecharModal = function() {
-            document.getElementById('modalEditar').style.display = 'none';
-        }
-
-        document.getElementById('formEditar').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('msg');
-            const uid = document.getElementById('editUid').value;
-            const nome = document.getElementById('editNome').value.trim();
-            const nivel = document.getElementById('editNivel').value;
-
-            try {
-                await updateDoc(doc(db, "usuarios", uid), {
-                    nome: nome,
-                    nivel: nivel,
-                    editado_em: new Date().toISOString(),
-                    editado_por: usuarioAdminAtual.email
-                });
-
-                msg.innerHTML = '<div class="sucesso">Usuário atualizado com sucesso!</div>';
-                fecharModal();
-                setTimeout(() => { msg.innerHTML = ''; }, 3000);
-                carregarUsuarios();
-            } catch (error) {
-                msg.innerHTML = `<div class="erro">Erro ao atualizar: ${error.message}</div>`;
-                console.error(error);
+            if (docSnap.exists()) {
+                const user = docSnap.data();
+                document.getElementById('editUid').value = uid;
+                document.getElementById('nome').value = user.nome;
+                document.getElementById('email').value = user.email;
+                document.getElementById('email').disabled = true;
+                document.getElementById('senha').value = '';
+                document.getElementById('senha').placeholder = 'Deixe em branco para manter';
+                document.getElementById('nivel').value = user.nivel;
+                window.scrollTo(0, 0);
             }
-        });
+        }
 
         window.excluirUsuario = async function(uid, email) {
-            if (uid === usuarioAdminAtual.uid) {
+            if (uid === usuarioAtual.uid) {
                 alert('Você não pode excluir seu próprio usuário');
                 return;
             }
-            if (!confirm(`Excluir ${email}?\n\nIsso remove só do Firestore. Você ainda precisa deletar o login em Authentication no Firebase Console.`)) return;
-            
-            try {
+            if (confirm(`Tem certeza que deseja excluir o usuário ${email}?\n\nAtenção: Isso remove apenas do banco de dados. O login no Firebase Auth deve ser removido manualmente no console.`)) {
                 await deleteDoc(doc(db, "usuarios", uid));
-                alert('Usuário removido do Firestore.\n\nIMPORTANTE: Acesse Firebase Console > Authentication e delete o usuário manualmente pra ele não conseguir mais logar.');
-                carregarUsuarios();
-            } catch (error) {
-                alert('Erro ao excluir: ' + error.message);
+                alert('Usuário removido do banco de dados. Remova também no Firebase Authentication.');
+                await carregarUsuarios();
             }
         }
 
-        // Fecha modal ao clicar fora
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalEditar');
-            if (event.target == modal) {
-                fecharModal();
-            }
+        window.limparForm = function() {
+            document.getElementById('formUsuario').reset();
+            document.getElementById('editUid').value = '';
+            document.getElementById('email').disabled = false;
+            document.getElementById('senha').placeholder = 'Mínimo 6 caracteres';
         }
     </script>
 </body>
