@@ -3,39 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Usuários - Sistema RNC</title>
+    <title>Gerenciar Usuários - RNC Elgin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
+      .container { max-width: 1000px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
-        .content { padding: 20px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; margin-bottom: 25px; align-items: end; }
-        .form-group { display: flex; flex-direction: column; }
+      .user-info { display: flex; align-items: center; gap: 15px; }
+      .user-name { font-weight: bold; color: #333; }
+      .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+      .content { padding: 20px; }
+      .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+      .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-add:hover { background: #218838; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+      .btn-adicionar { background: #28a745; color: white; }
+      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
-        tr:hover { background: #f5f5f5; }
-        .tag { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; }
-        .tag-admin { background: #dc3545; }
-        .tag-inspetor { background: #fd7e14; }
-        .tag-operador { background: #0d6efd; }
-        .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; margin-right: 5px; }
-        .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-        .loading { text-align: center; padding: 20px; color: #666; }
-        #modalEditar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 400px; }
-        .modal-content h3 { margin-bottom: 15px; }
-        .modal-botoes { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+      .badge-admin { background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+      .badge-operador { background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+      .badge-inspetor { background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+      .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }}
     </style>
 </head>
 <body>
@@ -43,75 +38,57 @@
         <div class="header-bar">
             <h1>Gerenciar Usuários</h1>
             <div class="user-info">
-                <span id="nomeUsuario">Carregando...</span>
+                <span class="user-name" id="nomeUsuario">Carregando...</span>
                 <a href="index.html" class="btn-voltar">← Voltar</a>
             </div>
         </div>
 
         <div class="content">
-            <h3>Adicionar Novo Usuário</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="novoEmail">Email do usuário</label>
-                    <input type="email" id="novoEmail" placeholder="usuario@elgin.com">
-                </div>
-                <div class="form-group">
-                    <label for="novoNome">Nome completo</label>
-                    <input type="text" id="novoNome" placeholder="João Silva">
-                </div>
-                <div class="form-group">
-                    <label for="novoNivel">Nível de acesso</label>
-                    <select id="novoNivel">
-                        <option value="operador">Operador</option>
-                        <option value="inspetor">Inspetor</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <button class="btn-add" onclick="adicionarUsuario()">+ Adicionar</button>
-            </div>
+            <div id="msg"></div>
 
-            <h3>Usuários Cadastrados</h3>
+            <h2>Adicionar Novo Usuário</h2>
+            <form id="formUsuario">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="email">Email do usuário *</label>
+                        <input type="email" id="email" required placeholder="usuario@elgin.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="nome">Nome completo *</label>
+                        <input type="text" id="nome" required placeholder="João Silva">
+                    </div>
+                    <div class="form-group">
+                        <label for="senha">Senha *</label>
+                        <input type="password" id="senha" required minlength="6" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label for="nivel">Nível de acesso *</label>
+                        <select id="nivel" required>
+                            <option value="operador">Operador</option>
+                            <option value="inspetor">Inspetor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-adicionar">+ Adicionar</button>
+            </form>
+
+            <h2 style="margin-top: 30px;">Usuários Cadastrados</h2>
             <table id="tabelaUsuarios">
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Nível</th>
-                        <th>Ações</th>
+                        <th>Nome</th><th>Email</th><th>Nível</th><th>Ações</th>
                     </tr>
                 </thead>
-                <tbody id="tabelaBody"><tr><td colspan="4" class="loading">Carregando...</td></tr></tbody>
+                <tbody id="tabelaBody"><tr><td colspan="4">Carregando...</td></tr></tbody>
             </table>
-        </div>
-    </div>
-
-    <div id="modalEditar">
-        <div class="modal-content">
-            <h3>Editar Usuário</h3>
-            <input type="hidden" id="editUid">
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label>Nome</label>
-                <input type="text" id="editNome">
-            </div>
-            <div class="form-group">
-                <label>Nível de acesso</label>
-                <select id="editNivel">
-                    <option value="operador">Operador</option>
-                    <option value="inspetor">Inspetor</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="modal-botoes">
-                <button onclick="fecharModal()" style="background: #6c757d; color: white;">Cancelar</button>
-                <button onclick="salvarEdicao()" style="background: #28a745; color: white;">Salvar</button>
-            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, setDoc, getDocs, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
@@ -125,24 +102,54 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let usuarioAtual = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
-            usuarioAtual = user;
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-            
             if (!userDoc.exists() || userDoc.data().nivel !== 'admin') {
-                alert('Acesso negado. Apenas administradores.');
+                alert('Apenas administradores podem acessar');
                 window.location.href = 'index.html';
                 return;
             }
-            
             document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (ADMIN)';
-            await carregarUsuarios();
+            carregarUsuarios();
+        });
+
+        document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('msg');
+            msg.innerHTML = '';
+
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const nivel = document.getElementById('nivel').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                const uid = userCredential.user.uid;
+
+                await setDoc(doc(db, "usuarios", uid), {
+                    nome: nome,
+                    email: email,
+                    nivel: nivel,
+                    criado_em: new Date().toISOString()
+                });
+
+                msg.innerHTML = '<div class="sucesso">Usuário cadastrado com sucesso!</div>';
+                document.getElementById('formUsuario').reset();
+                carregarUsuarios();
+            } catch (error) {
+                let erroMsg = 'Erro ao cadastrar: ';
+                if (error.code === 'auth/email-already-in-use') erroMsg += 'Email já cadastrado';
+                else if (error.code === 'auth/weak-password') erroMsg += 'Senha muito fraca. Mínimo 6 caracteres';
+                else if (error.code === 'auth/invalid-email') erroMsg += 'Email inválido';
+                else erroMsg += error.message;
+                msg.innerHTML = `<div class="erro">${erroMsg}</div>`;
+            }
         });
 
         async function carregarUsuarios() {
@@ -150,90 +157,32 @@
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '';
 
-            if (querySnapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="4" class="loading">Nenhum usuário cadastrado.</td></tr>';
-                return;
-            }
-
             querySnapshot.forEach((docSnap) => {
-                const u = docSnap.data();
-                const tr = document.createElement('tr');
-                const tagClass = `tag-${u.nivel}`;
-                
-                let botoes = `<button class="btn-editar" onclick="abrirModal('${docSnap.id}', '${u.nome}', '${u.nivel}')">Editar</button>`;
-                // Não deixa excluir a si mesmo
-                if (docSnap.id !== usuarioAtual.uid) {
-                    botoes += `<button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}', '${u.nome}')">Excluir</button>`;
-                }
+                const user = docSnap.data();
+                let badge = '';
+                if (user.nivel === 'admin') badge = '<span class="badge-admin">ADMIN</span>';
+                else if (user.nivel === 'inspetor') badge = '<span class="badge-inspetor">INSPETOR</span>';
+                else badge = '<span class="badge-operador">OPERADOR</span>';
 
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${u.nome}</td>
-                    <td>${u.email}</td>
-                    <td><span class="tag ${tagClass}">${u.nivel.toUpperCase()}</span></td>
-                    <td>${botoes}</td>
+                    <td>${user.nome}</td>
+                    <td>${user.email}</td>
+                    <td>${badge}</td>
+                    <td>
+                        <button class="btn-editar" onclick="alert('Editar nível em breve')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}')">Excluir</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.adicionarUsuario = async function() {
-            const email = document.getElementById('novoEmail').value.trim();
-            const nome = document.getElementById('novoNome').value.trim();
-            const nivel = document.getElementById('novoNivel').value;
-            
-            if (!email || !nome) {
-                alert('Preencha email e nome');
-                return;
-            }
-
-            // IMPORTANTE: Isso só cria o doc no Firestore. 
-            // O usuário ainda precisa ser criado no Firebase Auth pela tela de login/cadastro
-            // ou manualmente no console. Aqui estamos só dando a permissão.
-            const uid = email.replace(/[^a-zA-Z0-9]/g, '_'); // uid temporário baseado no email
-            
-            await setDoc(doc(db, "usuarios", uid), {
-                email: email,
-                nome: nome,
-                nivel: nivel,
-                criado_em: new Date().toISOString()
-            });
-
-            alert(`Usuário ${nome} adicionado. Lembre-se: ele ainda precisa se cadastrar com esse email na tela de login pra ter acesso.`);
-            document.getElementById('novoEmail').value = '';
-            document.getElementById('novoNome').value = '';
-            await carregarUsuarios();
-        }
-
-        window.abrirModal = function(uid, nome, nivel) {
-            document.getElementById('editUid').value = uid;
-            document.getElementById('editNome').value = nome;
-            document.getElementById('editNivel').value = nivel;
-            document.getElementById('modalEditar').style.display = 'flex';
-        }
-
-        window.fecharModal = function() {
-            document.getElementById('modalEditar').style.display = 'none';
-        }
-
-        window.salvarEdicao = async function() {
-            const uid = document.getElementById('editUid').value;
-            const nome = document.getElementById('editNome').value.trim();
-            const nivel = document.getElementById('editNivel').value;
-
-            await updateDoc(doc(db, "usuarios", uid), {
-                nome: nome,
-                nivel: nivel
-            });
-
-            fecharModal();
-            await carregarUsuarios();
-        }
-
-        window.excluirUsuario = async function(uid, nome) {
-            if (confirm(`Tem certeza que deseja excluir ${nome}? Isso remove a permissão, mas não apaga a conta de login.`)) {
-                await deleteDoc(doc(db, "usuarios", uid));
-                await carregarUsuarios();
-            }
+        window.excluirUsuario = async function(uid) {
+            if (!confirm('Tem certeza? Isso apaga só do Firestore. Delete também no Authentication do Firebase Console.')) return;
+            await deleteDoc(doc(db, "usuarios", uid));
+            alert('Usuário removido do Firestore. Acesse Firebase Console > Authentication pra deletar o login.');
+            carregarUsuarios();
         }
     </script>
 </body>
