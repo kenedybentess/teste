@@ -7,35 +7,35 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-     .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-     .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
+    .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-     .user-info { display: flex; align-items: center; gap: 15px; }
-     .user-name { font-weight: bold; color: #333; }
-     .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
-     .content { padding: 20px; }
-     .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-     .form-group { display: flex; flex-direction: column; }
+    .user-info { display: flex; align-items: center; gap: 15px; }
+    .user-name { font-weight: bold; color: #333; }
+    .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; }
+    .content { padding: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
-     .btn-adicionar { background: #28a745; color: white; }
-     .btn-salvar { background: #007bff; color: white; padding: 5px 10px; font-size: 12px; }
-     .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-     .permissoes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
-     .check-group { display: flex; align-items: center; gap: 8px; }
-     .check-group input { width: auto; }
-     .check-group label { margin: 0; font-weight: normal; font-size: 13px; }
+    .btn-adicionar { background: #28a745; color: white; }
+    .btn-salvar { background: #007bff; color: white; padding: 5px 10px; font-size: 12px; }
+    .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+    .permissoes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    .check-group { display: flex; align-items: center; gap: 8px; }
+    .check-group input { width: auto; }
+    .check-group label { margin: 0; font-weight: normal; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
-     .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
-     .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
-     .acoes { display: flex; gap: 5px; }
-     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-     .modal-content { background: #fff; max-width: 600px; margin: 50px auto; padding: 20px; border-radius: 8px; }
-     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-     .btn-fechar { background: #6c757d; color: white; padding: 5px 15px; }
+    .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .acoes { display: flex; gap: 5px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content { background: #fff; max-width: 600px; margin: 50px auto; padding: 20px; border-radius: 8px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .btn-fechar { background: #6c757d; color: white; padding: 5px 15px; }
         @media (max-width: 768px) {.form-grid,.permissoes-grid { grid-template-columns: 1fr; }}
     </style>
 </head>
@@ -70,17 +70,7 @@
                 </div>
 
                 <label style="font-weight:bold; margin-top:10px; display:block;">Permissões:</label>
-                <div class="permissoes-grid">
-                    <div class="check-group"><input type="checkbox" id="p_ver_rnc" checked disabled><label for="p_ver_rnc">Ver RNCs</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_criar_rnc"><label for="p_criar_rnc">Criar RNC</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_editar_rnc"><label for="p_editar_rnc">Editar RNC</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_excluir_rnc"><label for="p_excluir_rnc">Excluir RNC</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_importar_pecas"><label for="p_importar_pecas">Importar Lista Peças</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_exportar_excel"><label for="p_exportar_excel">Exportar Excel</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_gerenciar_usuarios"><label for="p_gerenciar_usuarios">Gerenciar Usuários</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_cadastrar_peca"><label for="p_cadastrar_peca">Cadastrar Peça Nova</label></div>
-                    <div class="check-group"><input type="checkbox" id="p_ver_dashboard"><label for="p_ver_dashboard">Ver Dashboard</label></div>
-                </div>
+                <div class="permissoes-grid" id="permissoesNovo"></div>
 
                 <button type="submit" class="btn-adicionar">+ Adicionar</button>
             </form>
@@ -89,7 +79,7 @@
             <table id="tabelaUsuarios">
                 <thead>
                     <tr>
-                        <th>Nome</th><th>Email</th><th>Permissões</th><th>Ações</th>
+                        <th>Nome</th><th>Email</th><th>Permissões Ativas</th><th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaBody"><tr><td colspan="4">Carregando...</td></tr></tbody>
@@ -97,7 +87,6 @@
         </div>
     </div>
 
-    <!-- Modal Editar Permissões -->
     <div id="modalPermissoes" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -141,6 +130,20 @@
             ver_dashboard: 'Ver Dashboard'
         };
 
+        function gerarCheckboxes(containerId, permissoes = {}) {
+            const grid = document.getElementById(containerId);
+            grid.innerHTML = '';
+            Object.keys(TODAS_PERMISSOES).forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'check-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="${containerId}_${p}" ${permissoes[p]? 'checked' : ''} ${p === 'ver_rnc'? 'disabled checked' : ''}>
+                    <label for="${containerId}_${p}">${TODAS_PERMISSOES[p]}</label>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
@@ -154,6 +157,7 @@
                 return;
             }
             document.getElementById('nomeUsuario').innerText = userDoc.data().nome;
+            gerarCheckboxes('permissoesNovo', { ver_rnc: true, criar_rnc: true });
             carregarUsuarios();
         });
 
@@ -168,9 +172,9 @@
 
             const permissoes = {};
             Object.keys(TODAS_PERMISSOES).forEach(p => {
-                permissoes[p] = document.getElementById(`p_${p}`).checked;
+                permissoes[p] = document.getElementById(`permissoesNovo_${p}`).checked;
             });
-            permissoes.ver_rnc = true; // todo mundo vê
+            permissoes.ver_rnc = true;
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
@@ -186,6 +190,7 @@
 
                 msg.innerHTML = '<div class="sucesso">Usuário cadastrado com sucesso!</div>';
                 document.getElementById('formUsuario').reset();
+                gerarCheckboxes('permissoesNovo', { ver_rnc: true, criar_rnc: true });
                 carregarUsuarios();
                 setTimeout(() => msg.innerHTML = '', 4000);
             } catch (error) {
@@ -207,15 +212,15 @@
                 const uid = docSnap.id;
 
                 const permissoesAtivas = Object.keys(user.permissoes || {})
-                   .filter(p => user.permissoes[p])
+                   .filter(p => user.permissoes[p] && p!== 'ver_rnc')
                    .map(p => TODAS_PERMISSOES[p])
-                   .join(', ');
+                   .join(', ') || 'Apenas visualização';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${user.nome}</td>
                     <td>${user.email}</td>
-                    <td style="font-size:11px;">${permissoesAtivas || 'Nenhuma'}</td>
+                    <td style="font-size:11px;">${permissoesAtivas}</td>
                     <td class="acoes">
                         <button class="btn-salvar" onclick="abrirModal('${uid}', '${user.nome}')">Permissões</button>
                         <button class="btn-excluir" onclick="excluirUsuario('${uid}')" ${uid === usuarioLogadoUid? 'disabled' : ''}>Excluir</button>
@@ -229,20 +234,7 @@
             uidEditando = uid;
             document.getElementById('modalNomeUser').innerText = nome;
             const userDoc = await getDoc(doc(db, "usuarios", uid));
-            const permissoes = userDoc.data().permissoes || {};
-
-            const grid = document.getElementById('modalPermissoesGrid');
-            grid.innerHTML = '';
-            Object.keys(TODAS_PERMISSOES).forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'check-group';
-                div.innerHTML = `
-                    <input type="checkbox" id="modal_${p}" ${permissoes[p]? 'checked' : ''} ${p === 'ver_rnc'? 'disabled' : ''}>
-                    <label for="modal_${p}">${TODAS_PERMISSOES[p]}</label>
-                `;
-                grid.appendChild(div);
-            });
-
+            gerarCheckboxes('modalPermissoesGrid', userDoc.data().permissoes || {});
             document.getElementById('modalPermissoes').style.display = 'block';
         }
 
@@ -254,7 +246,7 @@
         window.salvarPermissoes = async function() {
             const permissoes = {};
             Object.keys(TODAS_PERMISSOES).forEach(p => {
-                permissoes[p] = document.getElementById(`modal_${p}`).checked;
+                permissoes[p] = document.getElementById(`modalPermissoesGrid_${p}`).checked;
             });
             permissoes.ver_rnc = true;
 
