@@ -18,19 +18,24 @@
       .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        input:focus, select:focus { outline: none; border-color: #0056b3; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
       .btn-adicionar { background: #28a745; color: white; }
+      .btn-adicionar:hover:not(:disabled) { background: #218838; }
       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; }
+        tr:hover { background: #f5f5f5; }
       .badge-admin { background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
       .badge-operador { background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
       .badge-inspetor { background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
       .erro { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
       .sucesso { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
-        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }}
+      .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }}
     </style>
 </head>
 <body>
@@ -64,13 +69,13 @@
                     <div class="form-group">
                         <label for="nivel">Nível de acesso *</label>
                         <select id="nivel" required>
-                            <option value="operador">Operador</option>
-                            <option value="inspetor">Inspetor</option>
-                            <option value="admin">Admin</option>
+                            <option value="operador">Operador - Só visualiza</option>
+                            <option value="inspetor">Inspetor - Cadastra e edita RNC</option>
+                            <option value="admin">Admin - Acesso total</option>
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="btn-adicionar">+ Adicionar</button>
+                <button type="submit" class="btn-adicionar" id="btnAdicionar">+ Adicionar Usuário</button>
             </form>
 
             <h2 style="margin-top: 30px;">Usuários Cadastrados</h2>
@@ -87,7 +92,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, setDoc, getDocs, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -99,9 +104,16 @@
           appId: "1:75312642711:web:ae55732315738ca6ac87d2"
         };
 
+        // App principal - pro admin logado
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // App secundário - só pra criar usuários sem deslogar o admin
+        const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        let usuarioAdminAtual = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -110,10 +122,11 @@
             }
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
             if (!userDoc.exists() || userDoc.data().nivel !== 'admin') {
-                alert('Apenas administradores podem acessar');
+                alert('Apenas administradores podem acessar esta página');
                 window.location.href = 'index.html';
                 return;
             }
+            usuarioAdminAtual = user;
             document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (ADMIN)';
             carregarUsuarios();
         });
@@ -121,34 +134,54 @@
         document.getElementById('formUsuario').addEventListener('submit', async (e) => {
             e.preventDefault();
             const msg = document.getElementById('msg');
-            msg.innerHTML = '';
+            const btn = document.getElementById('btnAdicionar');
+            msg.innerHTML = '<div class="info">Criando usuário...</div>';
+            btn.disabled = true;
 
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
             const nivel = document.getElementById('nivel').value;
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                // 1. Cria no Authentication usando app secundário
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
                 const uid = userCredential.user.uid;
 
+                // 2. Desloga o usuário recém criado do auth secundário
+                await signOut(secondaryAuth);
+
+                // 3. Salva dados extras no Firestore
                 await setDoc(doc(db, "usuarios", uid), {
                     nome: nome,
                     email: email,
                     nivel: nivel,
-                    criado_em: new Date().toISOString()
+                    criado_em: new Date().toISOString(),
+                    criado_por: usuarioAdminAtual.email
                 });
 
                 msg.innerHTML = '<div class="sucesso">Usuário cadastrado com sucesso!</div>';
                 document.getElementById('formUsuario').reset();
                 carregarUsuarios();
             } catch (error) {
+                console.error('Erro completo:', error);
                 let erroMsg = 'Erro ao cadastrar: ';
-                if (error.code === 'auth/email-already-in-use') erroMsg += 'Email já cadastrado';
-                else if (error.code === 'auth/weak-password') erroMsg += 'Senha muito fraca. Mínimo 6 caracteres';
-                else if (error.code === 'auth/invalid-email') erroMsg += 'Email inválido';
-                else erroMsg += error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    erroMsg += 'Este email já está cadastrado';
+                } else if (error.code === 'auth/weak-password') {
+                    erroMsg += 'Senha muito fraca. Use mínimo 6 caracteres';
+                } else if (error.code === 'auth/invalid-email') {
+                    erroMsg += 'Email inválido';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    erroMsg += 'Email/Senha não ativado. Vá em Firebase Console > Authentication > Sign-in method e ative';
+                } else if (error.code === 'permission-denied') {
+                    erroMsg += 'Sem permissão no Firestore. Ajuste as regras';
+                } else {
+                    erroMsg += error.message;
+                }
                 msg.innerHTML = `<div class="erro">${erroMsg}</div>`;
+            } finally {
+                btn.disabled = false;
             }
         });
 
@@ -156,6 +189,11 @@
             const querySnapshot = await getDocs(collection(db, "usuarios"));
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4">Nenhum usuário cadastrado</td></tr>';
+                return;
+            }
 
             querySnapshot.forEach((docSnap) => {
                 const user = docSnap.data();
@@ -170,19 +208,27 @@
                     <td>${user.email}</td>
                     <td>${badge}</td>
                     <td>
-                        <button class="btn-editar" onclick="alert('Editar nível em breve')">Editar</button>
-                        <button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}')">Excluir</button>
+                        <button class="btn-excluir" onclick="excluirUsuario('${docSnap.id}', '${user.email}')">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.excluirUsuario = async function(uid) {
-            if (!confirm('Tem certeza? Isso apaga só do Firestore. Delete também no Authentication do Firebase Console.')) return;
-            await deleteDoc(doc(db, "usuarios", uid));
-            alert('Usuário removido do Firestore. Acesse Firebase Console > Authentication pra deletar o login.');
-            carregarUsuarios();
+        window.excluirUsuario = async function(uid, email) {
+            if (uid === usuarioAdminAtual.uid) {
+                alert('Você não pode excluir seu próprio usuário');
+                return;
+            }
+            if (!confirm(`Excluir ${email}?\n\nIsso remove só do Firestore. Você ainda precisa deletar o login em Authentication no Firebase Console.`)) return;
+            
+            try {
+                await deleteDoc(doc(db, "usuarios", uid));
+                alert('Usuário removido do Firestore.\n\nIMPORTANTE: Acesse Firebase Console > Authentication e delete o usuário manualmente pra ele não conseguir mais logar.');
+                carregarUsuarios();
+            } catch (error) {
+                alert('Erro ao excluir: ' + error.message);
+            }
         }
     </script>
 </body>
