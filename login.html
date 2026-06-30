@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema RNC Elgin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #0056b3 0%, #003d82 100%); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+        }
+        .login-container { 
+            background: #fff; 
+            padding: 40px 35px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); 
+            width: 100%; 
+            max-width: 400px; 
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #0056b3; font-size: 24px; margin-bottom: 5px; }
+        .logo p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #333; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 15px; 
+            transition: 0.2s;
+        }
+        input:focus { outline: none; border-color: #0056b3; }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #0056b3; 
+            color: #fff; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        button:hover { background: #004494; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .erro { 
+            color: #dc3545; 
+            text-align: center; 
+            margin-top: 15px; 
+            font-size: 14px; 
+            min-height: 20px;
+        }
+        .loading { display: none; text-align: center; margin-top: 15px; color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Sistema RNC</h1>
+            <p>Elgin Manaus - v8 Online</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">E-mail Corporativo</label>
+            <input type="email" id="email" placeholder="nome@elgin.com.br" autocomplete="email">
+        </div>
+        
+        <div class="form-group">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Digite sua senha" autocomplete="current-password">
+        </div>
+        
+        <button id="btnLogin" onclick="fazerLogin()">Entrar no Sistema</button>
+        <div id="msgErro" class="erro"></div>
+        <div id="loading" class="loading">Verificando credenciais...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
+          authDomain: "rnc-elgin.firebaseapp.com",
+          projectId: "rnc-elgin",
+          storageBucket: "rnc-elgin.firebasestorage.app",
+          messagingSenderId: "75312642711",
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Se já estiver logado, pula pra tela principal
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        window.fazerLogin = async function() {
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+            const msgErro = document.getElementById('msgErro');
+            const btnLogin = document.getElementById('btnLogin');
+            const loading = document.getElementById('loading');
+            
+            msgErro.innerText = '';
+            
+            if (!email || !senha) {
+                msgErro.innerText = 'Preencha e-mail e senha.';
+                return;
+            }
+
+            btnLogin.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, senha);
+                // onAuthStateChanged vai redirecionar
+            } catch (error) {
+                let msg = 'Erro ao fazer login.';
+                if (error.code === 'auth/invalid-credential') msg = 'E-mail ou senha inválidos.';
+                if (error.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Tente mais tarde.';
+                msgErro.innerText = msg;
+                btnLogin.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        // Login com Enter
+        document.getElementById('senha').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') fazerLogin();
+        });
+    </script>
+</body>
+</html>
