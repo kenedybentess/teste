@@ -1,655 +1,483 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema RNC - Elgin | Login</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-    :root {
-        --elgin-blue: #0056b3;
-        --elgin-blue-dark: #003d82;
-        --elgin-blue-light: #e8f1fb;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .elgin-gradient {
-        background: linear-gradient(135deg, var(--elgin-blue) 0%, var(--elgin-blue-dark) 100%);
-    }
-    .input-focus:focus {
-        box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2);
-        border-color: var(--elgin-blue);
-    }
-    .card-hover {
-        transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0, 86, 179, 0.15);
-    }
-    .fade-in {
-        animation: fadeIn 0.4s ease-in;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .slide-in {
-        animation: slideIn 0.3s ease-out;
-    }
-    @keyframes slideIn {
-        from { transform: translateX(-100%); }
-        to { transform: translateX(0); }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema RNC - Elgin v8 Online</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+   .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+        h1 { color: #0056b3; margin: 0; font-size: 24px; }
+   .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.3); text-decoration: none; display: inline-block; }
+   .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+   .content { padding: 20px; }
+   .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+   .form-group { display: flex; flex-direction: column; }
+   .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
+        input[readonly] { background: #f5f5f5; cursor: not-allowed; }
+        textarea { resize: vertical; }
+   .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        button:disabled { background: #ccc!important; cursor: not-allowed; }
+   .btn-salvar { background: #28a745; color: white; }
+   .btn-salvar:hover:not(:disabled) { background: #218838; }
+   .btn-limpar { background: #6c757d; color: white; }
+   .btn-excel { background: #217346; color: #fff; }
+   .btn-export-pecas { background: #17a2b8; color: #fff; }
+   .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+   .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+   .status-online { color: #2e7d32; font-weight: bold; }
+   .tabela-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        tr:hover { background: #f5f5f5; }
+   .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+   .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+   .loading { text-align: center; padding: 20px; color: #666; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
+    </style>
 </head>
-<body class="bg-gray-50">
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="min-h-screen flex items-center justify-center p-4 elgin-gradient">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden fade-in">
-            <div class="elgin-gradient p-8 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4 shadow-lg">
-                    <i class="fa-solid fa-clipboard-check text-3xl" style="color: var(--elgin-blue);"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-white mb-1">Sistema RNC</h1>
-                <p class="text-blue-100 text-sm">Relatório de Não Conformidade - Elgin</p>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
+            <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
+        </div>
+
+        <div class="content">
+            <div class="status-box">
+                <span id="statusPecas">Carregando...</span>
+                <span class="status-online">● Online - Firebase</span>
             </div>
-            
-            <div class="p-8">
-                <form id="loginForm" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fa-solid fa-user mr-2 text-gray-400"></i>Usuário
-                        </label>
-                        <input 
-                            type="text" 
-                            id="username" 
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none transition"
-                            placeholder="Digite seu usuário"
-                            autocomplete="username">
+
+            <h2>1. Importar Lista de Peças</h2>
+            <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+                <label for="import_pecas"><strong>Arquivo CSV/Excel com Códigos</strong></label>
+                <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
+                <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
+                <div class="botoes" style="margin-top:10px;">
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no Firebase</button>
+                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
+                </div>
+            </div>
+
+            <h2>2. Cadastrar/Editar RNC</h2>
+            <form id="formRNC">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cod_produto">CÓDIGO DO PRODUTO *</label>
+                        <input type="text" id="cod_produto" required>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fa-solid fa-lock mr-2 text-gray-400"></i>Senha
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="password" 
-                                id="password" 
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none transition pr-12"
-                                placeholder="Digite sua senha"
-                                autocomplete="current-password">
-                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
+                    <div class="form-group">
+                        <label for="codigo_peca">CÓDIGO PEÇA *</label>
+                        <input type="text" id="codigo_peca" required placeholder="Digite e pressione TAB">
+                    </div>
+                    <div class="form-group">
+                        <label for="denominacao">DENOMINAÇÃO *</label>
+                        <input type="text" id="denominacao" required readonly>
+                    </div>
+                    <div id="nova_peca_box" style="display:none; grid-column: 1 / -1; background:#fff3cd; padding:15px; border-radius:5px; border:1px solid #ffc107;">
+                        <p style="margin:0 0 10px 0; font-weight:bold; color:#856404;">⚠ Código não encontrado na lista</p>
+                        <div style="display:flex; gap:10px; align-items:end;">
+                            <div style="flex:1;">
+                                <label style="font-size:12px;">Denominação da nova peça:</label>
+                                <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
+                            </div>
+                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
+                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
                         </div>
                     </div>
-
-                    <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
-                        <span id="errorMessage">Usuário ou senha inválidos</span>
+                    <div class="form-group">
+                        <label for="fornecedor">FORNECEDOR</label>
+                        <input type="text" id="fornecedor">
                     </div>
-
-                    <button 
-                        type="submit" 
-                        class="w-full elgin-gradient text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:opacity-95">
-                        <i class="fa-solid fa-right-to-bracket mr-2"></i>Entrar no Sistema
-                    </button>
-                </form>
-
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-xs text-gray-500 text-center mb-3">Usuários de demonstração:</p>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <button onclick="fillLogin('admin','admin123')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user-shield block mb-1"></i>Admin
-                        </button>
-                        <button onclick="fillLogin('gestor','gestor123')" class="bg-green-50 hover:bg-green-100 text-green-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user-tie block mb-1"></i>Gestor
-                        </button>
-                        <button onclick="fillLogin('operador','operador123')" class="bg-orange-50 hover:bg-orange-100 text-orange-700 py-2 px-2 rounded transition">
-                            <i class="fa-solid fa-user block mb-1"></i>Operador
-                        </button>
+                    <div class="form-group">
+                        <label for="origem_defeito">ORIGEM DO DEFEITO *</label>
+                        <select id="origem_defeito" required>
+                            <option value="">Selecione...</option>
+                            <option value="Fornecedor">Fornecedor</option>
+                            <option value="Processo">Processo</option>
+                            <option value="Revisão">Revisão</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nf">Nº NF *</label>
+                        <input type="text" id="nf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qtd">QTD *</label>
+                        <input type="number" id="qtd" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reserva">Nº DA RESERVA</label>
+                        <input type="text" id="reserva">
+                    </div>
+                    <div class="form-group">
+                        <label for="data">DATA *</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto">VISTO/INSPETOR *</label>
+                        <input type="text" id="visto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visto_operador">VISTO/OPERADOR *</label>
+                        <input type="text" id="visto_operador" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">STATUS</label>
+                        <select id="status">
+                            <option value="Aberta">Aberta</option>
+                            <option value="Fechada">Fechada</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="nao_conforme">NÃO CONFORMIDADE *</label>
+                        <textarea id="nao_conforme" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
+                        <textarea id="acao_corretiva" rows="2"></textarea>
                     </div>
                 </div>
+                <div class="botoes">
+                    <button type="submit" class="btn-salvar">SALVAR RNC</button>
+                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
+                </div>
+            </form>
+
+            <h2>3. RNCs Cadastradas</h2>
+            <div class="tabela-container">
+                <table id="tabelaRNC">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Operador</th><th>Status</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaBody"><tr><td colspan="11" class="loading">Carregando RNCs do Firebase...</td></tr></tbody>
+                </table>
             </div>
         </div>
-        <p class="text-center text-white text-xs mt-6 opacity-80">
-            © 2024 Elgin S.A. - Todos os direitos reservados
-        </p>
     </div>
-</div>
 
-<!-- DASHBOARD PAGE -->
-<div id="dashboardPage" class="hidden min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="elgin-gradient shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <button id="menuToggle" class="lg:hidden text-white">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md">
-                            <i class="fa-solid fa-clipboard-check text-xl" style="color: var(--elgin-blue);"></i>
-                        </div>
-                        <div class="hidden sm:block">
-                            <h1 class="text-white font-bold text-lg">Sistema RNC</h1>
-                            <p class="text-blue-100 text-xs">Elgin S.A.</p>
-                        </div>
-                    </div>
-                </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
-                <div class="flex items-center space-x-4">
-                    <div class="hidden md:flex items-center space-x-3 bg-white/10 px-4 py-2 rounded-lg backdrop-blur">
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-user text-sm" style="color: var(--elgin-blue);"></i>
-                        </div>
-                        <div class="text-white text-sm">
-                            <p class="font-semibold leading-tight" id="userName">--</p>
-                            <p class="text-xs text-blue-100 leading-tight" id="userRole">--</p>
-                        </div>
-                    </div>
-                    <button onclick="logout()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition backdrop-blur">
-                        <i class="fa-solid fa-right-from-bracket mr-0 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Sair</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="hidden lg:block w-64 bg-white shadow-lg min-h-[calc(100vh-4rem)] fixed lg:sticky top-16">
-            <nav class="p-4 space-y-2">
-                <div class="px-4 py-3 mb-4">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu Principal</p>
-                </div>
-                
-                <button id="navDashboard" onclick="showView('dashboard')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition text-gray-700 hover:bg-blue-50">
-                    <i class="fa-solid fa-chart-line w-5"></i>
-                    <span class="font-medium">Dashboard</span>
-                </button>
-                
-                <button id="navCadastro" onclick="showView('cadastro')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition text-gray-700 hover:bg-blue-50">
-                    <i class="fa-solid fa-file-circle-plus w-5"></i>
-                    <span class="font-medium">Cadastrar RNC</span>
-                </button>
-                
-                <button id="navRelatorios" onclick="showView('relatorios')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition text-gray-700 hover:bg-blue-50">
-                    <i class="fa-solid fa-file-lines w-5"></i>
-                    <span class="font-medium">Relatórios</span>
-                </button>
-                
-                <button id="navUsuarios" onclick="showView('usuarios')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition text-gray-700 hover:bg-blue-50">
-                    <i class="fa-solid fa-users-gear w-5"></i>
-                    <span class="font-medium">Usuários</span>
-                </button>
-
-                <div class="pt-4 mt-4 border-t border-gray-200">
-                    <div class="px-4 py-2">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Seu Acesso</p>
-                        <div id="permissionBadge" class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"></div>
-                    </div>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Mobile Sidebar Overlay -->
-        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleSidebar()"></div>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 w-full">
-            <!-- Dashboard View -->
-            <div id="viewDashboard" class="fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Dashboard</h2>
-                    <p class="text-gray-600">Visão geral dos registros de não conformidade</p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-file-circle-exclamation text-xl" style="color: var(--elgin-blue);"></i>
-                            </div>
-                            <span class="text-green-500 text-sm font-semibold">+12%</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-800" id="totalRNC">142</h3>
-                        <p class="text-gray-600 text-sm mt-1">Total de RNCs</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-clock text-xl text-yellow-600"></i>
-                            </div>
-                            <span class="text-yellow-500 text-sm font-semibold">8</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-800" id="pendentesRNC">23</h3>
-                        <p class="text-gray-600 text-sm mt-1">Pendentes</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-check-circle text-xl text-green-600"></i>
-                            </div>
-                            <span class="text-green-500 text-sm font-semibold">+8%</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-800" id="resolvidasRNC">98</h3>
-                        <p class="text-gray-600 text-sm mt-1">Resolvidas</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-triangle-exclamation text-xl text-red-600"></i>
-                            </div>
-                            <span class="text-red-500 text-sm font-semibold">3</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-800" id="criticasRNC">21</h3>
-                        <p class="text-gray-600 text-sm mt-1">Críticas</p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">RNCs Recentes</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-200 text-gray-600 text-left">
-                                    <th class="pb-3 font-semibold">ID</th>
-                                    <th class="pb-3 font-semibold">Descrição</th>
-                                    <th class="pb-3 font-semibold">Setor</th>
-                                    <th class="pb-3 font-semibold">Status</th>
-                                    <th class="pb-3 font-semibold">Data</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-700">
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-3">#RNC-142</td>
-                                    <td class="py-3">Falha no processo de montagem</td>
-                                    <td class="py-3">Produção</td>
-                                    <td class="py-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">Pendente</span></td>
-                                    <td class="py-3">04/10/2024</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-3">#RNC-141</td>
-                                    <td class="py-3">Material fora de especificação</td>
-                                    <td class="py-3">Qualidade</td>
-                                    <td class="py-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Resolvida</span></td>
-                                    <td class="py-3">03/10/2024</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3">#RNC-140</td>
-                                    <td class="py-3">Atraso na entrega de insumos</td>
-                                    <td class="py-3">Logística</td>
-                                    <td class="py-3"><span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">Crítica</span></td>
-                                    <td class="py-3">03/10/2024</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cadastro RNC View -->
-            <div id="viewCadastro" class="hidden fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Cadastrar RNC</h2>
-                    <p class="text-gray-600">Registre uma nova não conformidade no sistema</p>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
-                    <form id="rncForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Título da RNC *</label>
-                                <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none" placeholder="Ex: Falha no processo X">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Setor *</label>
-                                <select required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none">
-                                    <option value="">Selecione o setor</option>
-                                    <option>Produção</option>
-                                    <option>Qualidade</option>
-                                    <option>Logística</option>
-                                    <option>Manutenção</option>
-                                    <option>Engenharia</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Categoria *</label>
-                                <select required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none">
-                                    <option value="">Selecione a categoria</option>
-                                    <option>Produto</option>
-                                    <option>Processo</option>
-                                    <option>Fornecedor</option>
-                                    <option>Cliente</option>
-                                    <option>Sistema</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Prioridade *</label>
-                                <select required class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none">
-                                    <option value="">Selecione a prioridade</option>
-                                    <option>Baixa</option>
-                                    <option>Média</option>
-                                    <option>Alta</option>
-                                    <option>Crítica</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição Detalhada *</label>
-                            <textarea required rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none resize-none" placeholder="Descreva detalhadamente a não conformidade identificada..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Ação Imediata</label>
-                            <textarea rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus outline-none resize-none" placeholder="Descreva as ações imediatas tomadas..."></textarea>
-                        </div>
-
-                        <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                            <button type="submit" class="flex-1 elgin-gradient text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i>Salvar RNC
-                            </button>
-                            <button type="reset" class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-300 transition">
-                                <i class="fa-solid fa-eraser mr-2"></i>Limpar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Relatorios View -->
-            <div id="viewRelatorios" class="hidden fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Relatórios</h2>
-                    <p class="text-gray-600">Gere e exporte relatórios das RNCs</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                    <i class="fa-solid fa-file-pdf text-6xl mb-4" style="color: var(--elgin-blue);"></i>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Área de Relatórios</h3>
-                    <p class="text-gray-600 mb-6">Funcionalidade disponível para Admin e Gestor</p>
-                    <button class="elgin-gradient text-white font-semibold px-6 py-3 rounded-lg shadow-lg">
-                        <i class="fa-solid fa-download mr-2"></i>Gerar Relatório
-                    </button>
-                </div>
-            </div>
-
-            <!-- Usuarios View -->
-            <div id="viewUsuarios" class="hidden fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Gerenciar Usuários</h2>
-                    <p class="text-gray-600">Controle de acesso e permissões do sistema</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                    <i class="fa-solid fa-users-gear text-6xl mb-4" style="color: var(--elgin-blue);"></i>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Administração de Usuários</h3>
-                    <p class="text-gray-600 mb-6">Funcionalidade disponível apenas para Administradores</p>
-                    <button class="elgin-gradient text-white font-semibold px-6 py-3 rounded-lg shadow-lg">
-                        <i class="fa-solid fa-user-plus mr-2"></i>Adicionar Usuário
-                    </button>
-                </div>
-            </div>
-
-            <!-- Access Denied View -->
-            <div id="viewAccessDenied" class="hidden fade-in">
-                <div class="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center max-w-2xl mx-auto">
-                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fa-solid fa-lock text-4xl text-red-600"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Acesso Negado</h3>
-                    <p class="text-gray-600 mb-6">Você não possui permissão para acessar esta área do sistema. Entre em contato com o administrador se precisar de acesso.</p>
-                    <button onclick="showView('dashboard')" class="elgin-gradient text-white font-semibold px-6 py-3 rounded-lg shadow-lg">
-                        <i class="fa-solid fa-arrow-left mr-2"></i>Voltar ao Dashboard
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
-</div>
-
-<script>
-    // Usuários mockados - em produção usar backend/API
-    const USERS_DB = {
-        'admin': { password: 'admin123', name: 'Administrador', role: 'Admin', level: 3 },
-        'gestor': { password: 'gestor123', name: 'Carlos Silva', role: 'Gestor', level: 2 },
-        'operador': { password: 'operador123', name: 'João Santos', role: 'Operador', level: 1 }
-    };
-
-    // Permissões por nível
-    const PERMISSIONS = {
-        1: { // Operador
-            dashboard: false,
-            cadastro: true,
-            relatorios: false,
-            usuarios: false
-        },
-        2: { // Gestor
-            dashboard: true,
-            cadastro: true,
-            relatorios: true,
-            usuarios: false
-        },
-        3: { // Admin
-            dashboard: true,
-            cadastro: true,
-            relatorios: true,
-            usuarios: true
-        }
-    };
-
-    let currentUser = null;
-    let currentView = 'dashboard';
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-        checkSession();
-        setupEventListeners();
-    });
-
-    function setupEventListeners() {
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
-        document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
-        document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
-        document.getElementById('rncForm').addEventListener('submit', handleRNCCadastro);
-    }
-
-    function checkSession() {
-        const session = localStorage.getItem('rnc_session');
-        if (session) {
-            try {
-                const userData = JSON.parse(session);
-                if (userData && USERS_DB[userData.username]) {
-                    currentUser = userData;
-                    showDashboard();
-                    return;
-                }
-            } catch (e) {
-                localStorage.removeItem('rnc_session');
-            }
-        }
-        showLogin();
-    }
-
-    function handleLogin(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value.trim().toLowerCase();
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('loginError');
-
-        if (USERS_DB[username] && USERS_DB[username].password === password) {
-            const user = USERS_DB[username];
-            currentUser = {
-                username: username,
-                name: user.name,
-                role: user.role,
-                level: user.level,
-                loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('rnc_session', JSON.stringify(currentUser));
-            errorDiv.classList.add('hidden');
-            showDashboard();
-        } else {
-            errorDiv.classList.remove('hidden');
-            document.getElementById('password').value = '';
-            setTimeout(() => errorDiv.classList.add('hidden'), 4000);
-        }
-    }
-
-    function logout() {
-        localStorage.removeItem('rnc_session');
-        currentUser = null;
-        currentView = 'dashboard';
-        document.getElementById('loginForm').reset();
-        showLogin();
-    }
-
-    function showLogin() {
-        document.getElementById('loginPage').classList.remove('hidden');
-        document.getElementById('dashboardPage').classList.add('hidden');
-    }
-
-    function showDashboard() {
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('dashboardPage').classList.remove('hidden');
-        updateUserInfo();
-        applyPermissions();
-        showView('dashboard');
-    }
-
-    function updateUserInfo() {
-        if (!currentUser) return;
-        document.getElementById('userName').textContent = currentUser.name;
-        document.getElementById('userRole').textContent = currentUser.role;
-        
-        const badge = document.getElementById('permissionBadge');
-        const colors = {
-            1: 'bg-orange-100 text-orange-700',
-            2: 'bg-green-100 text-green-700',
-            3: 'bg-blue-100 text-blue-700'
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
+          authDomain: "rnc-elgin.firebaseapp.com",
+          projectId: "rnc-elgin",
+          storageBucket: "rnc-elgin.firebasestorage.app",
+          messagingSenderId: "75312642711",
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
+          measurementId: "G-3Z7JMC88KM"
         };
-        const icons = {
-            1: 'fa-user',
-            2: 'fa-user-tie',
-            3: 'fa-user-shield'
-        };
-        badge.className = `mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${colors[currentUser.level]}`;
-        badge.innerHTML = `<i class="fa-solid ${icons[currentUser.level]} mr-2"></i>${currentUser.role}`;
-    }
 
-    function applyPermissions() {
-        if (!currentUser) return;
-        const perms = PERMISSIONS[currentUser.level];
-        
-        // Ocultar/mostrar itens do menu baseado em permissão
-        document.getElementById('navDashboard').style.display = perms.dashboard ? 'flex' : 'none';
-        document.getElementById('navCadastro').style.display = perms.cadastro ? 'flex' : 'none';
-        document.getElementById('navRelatorios').style.display = perms.relatorios ? 'flex' : 'none';
-        document.getElementById('navUsuarios').style.display = perms.usuarios ? 'flex' : 'none';
-    }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    function showView(view) {
-        // Operador redirecionado direto para cadastro se tentar acessar dashboard
-        if (currentUser && currentUser.level === 1 && view === 'dashboard') {
-            view = 'cadastro';
-        }
+        let pecasDB = {};
+        let pecasTempDB = {};
+        let listaPecasSalva = false;
 
-        const perms = PERMISSIONS[currentUser.level];
-        const hasPermission = perms[view];
-
-        // Esconder todas views
-        document.querySelectorAll('[id^="view"]').forEach(el => el.classList.add('hidden'));
-        
-        // Remover active de todos nav
-        document.querySelectorAll('[id^="nav"]').forEach(el => {
-            el.classList.remove('bg-blue-100', 'text-blue-700');
-            el.classList.add('text-gray-700');
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('data').valueAsDate = new Date();
+            await carregarPecasDoFirebase();
+            await carregarTabelaRNCs();
         });
 
-        if (hasPermission || view === 'accessDenied') {
-            document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
-            if (view !== 'accessDenied') {
-                const navBtn = document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1));
-                navBtn.classList.add('bg-blue-100', 'text-blue-700');
-                navBtn.classList.remove('text-gray-700');
+        async function carregarPecasDoFirebase() {
+            const querySnapshot = await getDocs(collection(db, "pecas"));
+            pecasDB = {};
+            querySnapshot.forEach((doc) => {
+                pecasDB[doc.data().codigo] = doc.data().denominacao;
+            });
+            listaPecasSalva = Object.keys(pecasDB).length > 0;
+            atualizarStatusPecas();
+        }
+
+        function atualizarStatusPecas() {
+            const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
+            const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
+            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
+        }
+
+        document.getElementById('import_pecas').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                pecasTempDB = {};
+                json.forEach((row, i) => {
+                    if (i === 0 ||!row[0]) return;
+                    const codigo = String(row[0]).trim().toUpperCase();
+                    const denom = String(row[1] || '').trim();
+                    pecasTempDB[codigo] = denom;
+                });
+                listaPecasSalva = false;
+                atualizarStatusPecas();
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar pro Firebase.`);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        window.salvarListaPecas = async function() {
+            if (Object.keys(pecasTempDB).length === 0) return;
+            const btn = document.getElementById('btnSalvarLista');
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+
+            const batch = writeBatch(db);
+            const pecasRef = collection(db, "pecas");
+
+            for (let codigo in pecasTempDB) {
+                const newDocRef = doc(pecasRef);
+                batch.set(newDocRef, {
+                    codigo: codigo,
+                    denominacao: pecasTempDB[codigo],
+                    criado_em: new Date().toISOString()
+                });
             }
-            currentView = view;
-        } else {
-            document.getElementById('viewAccessDenied').classList.remove('hidden');
+
+            await batch.commit();
+            pecasDB = {...pecasDB,...pecasTempDB};
+            pecasTempDB = {};
+            listaPecasSalva = true;
+            atualizarStatusPecas();
+            btn.innerText = '💾 Salvar Lista no Firebase';
+            alert('Lista de peças salva no Firebase!');
         }
 
-        // Fechar sidebar mobile após seleção
-        if (window.innerWidth < 1024) {
-            toggleSidebar();
+        window.exportarListaPecas = function() {
+            if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
+            const dados = [['Código Peça', 'Denominação']];
+            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
+            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
         }
-    }
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        
-        if (sidebar.classList.contains('hidden')) {
-            sidebar.classList.remove('hidden');
-            sidebar.classList.add('fixed', 'z-50', 'left-0', 'slide-in');
-            overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.add('hidden');
-            overlay.classList.add('hidden');
+        const inputCodigoPeca = document.getElementById('codigo_peca');
+        inputCodigoPeca.addEventListener('blur', function() {
+            const codigo = this.value.trim().toUpperCase();
+            const novaPecaBox = document.getElementById('nova_peca_box');
+            const inputDenom = document.getElementById('denominacao');
+            const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+            if (db[codigo]) {
+                inputDenom.value = db[codigo];
+                inputDenom.style.backgroundColor = '#e8f5e9';
+                novaPecaBox.style.display = 'none';
+            } else if (codigo!== '') {
+                inputDenom.value = '';
+                inputDenom.placeholder = 'Código não encontrado';
+                inputDenom.style.backgroundColor = '#fff3cd';
+                novaPecaBox.style.display = 'block';
+            } else {
+                inputDenom.style.backgroundColor = '#fff';
+                novaPecaBox.style.display = 'none';
+            }
+        });
+
+        window.cadastrarNovaPeca = async function() {
+            const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
+            const denom = document.getElementById('nova_denominacao').value.trim();
+            if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
+
+            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
+            pecasDB[codigo] = denom;
+            document.getElementById('denominacao').value = denom;
+            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('nova_denominacao').value = '';
+            atualizarStatusPecas();
+            alert('Peça ' + codigo + ' cadastrada no Firebase!');
         }
-    }
 
-    function togglePasswordVisibility() {
-        const input = document.getElementById('password');
-        const icon = document.querySelector('#togglePassword i');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
+        window.cancelarNovaPeca = function() {
+            document.getElementById('nova_peca_box').style.display = 'none';
+            document.getElementById('codigo_peca').value = '';
+            document.getElementById('denominacao').value = '';
+            document.getElementById('denominacao').style.backgroundColor = '#fff';
         }
-    }
 
-    function handleRNCCadastro(e) {
-        e.preventDefault();
-        alert('RNC cadastrada com sucesso!\n\nEm ambiente de produção, os dados seriam enviados para o servidor.');
-        e.target.reset();
-        
-        // Simular incremento
-        const total = document.getElementById('totalRNC');
-        total.textContent = parseInt(total.textContent) + 1;
-    }
+        document.getElementById('formRNC').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const rnc = {
+                cod_produto: document.getElementById('cod_produto').value,
+                cod_peca: document.getElementById('codigo_peca').value,
+                denominacao: document.getElementById('denominacao').value,
+                origem_defeito: document.getElementById('origem_defeito').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                nf: document.getElementById('nf').value,
+                qtd: Number(document.getElementById('qtd').value),
+                reserva: document.getElementById('reserva').value,
+                data: document.getElementById('data').value,
+                visto: document.getElementById('visto').value,
+                visto_operador: document.getElementById('visto_operador').value,
+                status: document.getElementById('status').value,
+                nao_conforme: document.getElementById('nao_conforme').value,
+                acao_corretiva: document.getElementById('acao_corretiva').value,
+                criado_em: new Date().toISOString()
+            };
 
-    function fillLogin(user, pass) {
-        document.getElementById('username').value = user;
-        document.getElementById('password').value = pass;
-    }
+            if (editId) {
+                await updateDoc(doc(db, "rncs", editId), rnc);
+                alert('RNC atualizada no Firebase!');
+            } else {
+                await addDoc(collection(db, "rncs"), rnc);
+                alert('RNC cadastrada no Firebase!');
+            }
+            limparForm();
+            await carregarTabelaRNCs();
+        });
 
-    // Prevenir acesso direto via URL hash
-    window.addEventListener('hashchange', () => {
-        if (!currentUser) {
-            window.location.hash = '';
-            showLogin();
+        async function carregarTabelaRNCs() {
+            const q = query(collection(db, "rncs"), orderBy("data", "desc"));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.origem_defeito || '-'}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
+                    <td>${rnc.visto_operador || '-'}</td>
+                    <td>${rnc.status}</td>
+                    <td>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
+                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
-    });
-</script>
-<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+
+        window.editarRNC = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                document.getElementById('editId').value = rnc.id;
+                document.getElementById('cod_produto').value = rnc.cod_produto;
+                document.getElementById('codigo_peca').value = rnc.cod_peca;
+                document.getElementById('denominacao').value = rnc.denominacao;
+                document.getElementById('origem_defeito').value = rnc.origem_defeito || '';
+                document.getElementById('fornecedor').value = rnc.fornecedor;
+                document.getElementById('nf').value = rnc.nf;
+                document.getElementById('qtd').value = rnc.qtd;
+                document.getElementById('reserva').value = rnc.reserva;
+                document.getElementById('data').value = rnc.data;
+                document.getElementById('visto').value = rnc.visto;
+                document.getElementById('visto_operador').value = rnc.visto_operador || '';
+                document.getElementById('status').value = rnc.status;
+                document.getElementById('nao_conforme').value = rnc.nao_conforme;
+                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
+                window.scrollTo(0, 0);
+            }
+        }
+
+        window.excluirRNC = async function(id) {
+            if (confirm('Tem certeza que deseja excluir esta RNC?')) {
+                await deleteDoc(doc(db, "rncs", id));
+                await carregarTabelaRNCs();
+            }
+        }
+
+        window.limparForm = function() {
+            document.getElementById('formRNC').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('data').valueAsDate = new Date();
+            document.getElementById('denominacao').style.backgroundColor = '#f5f5f5';
+            document.getElementById('nova_peca_box').style.display = 'none';
+        }
+
+        window.exportarExcelRNCs = async function() {
+            const querySnapshot = await getDocs(collection(db, "rncs"));
+            const rncs = [];
+            querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
+            if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
+            const ws = XLSX.utils.json_to_sheet(rncs);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
+            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+        }
+
+        window.imprimirEtiqueta = async function(id) {
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const etiquetaHTML = gerarEtiqueta100x60(rnc);
+                const win = window.open('', '_blank', 'width=400,height=300');
+                win.document.write(etiquetaHTML);
+                win.document.close();
+            }
+        }
+
+        function gerarEtiqueta100x60(rnc) {
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+<style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
+.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
+.linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
+.footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
+.nao-conf { font-size: 7pt; max-height: 7mm; overflow: hidden; }
+@media print {.no-print { display: none; } body { margin: 0; } }
+.no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+</style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
+<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
+<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
+<div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
+<div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
+<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || ''}</span></div>
+<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
+<div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
+<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
+<div class="footer">
+    <div style="display:flex; justify-content:space-between;">
+        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
+        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
+    </div>
+    <div style="text-align:right;">ID: ${rnc.id.slice(-6)}</div>
+</div>
+</div></body></html>`;
+        }
+    </script>
 </body>
 </html>
