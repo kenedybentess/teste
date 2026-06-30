@@ -38,6 +38,7 @@
       .btn-excluir { background: #dc3545; color: white; padding: 5px 12px; font-size: 12px; }
       .btn-editar { background: #007bff; color: white; padding: 5px 12px; font-size: 12px; margin-right: 5px; }
       .loading { text-align: center; padding: 20px; color: #666; }
+      .info-box { background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 13px; color: #856404; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -50,6 +51,11 @@
 
         <div class="content">
             <div class="alerta" id="alerta"></div>
+
+            <div class="info-box">
+                <strong>⚠️ Importante:</strong> Ao criar um usuário, ele já pode fazer login com o e-mail e senha definidos. 
+                Para desativar um usuário, delete ele aqui E também em Firebase Console > Authentication > Users.
+            </div>
 
             <h2>Cadastrar Novo Usuário</h2>
             <form id="formUsuario">
@@ -70,7 +76,7 @@
                         <label for="nivel">Nível de Acesso *</label>
                         <select id="nivel" required>
                             <option value="">Selecione...</option>
-                            <option value="operador">Operador - Só visualiza</option>
+                            <option value="operador">Operador - Só visualiza e imprime</option>
                             <option value="inspetor">Inspetor - Cria e edita RNC</option>
                             <option value="admin">Admin - Acesso total</option>
                         </select>
@@ -117,9 +123,14 @@
           appId: "1:75312642711:web:ae55732315738ca6ac87d2"
         };
 
+        // App principal - mantém o admin logado
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // App secundário - só pra criar usuários sem deslogar o admin
+        const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+        const secondaryAuth = getAuth(secondaryApp);
 
         let usuarioLogado = null;
 
@@ -158,11 +169,14 @@
             const nivel = document.getElementById('nivel').value;
 
             try {
-                // Cria usuário no Authentication
-                const userCred = await createUserWithEmailAndPassword(auth, email, senha);
+                // Usa o auth secundário pra não deslogar o admin
+                const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
                 const uid = userCred.user.uid;
 
-                // Cria documento no Firestore
+                // Desloga do app secundário imediatamente
+                await signOut(secondaryAuth);
+
+                // Cria documento no Firestore usando o app principal
                 await setDoc(doc(db, "usuarios", uid), {
                     nome: nome,
                     email: email,
@@ -179,9 +193,11 @@
             } catch (error) {
                 let msg = 'Erro ao criar usuário: ';
                 if (error.code === 'auth/email-already-in-use') msg += 'E-mail já cadastrado';
-                else if (error.code === 'auth/weak-password') msg += 'Senha muito fraca';
+                else if (error.code === 'auth/weak-password') msg += 'Senha muito fraca. Mínimo 6 caracteres';
+                else if (error.code === 'auth/invalid-email') msg += 'E-mail inválido';
                 else msg += error.message;
                 mostrarAlerta(msg, 'erro');
+                console.error(error);
             }
         });
 
@@ -235,7 +251,7 @@
             }
 
             await deleteDoc(doc(db, "usuarios", uid));
-            mostrarAlerta(`Usuário ${nome} removido do sistema. Remova também no Authentication > Users`, 'sucesso');
+            mostrarAlerta(`Usuário ${nome} removido do sistema. Remova também em Authentication > Users`, 'sucesso');
             carregarUsuarios();
         }
 
