@@ -7,44 +7,44 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+      .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-       .user-info { display: flex; align-items: center; gap: 15px; }
-       .user-name { font-weight: bold; color: #333; }
-       .btn-usuarios { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-sair { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+      .user-info { display: flex; align-items: center; gap: 15px; }
+      .user-name { font-weight: bold; color: #333; }
+      .btn-usuarios { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-sair { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-       .content { padding: 20px; }
-       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .form-group { display: flex; flex-direction: column; }
-       .form-group.full { grid-column: 1 / -1; }
+      .content { padding: 20px; }
+      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+      .form-group { display: flex; flex-direction: column; }
+      .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly], input:disabled, select:disabled, textarea:disabled { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-       .btn-salvar { background: #28a745; color: white; }
-       .btn-salvar:hover:not(:disabled) { background: #218838; }
-       .btn-limpar { background: #6c757d; color: white; }
-       .btn-excel { background: #217346; color: #fff; }
-       .btn-export-pecas { background: #17a2b8; color: #fff; }
-       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-       .status-online { color: #2e7d32; font-weight: bold; }
-       .tabela-container { overflow-x: auto; margin-top: 20px; }
+      .btn-salvar { background: #28a745; color: white; }
+      .btn-salvar:hover:not(:disabled) { background: #218838; }
+      .btn-limpar { background: #6c757d; color: white; }
+      .btn-excel { background: #217346; color: #fff; }
+      .btn-export-pecas { background: #17a2b8; color: #fff; }
+      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+      .status-online { color: #2e7d32; font-weight: bold; }
+      .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-       .loading { text-align: center; padding: 20px; color: #666; }
-       .hidden { display: none!important; }
+      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+      .loading { text-align: center; padding: 20px; color: #666; }
+      .hidden { display: none!important; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
@@ -103,6 +103,7 @@
                             <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
                             <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
                         </div>
+                    </div>
                     <div class="form-group">
                         <label for="fornecedor">FORNECEDOR</label>
                         <input type="text" id="fornecedor">
@@ -201,7 +202,7 @@
         let pecasTempDB = {};
         let listaPecasSalva = false;
         let usuarioAtual = null;
-        let permissoesUsuario = {};
+        let permissaoUsuario = 'operador';
 
         // CONTROLE DE LOGIN E PERMISSÃO
         onAuthStateChanged(auth, async (user) => {
@@ -213,22 +214,15 @@
             usuarioAtual = user;
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
 
-            if (!userDoc.exists()) {
-                alert('Usuário sem cadastro no sistema. Contate o administrador.');
-                await signOut(auth);
+            if (userDoc.exists()) {
+                permissaoUsuario = userDoc.data().nivel || 'operador';
+                document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (' + permissaoUsuario + ')';
+            } else {
+                document.getElementById('nomeUsuario').innerText = user.email + ' (sem permissão)';
+                alert('Usuário sem permissão cadastrada. Contate o administrador.');
+                signOut(auth);
                 return;
             }
-
-            const dadosUser = userDoc.data();
-            permissoesUsuario = dadosUser.permissoes || {};
-
-            if (!permissoesUsuario.ver_rnc) {
-                alert('Usuário sem permissão para acessar o sistema.');
-                await signOut(auth);
-                return;
-            }
-
-            document.getElementById('nomeUsuario').innerText = dadosUser.nome;
 
             aplicarPermissoes();
             document.getElementById('data').valueAsDate = new Date();
@@ -237,31 +231,22 @@
         });
 
         function aplicarPermissoes() {
-            console.log('Permissões:', permissoesUsuario);
-
-            if (!permissoesUsuario.importar_pecas) {
-                document.getElementById('boxImportar')?.classList.add('hidden');
-                document.getElementById('tituloImportar')?.classList.add('hidden');
+            if (permissaoUsuario === 'operador') {
+                // Operador: só visualiza
+                document.getElementById('boxImportar').classList.add('hidden');
+                document.getElementById('tituloImportar').classList.add('hidden');
+                document.getElementById('btnSalvarRNC').classList.add('hidden');
+                document.getElementById('btnExportRNC').classList.add('hidden');
+                document.getElementById('btnUsuarios').classList.add('hidden');
+                document.getElementById('formRNC').querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
             }
-            if (!permissoesUsuario.gerenciar_usuarios) {
-                document.getElementById('btnUsuarios')?.classList.add('hidden');
+            if (permissaoUsuario === 'inspetor') {
+                // Inspetor: não exclui, não importa lista, não gerencia usuários
+                document.getElementById('boxImportar').classList.add('hidden');
+                document.getElementById('tituloImportar').classList.add('hidden');
+                document.getElementById('btnUsuarios').classList.add('hidden');
             }
-            if (!permissoesUsuario.exportar_excel) {
-                document.getElementById('btnExportRNC')?.classList.add('hidden');
-            }
-            if (!permissoesUsuario.criar_rnc) {
-                document.getElementById('btnSalvarRNC')?.classList.add('hidden');
-            }
-            if (!permissoesUsuario.ver_dashboard) {
-                document.getElementById('btnDashboard')?.classList.add('hidden');
-            }
-
-            // Se não pode criar nem editar, desabilita form
-            if (!permissoesUsuario.criar_rnc &&!permissoesUsuario.editar_rnc) {
-                document.getElementById('formRNC')?.querySelectorAll('input, select, textarea').forEach(i => {
-                    if (i.id!== 'denominacao') i.disabled = true;
-                });
-            }
+            // Admin vê tudo
         }
 
         window.fazerLogout = function() {
@@ -282,12 +267,11 @@
             const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
             const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
             document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
-            const btnSalvar = document.getElementById('btnSalvarLista');
-            if (btnSalvar) btnSalvar.disabled = listaPecasSalva || qtd === 0;
+            document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
         }
 
         document.getElementById('import_pecas').addEventListener('change', function(e) {
-            if (!permissoesUsuario.importar_pecas) return;
+            if (permissaoUsuario!== 'admin') return;
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -311,7 +295,7 @@
         });
 
         window.salvarListaPecas = async function() {
-            if (!permissoesUsuario.importar_pecas) { alert('Sem permissão'); return; }
+            if (permissaoUsuario!== 'admin') { alert('Sem permissão'); return; }
             if (Object.keys(pecasTempDB).length === 0) return;
             const btn = document.getElementById('btnSalvarLista');
             btn.disabled = true;
@@ -362,7 +346,7 @@
                 inputDenom.value = '';
                 inputDenom.placeholder = 'Código não encontrado';
                 inputDenom.style.backgroundColor = '#fff3cd';
-                if (permissoesUsuario.cadastrar_peca) {
+                if (permissaoUsuario === 'admin' || permissaoUsuario === 'inspetor') {
                     novaPecaBox.style.display = 'block';
                 }
             } else {
@@ -372,7 +356,7 @@
         });
 
         window.cadastrarNovaPeca = async function() {
-            if (!permissoesUsuario.cadastrar_peca) { alert('Sem permissão'); return; }
+            if (permissaoUsuario === 'operador') { alert('Sem permissão'); return; }
             const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
             const denom = document.getElementById('nova_denominacao').value.trim();
             if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
@@ -396,17 +380,9 @@
 
         document.getElementById('formRNC').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (permissaoUsuario === 'operador') { alert('Sem permissão para salvar'); return; }
+
             const editId = document.getElementById('editId').value;
-
-            if (!editId &&!permissoesUsuario.criar_rnc) {
-                alert('Sem permissão para criar RNC');
-                return;
-            }
-            if (editId &&!permissoesUsuario.editar_rnc) {
-                alert('Sem permissão para editar RNC');
-                return;
-            }
-
             const rnc = {
                 cod_produto: document.getElementById('cod_produto').value,
                 cod_peca: document.getElementById('codigo_peca').value,
@@ -453,10 +429,10 @@
                 const tr = document.createElement('tr');
                 let botoesAcao = `<button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>`;
 
-                if (permissoesUsuario.editar_rnc) {
+                if (permissaoUsuario === 'admin' || permissaoUsuario === 'inspetor') {
                     botoesAcao += ` <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>`;
                 }
-                if (permissoesUsuario.excluir_rnc) {
+                if (permissaoUsuario === 'admin') {
                     botoesAcao += ` <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>`;
                 }
 
@@ -478,7 +454,7 @@
         }
 
         window.editarRNC = async function(id) {
-            if (!permissoesUsuario.editar_rnc) return;
+            if (permissaoUsuario === 'operador') return;
             const docRef = doc(db, "rncs", id);
             const docSnap = await getDoc(docRef);
 
@@ -504,7 +480,7 @@
         }
 
         window.excluirRNC = async function(id) {
-            if (!permissoesUsuario.excluir_rnc) { alert('Sem permissão para excluir'); return; }
+            if (permissaoUsuario!== 'admin') { alert('Apenas admin pode excluir'); return; }
             if (confirm('Tem certeza que deseja excluir esta RNC?')) {
                 await deleteDoc(doc(db, "rncs", id));
                 await carregarTabelaRNCs();
@@ -520,7 +496,6 @@
         }
 
         window.exportarExcelRNCs = async function() {
-            if (!permissoesUsuario.exportar_excel) { alert('Sem permissão'); return; }
             const querySnapshot = await getDocs(collection(db, "rncs"));
             const rncs = [];
             querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
