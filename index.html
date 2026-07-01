@@ -3,55 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema RNC - Elgin v9 RTDB</title>
+    <title>Sistema RNC - Elgin v8 Online</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+      .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-       .user-info { display: flex; align-items: center; gap: 15px; }
-       .user-name { font-weight: bold; color: #333; }
-       .btn-usuarios { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-sair { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+      .user-info { display: flex; align-items: center; gap: 15px; }
+      .user-name { font-weight: bold; color: #333; }
+      .btn-usuarios { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-sair { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-       .content { padding: 20px; }
-       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .form-group { display: flex; flex-direction: column; }
-       .form-group.full { grid-column: 1 / -1; }
+      .content { padding: 20px; }
+      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+      .form-group { display: flex; flex-direction: column; }
+      .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly], input:disabled, select:disabled, textarea:disabled { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-       .btn-salvar { background: #28a745; color: white; }
-       .btn-salvar:hover:not(:disabled) { background: #218838; }
-       .btn-limpar { background: #6c757d; color: white; }
-       .btn-excel { background: #217346; color: #fff; }
-       .btn-export-pecas { background: #17a2b8; color: #fff; }
-       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-       .status-online { color: #2e7d32; font-weight: bold; }
-       .tabela-container { overflow-x: auto; margin-top: 20px; }
+      .btn-salvar { background: #28a745; color: white; }
+      .btn-salvar:hover:not(:disabled) { background: #218838; }
+      .btn-limpar { background: #6c757d; color: white; }
+      .btn-excel { background: #217346; color: #fff; }
+      .btn-export-pecas { background: #17a2b8; color: #fff; }
+      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+      .status-online { color: #2e7d32; font-weight: bold; }
+      .tabela-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-       .loading { text-align: center; padding: 20px; color: #666; }
-       .hidden { display: none!important; }
+      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+      .loading { text-align: center; padding: 20px; color: #666; }
+      .hidden { display: none!important; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>Sistema de Cadastro RNC - Elgin v9 RTDB</h1>
+            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
             <div class="user-info">
                 <span class="user-name" id="nomeUsuario">Carregando...</span>
                 <a href="usuarios.html" target="_blank" class="btn-usuarios" id="btnUsuarios">👥 Usuários</a>
@@ -63,7 +63,7 @@
         <div class="content">
             <div class="status-box">
                 <span id="statusPecas">Carregando...</span>
-                <span class="status-online">● Online - RTDB</span>
+                <span class="status-online">● Online - Firebase</span>
             </div>
 
             <h2 id="tituloImportar">1. Importar Lista de Peças</h2>
@@ -72,7 +72,7 @@
                 <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
                 <small style="display:block; margin-top:5px; color:#555;">Formato: Coluna A = Código Peça | Coluna B = Denominação</small>
                 <div class="botoes" style="margin-top:10px;">
-                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no RTDB</button>
+                    <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista no Firebase</button>
                     <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
                 </div>
             </div>
@@ -156,6 +156,7 @@
                         <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
                         <textarea id="acao_corretiva" rows="2"></textarea>
                     </div>
+                </div>
                 <div class="botoes">
                     <button type="submit" class="btn-salvar" id="btnSalvarRNC">SALVAR RNC</button>
                     <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
@@ -180,22 +181,22 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, push, update, remove, onValue, runTransaction, query, orderByChild, limitToLast, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
         const firebaseConfig = {
-          apiKey: "COLOCA_SUA_API_KEY",
-          authDomain: "nc-versao2.firebaseapp.com",
-          databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
-          projectId: "nc-versao2",
-          storageBucket: "nc-versao2.appspot.com",
-          messagingSenderId: "COLOCA_SEU_SENDER_ID",
-          appId: "COLOCA_SEU_APP_ID"
+          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
+          authDomain: "rnc-elgin.firebaseapp.com",
+          projectId: "rnc-elgin",
+          storageBucket: "rnc-elgin.firebasestorage.app",
+          messagingSenderId: "75312642711",
+          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
+          measurementId: "G-3Z7JMC88KM"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
+        const db = getFirestore(app);
 
         let pecasDB = {};
         let pecasTempDB = {};
@@ -203,31 +204,35 @@
         let usuarioAtual = null;
         let permissaoUsuario = 'operador';
 
+        // CONTROLE DE LOGIN E PERMISSÃO
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
+
             usuarioAtual = user;
-            const userSnap = await get(ref(db, `usuarios/${user.uid}`));
-            if (userSnap.exists()) {
-                const userData = userSnap.val();
-                permissaoUsuario = userData.nivel || 'operador';
-                document.getElementById('nomeUsuario').innerText = userData.nome + ' (' + permissaoUsuario + ')';
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+
+            if (userDoc.exists()) {
+                permissaoUsuario = userDoc.data().nivel || 'operador';
+                document.getElementById('nomeUsuario').innerText = userDoc.data().nome + ' (' + permissaoUsuario + ')';
             } else {
                 document.getElementById('nomeUsuario').innerText = user.email + ' (sem permissão)';
                 alert('Usuário sem permissão cadastrada. Contate o administrador.');
                 signOut(auth);
                 return;
             }
+
             aplicarPermissoes();
             document.getElementById('data').valueAsDate = new Date();
-            carregarPecasDoRTDB();
-            carregarTabelaRNCs();
+            await carregarPecasDoFirebase();
+            await carregarTabelaRNCs();
         });
 
         function aplicarPermissoes() {
             if (permissaoUsuario === 'operador') {
+                // Operador: só visualiza
                 document.getElementById('boxImportar').classList.add('hidden');
                 document.getElementById('tituloImportar').classList.add('hidden');
                 document.getElementById('btnSalvarRNC').classList.add('hidden');
@@ -236,26 +241,32 @@
                 document.getElementById('formRNC').querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
             }
             if (permissaoUsuario === 'inspetor') {
+                // Inspetor: não exclui, não importa lista, não gerencia usuários
                 document.getElementById('boxImportar').classList.add('hidden');
                 document.getElementById('tituloImportar').classList.add('hidden');
                 document.getElementById('btnUsuarios').classList.add('hidden');
             }
+            // Admin vê tudo
         }
 
-        window.fazerLogout = () => signOut(auth);
+        window.fazerLogout = function() {
+            signOut(auth);
+        }
 
-        function carregarPecasDoRTDB() {
-            onValue(ref(db, 'pecas'), (snapshot) => {
-                pecasDB = snapshot.val() || {};
-                listaPecasSalva = Object.keys(pecasDB).length > 0;
-                atualizarStatusPecas();
+        async function carregarPecasDoFirebase() {
+            const querySnapshot = await getDocs(collection(db, "pecas"));
+            pecasDB = {};
+            querySnapshot.forEach((doc) => {
+                pecasDB[doc.data().codigo] = doc.data().denominacao;
             });
+            listaPecasSalva = Object.keys(pecasDB).length > 0;
+            atualizarStatusPecas();
         }
 
         function atualizarStatusPecas() {
             const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
             const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
-            document.getElementById('statusPecas').innerHTML = `Peças no RTDB: ${qtd} | Status: ${status}`;
+            document.getElementById('statusPecas').innerHTML = `Peças no Firebase: ${qtd} | Status: ${status}`;
             document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
         }
 
@@ -274,11 +285,11 @@
                     if (i === 0 ||!row[0]) return;
                     const codigo = String(row[0]).trim().toUpperCase();
                     const denom = String(row[1] || '').trim();
-                    pecasTempDB[codigo] = { codigo, denominacao: denom, ativo: true };
+                    pecasTempDB[codigo] = denom;
                 });
                 listaPecasSalva = false;
                 atualizarStatusPecas();
-                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar.`);
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas. Clique em 'Salvar Lista' para enviar pro Firebase.`);
             };
             reader.readAsArrayBuffer(file);
         });
@@ -289,19 +300,32 @@
             const btn = document.getElementById('btnSalvarLista');
             btn.disabled = true;
             btn.innerText = 'Enviando...';
-            const updates = {};
-            for (let codigo in pecasTempDB) updates[`/pecas/${codigo}`] = pecasTempDB[codigo];
-            await update(ref(db), updates);
+
+            const batch = writeBatch(db);
+            const pecasRef = collection(db, "pecas");
+
+            for (let codigo in pecasTempDB) {
+                const newDocRef = doc(pecasRef);
+                batch.set(newDocRef, {
+                    codigo: codigo,
+                    denominacao: pecasTempDB[codigo],
+                    criado_em: new Date().toISOString()
+                });
+            }
+
+            await batch.commit();
+            pecasDB = {...pecasDB,...pecasTempDB};
             pecasTempDB = {};
             listaPecasSalva = true;
-            btn.innerText = '💾 Salvar Lista no RTDB';
-            alert('Lista de peças salva no Realtime Database!');
+            atualizarStatusPecas();
+            btn.innerText = '💾 Salvar Lista no Firebase';
+            alert('Lista de peças salva no Firebase!');
         }
 
         window.exportarListaPecas = function() {
             if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
             const dados = [['Código Peça', 'Denominação']];
-            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo].denominacao]);
+            for (let codigo in pecasDB) dados.push([codigo, pecasDB[codigo]]);
             const ws = XLSX.utils.aoa_to_sheet(dados);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Peças');
@@ -313,9 +337,9 @@
             const codigo = this.value.trim().toUpperCase();
             const novaPecaBox = document.getElementById('nova_peca_box');
             const inputDenom = document.getElementById('denominacao');
-            const listaPecas = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
-            if (listaPecas[codigo]) {
-                inputDenom.value = listaPecas[codigo].denominacao;
+            const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+            if (db[codigo]) {
+                inputDenom.value = db[codigo];
                 inputDenom.style.backgroundColor = '#e8f5e9';
                 novaPecaBox.style.display = 'none';
             } else if (codigo!== '') {
@@ -336,12 +360,15 @@
             const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
             const denom = document.getElementById('nova_denominacao').value.trim();
             if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
-            await set(ref(db, `pecas/${codigo}`), { codigo, denominacao: denom, ativo: true });
+
+            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
+            pecasDB[codigo] = denom;
             document.getElementById('denominacao').value = denom;
             document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
             document.getElementById('nova_peca_box').style.display = 'none';
             document.getElementById('nova_denominacao').value = '';
-            alert('Peça ' + codigo + ' cadastrada!');
+            atualizarStatusPecas();
+            alert('Peça ' + codigo + ' cadastrada no Firebase!');
         }
 
         window.cancelarNovaPeca = function() {
@@ -354,16 +381,8 @@
         document.getElementById('formRNC').addEventListener('submit', async function(e) {
             e.preventDefault();
             if (permissaoUsuario === 'operador') { alert('Sem permissão para salvar'); return; }
-            const btn = document.getElementById('btnSalvarRNC');
-            btn.disabled = true;
-            btn.innerText = 'Salvando...';
 
             const editId = document.getElementById('editId').value;
-            let sequencial = null;
-            if (!editId) {
-                const result = await runTransaction(ref(db, 'contadores/rnc'), (current) => (current || 0) + 1);
-                sequencial = `RNC-2026-${String(result.snapshot.val()).padStart(4, '0')}`;
-            }
             const rnc = {
                 cod_produto: document.getElementById('cod_produto').value,
                 cod_peca: document.getElementById('codigo_peca').value,
@@ -382,62 +401,65 @@
                 criado_por: usuarioAtual.email,
                 criado_em: new Date().toISOString()
             };
+
             if (editId) {
-                await update(ref(db, `rncs/${editId}`), rnc);
-                alert('RNC atualizada!');
+                await updateDoc(doc(db, "rncs", editId), rnc);
+                alert('RNC atualizada no Firebase!');
             } else {
-                rnc.sequencial = sequencial;
-                await push(ref(db, 'rncs'), rnc);
-                alert(`RNC ${sequencial} cadastrada!`);
+                await addDoc(collection(db, "rncs"), rnc);
+                alert('RNC cadastrada no Firebase!');
             }
             limparForm();
-            btn.disabled = false;
-            btn.innerText = 'SALVAR RNC';
+            await carregarTabelaRNCs();
         });
 
-        function carregarTabelaRNCs() {
-            onValue(query(ref(db, 'rncs'), orderByChild('data'), limitToLast(100)), (snapshot) => {
-                const tbody = document.getElementById('tabelaBody');
-                tbody.innerHTML = '';
-                const dados = [];
-                snapshot.forEach(child => dados.push({ id: child.key,...child.val() }));
-                dados.reverse();
-                if (dados.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
-                    return;
+        async function carregarTabelaRNCs() {
+            const q = query(collection(db, "rncs"), orderBy("data", "desc"));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaBody');
+            tbody.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const rnc = {id: docSnap.id,...docSnap.data()};
+                const tr = document.createElement('tr');
+                let botoesAcao = `<button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>`;
+
+                if (permissaoUsuario === 'admin' || permissaoUsuario === 'inspetor') {
+                    botoesAcao += ` <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>`;
                 }
-                dados.forEach(rnc => {
-                    const tr = document.createElement('tr');
-                    let botoesAcao = `<button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>`;
-                    if (permissaoUsuario === 'admin' || permissaoUsuario === 'inspetor') {
-                        botoesAcao += ` <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>`;
-                    }
-                    if (permissaoUsuario === 'admin') {
-                        botoesAcao += ` <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>`;
-                    }
-                    tr.innerHTML = `
-                        <td>${rnc.sequencial || rnc.id.slice(-6)}</td>
-                        <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                        <td>${rnc.cod_produto}</td>
-                        <td>${rnc.cod_peca}</td>
-                        <td>${rnc.origem_defeito || '-'}</td>
-                        <td>${rnc.nf}</td>
-                        <td>${rnc.qtd}</td>
-                        <td>${rnc.nao_conforme.substring(0, 50)}...</td>
-                        <td>${rnc.visto_operador || '-'}</td>
-                        <td>${rnc.status}</td>
-                        <td>${botoesAcao}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+                if (permissaoUsuario === 'admin') {
+                    botoesAcao += ` <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${rnc.id.slice(-6)}</td>
+                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${rnc.cod_produto}</td>
+                    <td>${rnc.cod_peca}</td>
+                    <td>${rnc.origem_defeito || '-'}</td>
+                    <td>${rnc.nf}</td>
+                    <td>${rnc.qtd}</td>
+                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
+                    <td>${rnc.visto_operador || '-'}</td>
+                    <td>${rnc.status}</td>
+                    <td>${botoesAcao}</td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
         window.editarRNC = async function(id) {
             if (permissaoUsuario === 'operador') return;
-            const snap = await get(ref(db, `rncs/${id}`));
-            if (snap.exists()) {
-                const rnc = { id: snap.key,...snap.val() };
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
                 document.getElementById('editId').value = rnc.id;
                 document.getElementById('cod_produto').value = rnc.cod_produto;
                 document.getElementById('codigo_peca').value = rnc.cod_peca;
@@ -460,7 +482,8 @@
         window.excluirRNC = async function(id) {
             if (permissaoUsuario!== 'admin') { alert('Apenas admin pode excluir'); return; }
             if (confirm('Tem certeza que deseja excluir esta RNC?')) {
-                await remove(ref(db, `rncs/${id}`));
+                await deleteDoc(doc(db, "rncs", id));
+                await carregarTabelaRNCs();
             }
         }
 
@@ -473,9 +496,9 @@
         }
 
         window.exportarExcelRNCs = async function() {
-            const snap = await get(ref(db, 'rncs'));
+            const querySnapshot = await getDocs(collection(db, "rncs"));
             const rncs = [];
-            snap.forEach(child => rncs.push({ ID: child.key,...child.val() }));
+            querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
             if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
             const ws = XLSX.utils.json_to_sheet(rncs);
             const wb = XLSX.utils.book_new();
@@ -484,9 +507,10 @@
         }
 
         window.imprimirEtiqueta = async function(id) {
-            const snap = await get(ref(db, `rncs/${id}`));
-            if (snap.exists()) {
-                const rnc = { id: snap.key,...snap.val() };
+            const docRef = doc(db, "rncs", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const rnc = {id: docSnap.id,...docSnap.data()};
                 const etiquetaHTML = gerarEtiqueta100x60(rnc);
                 const win = window.open('', '_blank', 'width=400,height=300');
                 win.document.write(etiquetaHTML);
@@ -495,7 +519,7 @@
         }
 
         function gerarEtiqueta100x60(rnc) {
-            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta ${rnc.sequencial || rnc.id.slice(-6)}</title>
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
 <style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
 .etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
@@ -514,14 +538,14 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || ''}</span></div>
 <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
 <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
-<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T03:00:00').toLocaleDateString('pt-BR')}</span></div>
+<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
 <div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
 <div class="footer">
     <div style="display:flex; justify-content:space-between;">
         <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
         <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
     </div>
-    <div style="text-align:right;">ID: ${rnc.sequencial || rnc.id.slice(-6)}</div>
+    <div style="text-align:right;">ID: ${rnc.id.slice(-6)}</div>
 </div>
 </div></body></html>`;
         }
