@@ -26,10 +26,6 @@
         .btn-adicionar:hover:not(:disabled) { background: #218838; }
         .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
         .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-        .permissoes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        .check-group { display: flex; align-items: center; gap: 8px; }
-        .check-group input { width: auto; }
-        .check-group label { margin: 0; font-weight: normal; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
@@ -43,7 +39,9 @@
         .badge-admin { background: #dc3545; color: white; }
         .badge-inspetor { background: #ffc107; color: #000; }
         .badge-operador { background: #6c757d; color: white; }
-        @media (max-width: 768px) { .form-grid,.permissoes-grid { grid-template-columns: 1fr; } .header-bar { flex-direction: column; gap: 10px; } }
+        .bloqueado { text-align: center; padding: 40px; color: #dc3545; font-size: 18px; font-weight: bold; }
+        #formUsuario { display: none; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
@@ -56,54 +54,61 @@
             </div>
         </div>
 
-        <div class="content">
+        <div class="content" id="conteudoPrincipal">
             <div id="msg" class="msg"></div>
 
-            <h2>Adicionar Novo Usuário</h2>
-            <form id="formUsuario">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="email">Email do usuário *</label>
-                        <input type="email" id="email" required placeholder="usuario@elgin.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="nome">Nome completo *</label>
-                        <input type="text" id="nome" required placeholder="João Silva">
-                    </div>
-                    <div class="form-group">
-                        <label for="senha">Senha *</label>
-                        <input type="password" id="senha" required minlength="6" placeholder="Mínimo 6 caracteres">
-                    </div>
-                </div>
+            <div id="telaBloqueada" class="bloqueado" style="display:none;">
+                ⛔ Você não tem permissão para acessar esta página<br>
+                <small>Redirecionando...</small>
+            </div>
 
-                <div class="form-group">
-                    <label for="nivel">Nível de Permissão *</label>
-                    <select id="nivel" required>
-                        <option value="operador">Operador - Só visualiza</option>
-                        <option value="inspetor">Inspetor - Cadastra/Edita RNC</option>
-                        <option value="admin">Admin - Acesso total</option>
-                    </select>
-                </div>
+            <div id="telaAdmin" style="display:none;">
+                <h2>Adicionar Novo Usuário</h2>
+                <form id="formUsuario">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">Email do usuário *</label>
+                            <input type="email" id="email" required placeholder="usuario@elgin.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="nome">Nome completo *</label>
+                            <input type="text" id="nome" required placeholder="João Silva">
+                        </div>
+                        <div class="form-group">
+                            <label for="senha">Senha *</label>
+                            <input type="password" id="senha" required minlength="6" placeholder="Mínimo 6 caracteres">
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn-adicionar" id="btnAdicionar">+ Adicionar Usuário</button>
-            </form>
+                    <div class="form-group">
+                        <label for="nivel">Nível de Permissão *</label>
+                        <select id="nivel" required>
+                            <option value="operador">Operador - Só visualiza</option>
+                            <option value="inspetor">Inspetor - Cadastra/Edita RNC</option>
+                            <option value="admin">Admin - Acesso total</option>
+                        </select>
+                    </div>
 
-            <h2>Usuários Cadastrados</h2>
-            <table id="tabelaUsuarios">
-                <thead>
-                    <tr>
-                        <th>Nome</th><th>Email</th><th>Nível</th><th>Criado em</th><th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaBody"><tr><td colspan="5" class="loading">Carregando...</td></tr></tbody>
-            </table>
+                    <button type="submit" class="btn-adicionar" id="btnAdicionar">+ Adicionar Usuário</button>
+                </form>
+
+                <h2>Usuários Cadastrados</h2>
+                <table id="tabelaUsuarios">
+                    <thead>
+                        <tr>
+                            <th>Nome</th><th>Email</th><th>Nível</th><th>Criado em</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaBody"><tr><td colspan="5" class="loading">Carregando...</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDocFromServer, collection, getDocs, setDoc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, setDoc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
@@ -120,9 +125,9 @@
         const db = getFirestore(app);
 
         let usuarioAtual = null;
-        let permissaoUsuario = 'operador';
+        let permissaoUsuario = null;
 
-        // CONTROLE DE ACESSO - CORRIGIDO COM getDocFromServer
+        // CONTROLE DE ACESSO - CORRIGIDO PRA EVITAR CONDIÇÃO DE CORRIDA
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
@@ -132,37 +137,47 @@
             usuarioAtual = user;
 
             try {
-                // FORÇA BUSCAR DO SERVIDOR pra não pegar cache antigo
-                const userDoc = await getDocFromServer(doc(db, "usuarios", user.uid));
-
-                if (!userDoc.exists()) {
-                    mostrarMsg('Usuário sem permissão cadastrada no sistema', 'erro');
+                // Busca o documento do usuário
+                const userDocSnap = await getDoc(doc(db, "usuarios", user.uid));
+                
+                if (!userDocSnap.exists()) {
+                    mostrarBloqueio('Usuário sem cadastro no sistema');
                     setTimeout(() => window.location.href = 'index.html', 2000);
                     return;
                 }
 
-                const dadosUser = userDoc.data();
-                permissaoUsuario = dadosUser.nivel || 'operador';
+                const dadosUser = userDocSnap.data();
+                permissaoUsuario = dadosUser.nivel;
+                
+                // Atualiza header
                 document.getElementById('nomeUsuario').innerText = dadosUser.nome + ' (' + permissaoUsuario + ')';
 
-                // BLOQUEIA SE NÃO FOR ADMIN
+                // CHECAGEM DE ADMIN - SÓ CONTINUA SE FOR ADMIN
                 if (permissaoUsuario !== 'admin') {
-                    alert('Você não tem permissão para gerenciar usuários');
-                    window.location.href = 'index.html';
+                    mostrarBloqueio('Você não tem permissão para gerenciar usuários');
+                    setTimeout(() => window.location.href = 'index.html', 2000);
                     return;
                 }
 
-                // Só carrega a lista se for admin
+                // SE CHEGOU AQUI, É ADMIN
+                document.getElementById('telaAdmin').style.display = 'block';
+                document.getElementById('formUsuario').style.display = 'block';
                 await carregarUsuarios();
 
             } catch (error) {
-                console.error("Erro ao verificar permissão:", error);
-                mostrarMsg('Erro ao carregar permissões: ' + error.message, 'erro');
+                console.error("Erro na checagem:", error);
+                mostrarMsg('Erro ao verificar permissão: ' + error.message, 'erro');
                 setTimeout(() => window.location.href = 'index.html', 2000);
             }
         });
 
-        // ADICIONAR USUÁRIO - CRIA NO AUTH + FIRESTORE
+        function mostrarBloqueio(texto) {
+            document.getElementById('telaBloqueada').innerHTML = '⛔ ' + texto + '<br><small>Redirecionando...</small>';
+            document.getElementById('telaBloqueada').style.display = 'block';
+            document.getElementById('telaAdmin').style.display = 'none';
+        }
+
+        // ADICIONAR USUÁRIO
         document.getElementById('formUsuario').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -181,10 +196,10 @@
             btn.innerText = 'Criando...';
 
             try {
-                // 1. Cria no Firebase Authentication
+                // 1. Cria no Authentication
                 const userCred = await createUserWithEmailAndPassword(auth, email, senha);
 
-                // 2. Cria documento no Firestore com o mesmo UID
+                // 2. Cria no Firestore
                 await setDoc(doc(db, "usuarios", userCred.user.uid), {
                     nome: nome,
                     email: email,
@@ -203,6 +218,8 @@
                     msgErro += 'Este email já está cadastrado';
                 } else if (error.code === 'auth/weak-password') {
                     msgErro += 'Senha muito fraca. Use no mínimo 6 caracteres';
+                } else if (error.code === 'auth/invalid-email') {
+                    msgErro += 'Email inválido';
                 } else {
                     msgErro += error.message;
                 }
@@ -213,7 +230,7 @@
             }
         });
 
-        // CARREGAR LISTA DE USUÁRIOS
+        // CARREGAR LISTA
         async function carregarUsuarios() {
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '<tr><td colspan="5" class="loading">Carregando...</td></tr>';
@@ -236,14 +253,15 @@
                     const dataFormatada = user.criado_em ? new Date(user.criado_em).toLocaleDateString('pt-BR') : '-';
                     
                     let botoesAcao = '-';
-                    // Não deixa excluir a si mesmo
                     if (user.id !== usuarioAtual.uid) {
                         botoesAcao = `
                             <div class="acoes">
-                                <button class="btn-editar" onclick="editarUsuario('${user.id}', '${user.nivel}')">Alterar Nível</button>
+                                <button class="btn-editar" onclick="editarUsuario('${user.id}', '${user.nivel}', '${user.nome}')">Alterar Nível</button>
                                 <button class="btn-excluir" onclick="excluirUsuario('${user.id}', '${user.nome}')">Excluir</button>
                             </div>
                         `;
+                    } else {
+                        botoesAcao = '<small style="color:#999;">Você</small>';
                     }
 
                     tr.innerHTML = `
@@ -257,35 +275,35 @@
                 });
 
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="5" class="erro">Erro ao carregar usuários</td></tr>';
                 console.error(error);
+                tbody.innerHTML = '<tr><td colspan="5" class="erro">Erro ao carregar: ' + error.message + '</td></tr>';
             }
         }
 
-        // EDITAR NÍVEL DO USUÁRIO
-        window.editarUsuario = async function(uid, nivelAtual) {
+        // EDITAR NÍVEL
+        window.editarUsuario = async function(uid, nivelAtual, nome) {
             if (permissaoUsuario !== 'admin') return;
             
-            const novoNivel = prompt(`Alterar nível do usuário:\n\nAtual: ${nivelAtual}\n\nDigite: admin, inspetor ou operador`, nivelAtual);
+            const novoNivel = prompt(`Alterar nível de ${nome}:\n\nAtual: ${nivelAtual}\n\nDigite: admin, inspetor ou operador`, nivelAtual);
             
-            if (!novoNivel || !['admin', 'inspetor', 'operador'].includes(novoNivel)) {
+            if (!novoNivel || !['admin', 'inspetor', 'operador'].includes(novoNivel.toLowerCase())) {
                 return;
             }
 
             try {
-                await updateDoc(doc(db, "usuarios", uid), { nivel: novoNivel });
-                mostrarMsg('Nível atualizado com sucesso!', 'sucesso');
+                await updateDoc(doc(db, "usuarios", uid), { nivel: novoNivel.toLowerCase() });
+                mostrarMsg('Nível de ' + nome + ' atualizado!', 'sucesso');
                 await carregarUsuarios();
             } catch (error) {
                 mostrarMsg('Erro ao atualizar: ' + error.message, 'erro');
             }
         }
 
-        // EXCLUIR USUÁRIO - Só remove do Firestore. Auth precisa ser manual
+        // EXCLUIR USUÁRIO
         window.excluirUsuario = async function(uid, nome) {
             if (permissaoUsuario !== 'admin') return;
             
-            if (!confirm(`Tem certeza que deseja excluir ${nome}?\n\nATENÇÃO: Isso só remove do banco de dados. O login no Authentication precisa ser excluído manualmente no Console do Firebase.`)) {
+            if (!confirm(`Excluir ${nome}?\n\nATENÇÃO: Remove apenas do banco de dados. O login no Authentication deve ser excluído manualmente no Console do Firebase.`)) {
                 return;
             }
 
@@ -302,6 +320,7 @@
             const msgDiv = document.getElementById('msg');
             msgDiv.className = 'msg ' + tipo;
             msgDiv.innerText = texto;
+            window.scrollTo(0, 0);
             setTimeout(() => {
                 msgDiv.className = 'msg';
             }, 4000);
