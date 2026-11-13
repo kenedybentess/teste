@@ -65,164 +65,231 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden">
 
+    <!-- Container de Notificações (Toast) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- ===================================================================== -->
-    <!-- MODO 1: PAINEL DE CONTROLE / CONFIGURAÇÃO (ADMIN)                     -->
+    <!-- 1. MODO PAINEL DE CONTROLE (ADMIN)                                    -->
     <!-- ===================================================================== -->
-    <div id="admin-app" class="min-h-screen flex flex-col hidden">
-        
-        <!-- Top Navbar -->
+    <div id="admin-app" class="min-h-screen flex flex-col">
+        <!-- Cabeçalho Superior -->
         <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                         <i class="fa-solid fa-display text-white text-lg"></i>
                     </div>
                     <div>
                         <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
-                            SignagePro <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Multi-Tela</span>
+                            SignagePro
+                            <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Rede / Nuvem</span>
                         </h1>
-                        <p class="text-xs text-slate-400 hidden sm:block">Central de Gerenciamento e Transmissão Local</p>
+                        <p class="text-xs text-slate-400 hidden sm:block">Central de Gerenciamento & Sincronização Multi-Computador</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <span id="sync-badge" class="hidden md:inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Sincronizado
-                    </span>
-                    <button onclick="exportConfig()" title="Exportar Backup JSON" class="p-2.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-download"></i>
-                        <span class="hidden lg:inline">Backup</span>
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+                    <!-- Indicador / Seletor de Sala (Workspace) -->
+                    <button onclick="openWorkspaceModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-indigo-500/40 text-xs font-medium text-indigo-300 transition" title="Configurar Código da Sala / Modo deste PC">
+                        <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span>Sala: <strong id="current-workspace-label" class="font-mono text-white">EMPRESA-01</strong></span>
+                        <i class="fa-solid fa-gear text-slate-400 ml-0.5"></i>
                     </button>
-                    <label title="Importar Backup JSON" class="p-2.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-sm flex items-center gap-2 cursor-pointer">
+
+                    <!-- Sincronizar Todas as Telas -->
+                    <button onclick="forceSyncAllScreens()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-xs font-medium text-emerald-300 transition" title="Reiniciar e sincronizar todas as telas conectadas agora">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span class="hidden md:inline">Sincronizar Telas</span>
+                    </button>
+
+                    <!-- Exportar / Importar Backup JSON -->
+                    <button onclick="exportConfig()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition flex items-center gap-1.5" title="Exportar Backup JSON">
+                        <i class="fa-solid fa-download"></i>
+                        <span class="hidden lg:inline">Exportar</span>
+                    </button>
+                    <label class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition flex items-center gap-1.5 cursor-pointer" title="Restaurar Backup JSON">
                         <i class="fa-solid fa-upload"></i>
-                        <span class="hidden lg:inline">Restaurar</span>
+                        <span class="hidden lg:inline">Importar</span>
                         <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="importConfig(event)">
                     </label>
-                    <button onclick="resetDemoData()" title="Restaurar Exemplos Padrão" class="p-2.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition text-sm">
+                    <button onclick="resetDemoData()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition" title="Restaurar Exemplos Padrão">
                         <i class="fa-solid fa-rotate-left"></i>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Main Workspace -->
+        <!-- Conteúdo Principal -->
         <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Left Sidebar: Lista de Telas / Monitores -->
+            <!-- Coluna Esquerda: Lista de Telas / Monitores -->
             <aside class="lg:col-span-4 flex flex-col gap-4">
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                             <i class="fa-solid fa-tv text-indigo-400"></i> Telas Configuradas
                         </h2>
-                        <button onclick="openScreenModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
+                        <button onclick="openScreenModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
                             <i class="fa-solid fa-plus"></i> Nova Tela
                         </button>
                     </div>
 
-                    <!-- Lista de Telas -->
-                    <div id="screens-list" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
-                        <!-- Renderizado via JS -->
+                    <!-- Lista Dinâmica de Telas -->
+                    <div id="screens-list" class="space-y-2.5">
+                        <!-- Preenchido via JS -->
                     </div>
                 </div>
 
-                <!-- Card de Dicas de Uso Multi-Monitor -->
-                <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 text-xs text-slate-400 space-y-2.5">
-                    <div class="flex items-center gap-2 text-slate-200 font-semibold">
-                        <i class="fa-solid fa-circle-info text-indigo-400"></i> Como usar em vários monitores:
+                <!-- Card de Dica: Como usar em vários PCs -->
+                <div class="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-500/20 rounded-2xl p-4 text-xs text-slate-300 space-y-2.5">
+                    <div class="flex items-center gap-2 font-semibold text-indigo-300">
+                        <i class="fa-solid fa-network-wired"></i> Como exibir em outros computadores:
                     </div>
-                    <p>1. Configure cada monitor ou TV conectada ao PC na lista acima.</p>
-                    <p>2. Clique em <strong class="text-emerald-400">"Abrir Modo Exibição"</strong> para abrir uma janela dedicada.</p>
-                    <p>3. Arraste a janela aberta para o monitor desejado e pressione <strong>F11</strong> (ou clique no botão Tela Cheia).</p>
-                    <p class="text-slate-500 pt-1 border-t border-slate-800">
-                        <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Qualquer alteração feita aqui atualiza as telas abertas instantaneamente!
-                    </p>
+                    <ol class="list-decimal list-inside space-y-1.5 text-slate-400 leading-relaxed">
+                        <li>Abra este arquivo HTML nos outros PCs ou Smart TVs.</li>
+                        <li>Clique em <strong class="text-slate-200">Sala: <span id="tip-workspace-code">EMPRESA-01</span></strong> no topo e escolha <strong class="text-emerald-300">Modo Exibição (TV)</strong>.</li>
+                        <li>Selecione qual tela aquele PC deve exibir e aperte <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-200">F11</kbd>.</li>
+                        <li>Tudo que você alterar aqui sincroniza via Firebase automaticamente!</li>
+                    </ol>
                 </div>
             </aside>
 
-            <!-- Right Content: Detalhes e Playlist da Tela Selecionada -->
-            <section class="lg:col-span-8 flex flex-col gap-5" id="screen-editor-container">
-                <!-- Renderizado via JS -->
+            <!-- Coluna Direita: Editor da Tela Selecionada & Playlist -->
+            <section id="screen-editor-container" class="lg:col-span-8 flex flex-col gap-5">
+                <!-- Preenchido via JS -->
             </section>
-
         </main>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODO 2: JANELA DE EXIBIÇÃO DEDICADA (PLAYER / FULLSCREEN)             -->
+    <!-- 2. MODO EXIBIÇÃO (PLAYER DEDICADO PARA MONITOR / TV)                  -->
     <!-- ===================================================================== -->
-    <div id="player-app" class="fixed inset-0 bg-black text-white hidden select-none overflow-hidden flex flex-col justify-between">
-        
-        <!-- Área Principal de Renderização do Conteúdo -->
-        <div id="player-stage" class="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
-            <!-- Conteúdo dinâmico inserido via JS -->
+    <div id="player-app" class="hidden fixed inset-0 bg-black text-white z-50 flex flex-col overflow-hidden select-none">
+        <!-- Barra de Progresso Superior -->
+        <div id="player-progress-wrapper" class="w-full h-1.5 bg-white/10 z-30">
+            <div id="player-progress-bar" class="h-full bg-indigo-500 transition-all duration-100 ease-linear" style="width: 0%"></div>
         </div>
 
-        <!-- Barra de Progresso Discreta (Topo ou Base) -->
-        <div id="player-progress-wrapper" class="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 z-30 pointer-events-none">
-            <div id="player-progress-bar" class="h-full bg-indigo-500 transition-all duration-100 ease-linear" style="width: 0%;"></div>
+        <!-- Palco de Exibição do Conteúdo Atual -->
+        <div id="player-stage" class="flex-1 w-full h-full relative flex items-center justify-center overflow-hidden">
+            <!-- Conteúdo (Imagem, PDF, Iframe ou Texto) injetado aqui -->
         </div>
 
-        <!-- Controles Flutuantes (Ocultos quando o mouse fica parado) -->
-        <div id="player-hud" class="relative z-40 p-4 sm:p-6 flex flex-col justify-between h-full pointer-events-none transition-opacity duration-300 opacity-100">
+        <!-- HUD Flutuante (Aparece ao mover o mouse) -->
+        <div id="player-hud" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 transition-opacity duration-300 opacity-100">
+            <div class="flex flex-col pr-3 border-r border-slate-700">
+                <span id="hud-screen-name" class="text-xs font-bold text-indigo-400">Tela 1</span>
+                <span id="hud-item-info" class="text-[11px] text-slate-300">Item 1 de 3</span>
+            </div>
             
-            <!-- Top HUD -->
-            <div class="flex items-center justify-between pointer-events-auto bg-slate-950/80 backdrop-blur-md border border-white/10 px-4 py-3 rounded-2xl shadow-2xl max-w-4xl mx-auto w-full">
-                <div class="flex items-center gap-3">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <div>
-                        <h2 id="hud-screen-name" class="font-bold text-sm sm:text-base text-white">Nome da Tela</h2>
-                        <p id="hud-item-info" class="text-xs text-slate-400">Item 1 de 3 • 10s</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button onclick="playerPrev()" title="Anterior" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                        <i class="fa-solid fa-backward-step"></i>
-                    </button>
-                    <button onclick="playerTogglePause()" id="hud-pause-btn" title="Pausar/Continuar" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                        <i class="fa-solid fa-pause"></i>
-                    </button>
-                    <button onclick="playerNext()" title="Próximo" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                        <i class="fa-solid fa-forward-step"></i>
-                    </button>
-                    <div class="w-px h-6 bg-white/15 mx-1"></div>
-                    <button onclick="toggleFullScreen()" title="Tela Cheia (Fullscreen)" class="px-3.5 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-medium flex items-center gap-2 transition shadow-lg">
-                        <i class="fa-solid fa-expand"></i>
-                        <span class="hidden sm:inline">Tela Cheia</span>
-                    </button>
-                    <button onclick="returnToAdmin()" title="Voltar ao Painel" class="px-3 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
-                        <i class="fa-solid fa-gear"></i>
-                        <span class="hidden sm:inline">Painel</span>
-                    </button>
-                </div>
+            <div class="flex items-center gap-2">
+                <button onclick="playerPrev()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition" title="Anterior">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button id="hud-pause-btn" onclick="playerTogglePause()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition" title="Pausar/Retomar">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+                <button onclick="playerNext()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition" title="Próximo">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                <button onclick="toggleFullScreen()" class="px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition flex items-center gap-1.5" title="Tela Cheia">
+                    <i class="fa-solid fa-expand"></i>
+                    <span class="hidden sm:inline">Tela Cheia</span>
+                </button>
+                <button onclick="openDisplaySelectorModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-emerald-600/30 hover:text-emerald-300 text-slate-300 transition" title="Trocar Tela Exibida neste PC">
+                    <i class="fa-solid fa-tv"></i>
+                </button>
+                <button onclick="returnToAdmin()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-rose-600/30 hover:text-rose-300 text-slate-300 transition" title="Voltar ao Painel Admin">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
             </div>
-
-            <!-- Aviso Central Inicial para Tela Cheia (Desaparece ao clicar) -->
-            <div id="fullscreen-prompt" class="pointer-events-auto mx-auto bg-slate-900/90 backdrop-blur-md border border-indigo-500/40 px-6 py-4 rounded-2xl shadow-2xl text-center max-w-md">
-                <p class="text-sm text-slate-200 mb-3">Mova o mouse para exibir os controles. Para melhor experiência no monitor secundário, ative a tela cheia:</p>
-                <div class="flex justify-center gap-3">
-                    <button onclick="toggleFullScreen(); document.getElementById('fullscreen-prompt').classList.add('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition flex items-center gap-2">
-                        <i class="fa-solid fa-expand"></i> Ativar Tela Cheia Agora
-                    </button>
-                    <button onclick="document.getElementById('fullscreen-prompt').classList.add('hidden')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-3 py-2 rounded-xl transition">
-                        Dispensar
-                    </button>
-                </div>
-            </div>
-
-            <div class="h-2"></div>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODAIS DO PAINEL ADMINISTRATIVO                                       -->
+    <!-- MODAL: CONFIGURAÇÃO DE SALA (WORKSPACE) & MODO DO COMPUTADOR          -->
     <!-- ===================================================================== -->
+    <div id="modal-workspace" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cloud text-indigo-400"></i> Conexão Multi-Computador
+                </h3>
+                <button onclick="closeModal('modal-workspace')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400">Status do Firebase:</span>
+                        <span id="modal-sync-status" class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> Conectado
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Use o <strong>mesmo Código de Sala</strong> no PC Principal e nos outros computadores das TVs para sincronizar tudo em tempo real.
+                    </p>
+                </div>
 
-    <!-- Modal: Criar / Editar Tela -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Código da Sala / Empresa</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="workspace-code-input" placeholder="Ex: EMPRESA-01" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-mono uppercase text-white focus:outline-none focus:border-indigo-500">
+                        <button type="button" onclick="applyWorkspaceCode()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                            Conectar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 space-y-2">
+                    <label class="block text-xs font-medium text-slate-300">Função deste Computador:</label>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" onclick="switchToAdminMode()" class="p-3 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-left transition">
+                            <div class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sliders"></i> Painel Controle
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Gerenciar telas e mídias.</p>
+                        </button>
+                        <button type="button" onclick="openDisplaySelectorModal()" class="p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-left transition">
+                            <div class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-tv"></i> Modo Exibição
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Transformar este PC em TV.</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: ESCOLHER QUAL TELA EXIBIR NESTE COMPUTADOR                     -->
+    <!-- ===================================================================== -->
+    <div id="modal-display-selector" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-tv text-emerald-400"></i> Selecionar Tela para Exibir
+                </h3>
+                <button onclick="closeModal('modal-display-selector')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Escolha qual tela configurada na sala <strong id="selector-workspace-name" class="text-white font-mono">EMPRESA-01</strong> este computador vai reproduzir:</p>
+            
+            <div id="display-selector-list" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: ADICIONAR / EDITAR TELA                                        -->
+    <!-- ===================================================================== -->
     <div id="modal-screen" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
             <div class="flex items-center justify-between mb-4">
                 <h3 id="modal-screen-title" class="text-lg font-bold text-white">Nova Tela / Monitor</h3>
                 <button onclick="closeModal('modal-screen')" class="text-slate-400 hover:text-white p-1">
@@ -233,37 +300,38 @@
                 <input type="hidden" id="screen-id-input">
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1.5">Nome da Tela / Localização *</label>
-                    <input type="text" id="screen-name-input" required placeholder="Ex: Tela 1 - Recepção Principal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="screen-name-input" required placeholder="Ex: Tela 1 - Recepção Principal" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Descrição ou Resolução (Opcional)</label>
-                    <input type="text" id="screen-desc-input" placeholder="Ex: TV Samsung 50'' HDMI 2 - Full HD" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Descrição / Resolução (Opcional)</label>
+                    <input type="text" id="screen-desc-input" placeholder="Ex: TV Samsung 50&quot; HDMI 2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
-                <div class="grid grid-cols-2 gap-3 pt-1">
-                    <label class="flex items-center gap-2.5 bg-slate-950 border border-slate-800 p-3 rounded-xl cursor-pointer">
-                        <input type="checkbox" id="screen-progress-input" checked class="w-4 h-4 accent-indigo-500 rounded">
-                        <span class="text-xs text-slate-300">Barra de progresso</span>
-                    </label>
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Fundo da Tela</label>
-                        <select id="screen-bg-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-white">
-                            <option value="#000000">Preto Puro (Padrão)</option>
-                            <option value="#0f172a">Azul Escuro Slate</option>
-                            <option value="#ffffff">Branco Claro</option>
-                        </select>
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Barra de Progresso</label>
+                        <label class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 cursor-pointer">
+                            <input type="checkbox" id="screen-progress-input" checked class="rounded text-indigo-600 focus:ring-0 bg-slate-900 border-slate-700">
+                            <span class="text-xs text-slate-300">Exibir no topo</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Cor de Fundo</label>
+                        <input type="color" id="screen-bg-input" value="#000000" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl px-1.5 py-1 cursor-pointer">
                     </div>
                 </div>
-                <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-800">
-                    <button type="button" onclick="closeModal('modal-screen')" class="px-4 py-2 rounded-xl text-sm text-slate-300 hover:bg-slate-800 transition">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/20">Salvar Tela</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeModal('modal-screen')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/20">Salvar Tela</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Adicionar / Editar Item na Playlist -->
+    <!-- ===================================================================== -->
+    <!-- MODAL: ADICIONAR / EDITAR ITEM DA PLAYLIST                            -->
+    <!-- ===================================================================== -->
     <div id="modal-item" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl animate-fade-in my-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl my-8 animate-fade-in">
             <div class="flex items-center justify-between mb-4">
                 <h3 id="modal-item-title" class="text-lg font-bold text-white">Adicionar Conteúdo à Playlist</h3>
                 <button onclick="closeModal('modal-item')" class="text-slate-400 hover:text-white p-1">
@@ -292,43 +360,43 @@
                         </button>
                         <button type="button" data-type="text" onclick="selectItemType('text')" class="type-btn flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 text-xs font-medium transition">
                             <i class="fa-regular fa-file-lines text-lg"></i>
-                            <span>Texto / Doc</span>
+                            <span>Documento / TXT</span>
                         </button>
                     </div>
                     <input type="hidden" id="item-type-input" value="image">
                 </div>
 
-                <!-- Título e Duração -->
+                <!-- Título e Tempo de Exibição -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-medium text-slate-300 mb-1.5">Título de Identificação *</label>
-                        <input type="text" id="item-title-input" required placeholder="Ex: Banner Promocional" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="item-title-input" required placeholder="Ex: Tabela de Preços / Aviso Geral" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-300 mb-1.5">Duração (segundos) *</label>
-                        <input type="number" id="item-duration-input" required min="2" max="3600" value="10" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <input type="number" id="item-duration-input" min="2" max="3600" value="10" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
 
-                <!-- Campos Dinâmicos conforme o Tipo -->
-                
+                <!-- CAMPOS DINÂMICOS POR TIPO -->
                 <!-- 1. IMAGEM -->
-                <div id="field-group-image" class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                <div id="field-group-image" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Enviar Imagem do PC (PNG, JPG, GIF, WebP)</label>
-                        <input type="file" id="item-image-file" accept="image/*" onchange="handleFileUpload(event, 'image')" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
-                    </div>
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-slate-800"></div>
-                        <span class="flex-shrink mx-3 text-[11px] text-slate-500 uppercase">ou informe a URL</span>
-                        <div class="flex-grow border-t border-slate-800"></div>
-                    </div>
-                    <div>
-                        <input type="url" id="item-image-url" placeholder="https://exemplo.com/imagem.jpg" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Carregar Imagem do PC ou Colar URL</label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <label class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 cursor-pointer transition">
+                                <i class="fa-solid fa-folder-open text-indigo-400"></i>
+                                <span>Escolher Arquivo (JPG, PNG, WEBP)</span>
+                                <input type="file" id="item-image-file" accept="image/*" class="hidden" onchange="handleFileUpload(event, 'image')">
+                            </label>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Ajuste na Tela</label>
-                        <select id="item-image-fit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="url" id="item-image-url" placeholder="Ou cole o link direto da imagem: https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Ajuste na Tela</label>
+                        <select id="item-image-fit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                             <option value="contain">Ajustar inteiro sem cortar (Contain)</option>
                             <option value="cover">Preencher toda a tela (Cover)</option>
                         </select>
@@ -336,105 +404,114 @@
                 </div>
 
                 <!-- 2. PDF -->
-                <div id="field-group-pdf" class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 hidden">
+                <div id="field-group-pdf" class="space-y-3 hidden">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Selecionar Arquivo PDF do Computador</label>
-                        <input type="file" id="item-pdf-file" accept="application/pdf" onchange="handleFileUpload(event, 'pdf')" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer">
-                    </div>
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-slate-800"></div>
-                        <span class="flex-shrink mx-3 text-[11px] text-slate-500 uppercase">ou link direto do PDF</span>
-                        <div class="flex-grow border-t border-slate-800"></div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Carregar PDF do PC ou Colar Link</label>
+                        <label class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 cursor-pointer transition">
+                            <i class="fa-regular fa-file-pdf text-rose-400 text-base"></i>
+                            <span>Selecionar Arquivo PDF do Computador</span>
+                            <input type="file" id="item-pdf-file" accept="application/pdf" class="hidden" onchange="handleFileUpload(event, 'pdf')">
+                        </label>
                     </div>
                     <div>
-                        <input type="url" id="item-pdf-url" placeholder="https://exemplo.com/documento.pdf" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <input type="url" id="item-pdf-url" placeholder="Ou cole o link do PDF: https://exemplo.com/documento.pdf" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
-                    <p class="text-[11px] text-slate-400"><i class="fa-solid fa-info-circle text-indigo-400 mr-1"></i> Dica: Adicione <code class="text-slate-300">#toolbar=0&navpanes=0</code> ao final de links PDF para ocultar a barra de ferramentas.</p>
+                    <p class="text-[11px] text-slate-400"><i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> Dica: PDFs até 650 KB são sincronizados diretamente pela nuvem. Para arquivos maiores, use um link direto.</p>
                 </div>
 
                 <!-- 3. LINK / SITE -->
-                <div id="field-group-link" class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 hidden">
+                <div id="field-group-link" class="space-y-3 hidden">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1.5">URL do Site, Dashboard ou Documento Online *</label>
-                        <input type="url" id="item-link-url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">URL do Site / Dashboard / Sistema *</label>
+                        <input type="url" id="item-link-url" placeholder="https://exemplo.com/painel-indicadores" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
-                    <p class="text-[11px] text-amber-400/90 leading-relaxed">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Nota: Alguns sites (como Google, YouTube normal ou bancos) bloqueiam exibição em iframe por segurança (X-Frame-Options). Prefira links de incorporação (Embed), PowerBI, Google Docs/Slides publicados na web, Grafana ou sistemas internos.
+                    <p class="text-[11px] text-amber-400/90 bg-amber-950/30 border border-amber-500/20 p-2.5 rounded-xl">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Alguns sites externos (como Google ou bancos) bloqueiam exibição dentro de painéis por segurança (<code class="font-mono">X-Frame-Options</code>). Prefira links públicos incorporáveis ou dashboards próprios.
                     </p>
                 </div>
 
-                <!-- 4. TEXTO / DOCUMENTO (.TXT) -->
-                <div id="field-group-text" class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 hidden">
+                <!-- 4. DOCUMENTO / TXT -->
+                <div id="field-group-text" class="space-y-3 hidden">
                     <div class="flex items-center justify-between">
-                        <label class="block text-xs font-medium text-slate-300">Conteúdo do Comunicado / Documento</label>
-                        <label class="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer flex items-center gap-1.5 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
-                            <i class="fa-solid fa-file-arrow-up"></i> Carregar arquivo .TXT
-                            <input type="file" id="item-txt-file" accept=".txt,.md,.csv,.log" onchange="handleTxtUpload(event)" class="hidden">
+                        <label class="block text-xs font-medium text-slate-300">Conteúdo do Comunicado / Documento *</label>
+                        <label class="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer flex items-center gap-1">
+                            <i class="fa-solid fa-file-arrow-up"></i> Importar arquivo .TXT
+                            <input type="file" id="item-txt-file" accept=".txt,.md,.csv,.log" class="hidden" onchange="handleTxtUpload(event)">
                         </label>
                     </div>
-                    <textarea id="item-text-content" rows="5" placeholder="Digite aqui o aviso, comunicado, cardápio, metas do dia ou importe um arquivo .txt..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+                    <textarea id="item-text-content" rows="5" placeholder="Digite aqui o comunicado, metas do dia, cardápio ou avisos..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                    
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Estilo Visual do Cartão</label>
-                            <select id="item-text-theme" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                                <option value="dark-modern">Escuro Profissional (Alto Contraste)</option>
+                            <label class="block text-xs font-medium text-slate-300 mb-1.5">Tema Visual</label>
+                            <select id="item-text-theme" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="dark-modern">Escuro Moderno (Alto Contraste)</option>
                                 <option value="light-clean">Claro Corporativo (Fundo Branco)</option>
-                                <option value="indigo-alert">Destaque Azul / Aviso Importante</option>
-                                <option value="emerald-board">Quadro Verde / Metas</option>
+                                <option value="indigo-alert">Destaque Azul / Índigo</option>
+                                <option value="emerald-board">Quadro Verde / Indicadores</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Tamanho da Fonte</label>
-                            <select id="item-text-size" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                                <option value="normal">Normal (Textos longos)</option>
-                                <option value="large" selected>Grande (Comunicados)</option>
-                                <option value="xlarge">Extra Grande (Avisos curtos)</option>
+                            <label class="block text-xs font-medium text-slate-300 mb-1.5">Tamanho da Fonte</label>
+                            <select id="item-text-size" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="normal">Média (Textos longos)</option>
+                                <option value="large" selected>Grande (Avisos e Listas)</option>
+                                <option value="xlarge">Extra Grande (Manchetes)</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Status do Upload / Arquivo -->
-                <div id="upload-status-box" class="hidden text-xs p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 flex items-center justify-between">
-                    <span id="upload-status-text">Arquivo carregado na memória.</span>
-                    <button type="button" onclick="clearTempUpload()" class="text-rose-400 hover:underline ml-2">Remover</button>
+                <!-- Indicador de Arquivo Carregado -->
+                <div id="upload-status-box" class="hidden bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between text-xs text-emerald-300">
+                    <span id="upload-status-text" class="truncate pr-2"><i class="fa-solid fa-check-circle mr-1.5"></i> Arquivo pronto</span>
+                    <button type="button" onclick="clearTempUpload()" class="text-slate-400 hover:text-white shrink-0">Remover</button>
                 </div>
 
-                <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-800">
-                    <button type="button" onclick="closeModal('modal-item')" class="px-4 py-2 rounded-xl text-sm text-slate-300 hover:bg-slate-800 transition">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/20">Salvar na Playlist</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeModal('modal-item')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/20">Salvar na Playlist</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- ===================================================================== -->
+    <!-- LÓGICA JAVASCRIPT & SINCRONIZAÇÃO EM NUVEM (FIREBASE RTDB)            -->
+    <!-- ===================================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, off } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    <!-- ===================================================================== -->
-    <!-- LÓGICA JAVASCRIPT COMPLETA                                            -->
-    <!-- ===================================================================== -->
-    <script>
         /**
-         * ARQUITETURA DO SISTEMA:
-         * 1. Estado centralizado em `appData` com múltiplas telas (`screens`).
-         * 2. Persistência no `localStorage` sob a chave `signage_pro_data_v1`.
-         * 3. Sincronização em tempo real entre abas/janelas usando `BroadcastChannel` + evento `storage`.
-         * 4. Arquivos locais grandes (> 2MB) usam `URL.createObjectURL()` na sessão atual com aviso ao usuário,
-         *    enquanto arquivos menores são convertidos para Base64 para sobreviverem ao F5/recarregamento.
+         * ARQUITETURA MULTI-COMPUTADOR COM FIREBASE REALTIME DATABASE:
+         * - URL: https://controle-de-estoque-c5cc4-default-rtdb.firebaseio.com/
+         * - Caminho no banco: /signage_workspaces/{workspaceCode}
+         * - Permite abrir este arquivo .html diretamente em vários PCs pela rede/internet
+         *   e sincronizar telas, imagens, PDFs, links e textos em tempo real.
          */
 
-        const STORAGE_KEY = 'signage_pro_data_v1';
+        const FIREBASE_RTDB_URL = "https://controle-de-estoque-c5cc4-default-rtdb.firebaseio.com";
         const CHANNEL_NAME = 'signage_pro_sync_channel';
         const syncChannel = new BroadcastChannel(CHANNEL_NAME);
 
-        // Armazena Blob URLs temporários da sessão atual (para arquivos grandes)
-        const sessionBlobRegistry = {};
-        let tempUploadedData = null; // { url, isBlob, fileName }
+        // Estado em memória e controle de conexão
+        let inMemoryCache = null;
+        let tempUploadedData = null;
+        let rtdb = null;
+        let activeDbRef = null;
+        let activeDbCallback = null;
+        let pollingInterval = null;
+        let isCloudConnected = false;
 
-        // Dados de Demonstração Pré-carregados
+        // Recupera código de workspace da URL (?room=...) ou usa padrão
+        const urlParamsInit = new URLSearchParams(window.location.search);
+        let workspaceCode = (urlParamsInit.get('room') || 'EMPRESA-01').toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+
+        // Dados iniciais padrão
         const DEFAULT_DATA = {
             selectedScreenId: 'tela-recepcao',
+            syncTimestamp: Date.now(),
             screens: [
                 {
                     id: 'tela-recepcao',
@@ -459,13 +536,6 @@
                             duration: 8,
                             url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80',
                             fit: 'cover'
-                        },
-                        {
-                            id: 'item-103',
-                            type: 'link',
-                            title: 'Relógio Mundial & Clima',
-                            duration: 10,
-                            url: 'https://www.wikipedia.org/'
                         }
                     ]
                 },
@@ -484,37 +554,21 @@
                             content: 'METAS DE PRODUÇÃO - TURNO A\n\n• Meta Diária: 1.250 unidades\n• Realizado até agora: 1.180 unidades (94,4%)\n• Dias sem acidentes: 342 dias\n\nParabéns à equipe pelo excelente desempenho!',
                             theme: 'emerald-board',
                             fontSize: 'large'
-                        },
-                        {
-                            id: 'item-202',
-                            type: 'image',
-                            title: 'Segurança em Primeiro Lugar',
-                            duration: 8,
-                            url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80',
-                            fit: 'cover'
                         }
                     ]
                 },
                 {
                     id: 'tela-vitrine',
                     name: 'Tela 3 - Vitrine / Ofertas',
-                    description: 'Display Vertical / Promocional',
+                    description: 'Display Promocional',
                     showProgress: false,
                     bgColor: '#000000',
                     playlist: [
                         {
                             id: 'item-301',
-                            type: 'image',
-                            title: 'Destaque da Semana',
-                            duration: 7,
-                            url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1920&q=80',
-                            fit: 'cover'
-                        },
-                        {
-                            id: 'item-302',
                             type: 'text',
                             title: 'Condições Especiais',
-                            duration: 7,
+                            duration: 8,
                             content: 'OFERTA RELÂMPAGO\n\nToda a linha com 20% de desconto à vista ou em até 10x sem juros.\n\nConsulte nossos consultores no balcão!',
                             theme: 'light-clean',
                             fontSize: 'xlarge'
@@ -524,96 +578,275 @@
             ]
         };
 
-        let appData = loadData();
+        let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
 
         // =====================================================================
-        // INICIALIZAÇÃO E ROTEAMENTO (ADMIN VS PLAYER)
+        // INICIALIZAÇÃO DO FIREBASE REALTIME DATABASE
         // =====================================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const screenIdParam = urlParams.get('screen');
+        async function initCloudSync() {
+            updateWorkspaceLabels();
 
-            if (screenIdParam) {
-                // Inicia Modo Exibição Dedicado
-                initPlayerMode(screenIdParam);
-            } else {
-                // Inicia Painel de Controle
-                initAdminMode();
+            try {
+                const firebaseConfig = {
+                    databaseURL: FIREBASE_RTDB_URL
+                };
+
+                const app = initializeApp(firebaseConfig);
+                rtdb = getDatabase(app);
+
+                subscribeToWorkspace(workspaceCode);
+            } catch (err) {
+                console.warn('Erro ao conectar ao Firebase RTDB, operando em modo local:', err);
+                setConnectionStatus(false, 'Modo Offline / Local');
             }
-        });
+        }
 
-        // Escuta atualizações em tempo real de outras abas
-        syncChannel.onmessage = (event) => {
-            if (event.data && event.data.type === 'DATA_UPDATED') {
-                appData = event.data.payload;
-                const urlParams = new URLSearchParams(window.location.search);
-                const screenIdParam = urlParams.get('screen');
+        function applyIncomingRemoteData(remoteData) {
+            if (!remoteData || !Array.isArray(remoteData.screens)) return;
+
+            // Garante que cada tela tenha array playlist válido (RTDB omite arrays vazios)
+            remoteData.screens = remoteData.screens.map(s => ({
+                ...s,
+                playlist: Array.isArray(s.playlist) ? s.playlist : []
+            }));
+
+            const prevSyncTs = appData.syncTimestamp;
+            const prevSerialized = JSON.stringify(appData.screens);
+            const nextSerialized = JSON.stringify(remoteData.screens);
+
+            if (prevSerialized !== nextSerialized || remoteData.syncTimestamp !== prevSyncTs) {
+                appData = remoteData;
+                inMemoryCache = appData;
+
+                const currentParams = new URLSearchParams(window.location.search);
+                const screenIdParam = currentParams.get('screen');
 
                 if (screenIdParam) {
-                    handlePlayerDataSync(screenIdParam);
+                    const forceReset = remoteData.syncTimestamp && remoteData.syncTimestamp !== prevSyncTs;
+                    handlePlayerDataSync(screenIdParam, forceReset);
                 } else {
                     renderScreensList();
                     renderScreenEditor();
                 }
             }
-        };
+        }
 
-        // Fallback via evento storage do navegador
-        window.addEventListener('storage', (e) => {
-            if (e.key === STORAGE_KEY && e.newValue) {
-                try {
-                    appData = JSON.parse(e.newValue);
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const screenIdParam = urlParams.get('screen');
-                    if (screenIdParam) {
-                        handlePlayerDataSync(screenIdParam);
-                    } else {
-                        renderScreensList();
-                        renderScreenEditor();
-                    }
-                } catch (err) {
-                    console.error('Erro ao sincronizar storage:', err);
-                }
+        function subscribeToWorkspace(code) {
+            if (!rtdb) return;
+
+            // Remove listener anterior se houver troca de sala
+            if (activeDbRef && activeDbCallback) {
+                off(activeDbRef, 'value', activeDbCallback);
             }
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+
+            const workspaceRef = ref(rtdb, `signage_workspaces/${code}`);
+            activeDbRef = workspaceRef;
+
+            activeDbCallback = (snapshot) => {
+                setConnectionStatus(true, 'Firebase Conectado');
+                if (snapshot.exists()) {
+                    applyIncomingRemoteData(snapshot.val());
+                } else {
+                    // Primeiro acesso nesta sala: cria dados iniciais se estiver no modo Admin
+                    const currentParams = new URLSearchParams(window.location.search);
+                    if (!currentParams.get('screen')) {
+                        saveData(false);
+                    }
+                }
+            };
+
+            onValue(workspaceRef, activeDbCallback, (error) => {
+                console.error('Erro no listener do Realtime Database:', error);
+                setConnectionStatus(false, 'Erro de permissão/rede');
+            });
+
+            // Verificação periódica silenciosa a cada 15s como redundância para TVs 24/7
+            pollingInterval = setInterval(async () => {
+                try {
+                    const snap = await get(workspaceRef);
+                    if (snap.exists()) {
+                        setConnectionStatus(true, 'Firebase Conectado');
+                        applyIncomingRemoteData(snap.val());
+                    }
+                } catch (e) {
+                    // Ignora falhas momentâneas de rede
+                }
+            }, 15000);
+        }
+
+        function setConnectionStatus(connected, labelText) {
+            isCloudConnected = connected;
+            const dot = document.getElementById('cloud-status-dot');
+            const modalStatus = document.getElementById('modal-sync-status');
+
+            if (dot) {
+                dot.className = connected
+                    ? 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse'
+                    : 'w-2 h-2 rounded-full bg-amber-400';
+            }
+            if (modalStatus) {
+                modalStatus.innerHTML = connected
+                    ? `<i class="fa-solid fa-circle-check"></i> ${escapeHtml(labelText)}`
+                    : `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> <span class="text-amber-300">${escapeHtml(labelText)}</span>`;
+            }
+        }
+
+        function updateWorkspaceLabels() {
+            const lbl = document.getElementById('current-workspace-label');
+            const tip = document.getElementById('tip-workspace-code');
+            const selName = document.getElementById('selector-workspace-name');
+            const input = document.getElementById('workspace-code-input');
+
+            if (lbl) lbl.textContent = workspaceCode;
+            if (tip) tip.textContent = workspaceCode;
+            if (selName) selName.textContent = workspaceCode;
+            if (input) input.value = workspaceCode;
+        }
+
+        // =====================================================================
+        // INICIALIZAÇÃO DA INTERFACE
+        // =====================================================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const screenIdParam = urlParams.get('screen');
+
+            if (screenIdParam) {
+                initPlayerMode(screenIdParam);
+            } else {
+                initAdminMode();
+            }
+
+            await initCloudSync();
         });
 
+        // Sincronização instantânea entre abas do mesmo PC via BroadcastChannel
+        syncChannel.onmessage = (event) => {
+            if (event.data && event.data.type === 'DATA_UPDATED' && event.data.room === workspaceCode) {
+                applyIncomingRemoteData(event.data.payload);
+            }
+        };
+
         // =====================================================================
-        // PERSISTÊNCIA E NOTIFICAÇÕES
+        // SALVAMENTO NO FIREBASE RTDB + BROADCAST LOCAL
         // =====================================================================
-        function loadData() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && Array.isArray(parsed.screens) && parsed.screens.length > 0) {
-                        return parsed;
+        async function saveData(showToastMsg = false) {
+            inMemoryCache = appData;
+
+            // 1. Transmite imediatamente para abas no mesmo PC
+            syncChannel.postMessage({
+                type: 'DATA_UPDATED',
+                room: workspaceCode,
+                payload: appData
+            });
+
+            // 2. Envia para o Firebase Realtime Database
+            if (rtdb) {
+                try {
+                    const workspaceRef = ref(rtdb, `signage_workspaces/${workspaceCode}`);
+                    await set(workspaceRef, appData);
+                    setConnectionStatus(true, 'Firebase Conectado');
+
+                    if (showToastMsg) {
+                        showToast(`Sincronizado com todos os PCs da sala "${workspaceCode}"!`, 'success');
                     }
+                } catch (e) {
+                    console.error('Erro ao salvar no Firebase RTDB:', e);
+                    setConnectionStatus(false, 'Erro ao salvar na nuvem');
+                    showToast('Falha ao enviar para o Firebase. Verifique a internet ou regras do banco.', 'error');
                 }
-            } catch (e) {
-                console.warn('Falha ao ler localStorage, usando padrão:', e);
-            }
-            return JSON.parse(JSON.stringify(DEFAULT_DATA));
-        }
-
-        function saveData(showToastMsg = false) {
-            try {
-                // Cria cópia sanitizada (não salva blob: URLs no localStorage se não forem persistentes, mas mantém na sessão)
-                const serialized = JSON.stringify(appData);
-                localStorage.setItem(STORAGE_KEY, serialized);
-                
-                // Transmite para todas as janelas abertas instantaneamente
-                syncChannel.postMessage({ type: 'DATA_UPDATED', payload: appData });
-                
-                if (showToastMsg) showToast('Configurações salvas e sincronizadas!', 'success');
-            } catch (e) {
-                // Caso exceda a cota de ~5MB do localStorage
-                console.error('Limite do localStorage excedido:', e);
-                showToast('Aviso: Arquivo muito grande para salvar permanentemente no navegador. Funcionará nesta sessão enquanto a aba estiver aberta.', 'warning');
-                // Ainda assim envia via BroadcastChannel para telas abertas na mesma sessão!
-                syncChannel.postMessage({ type: 'DATA_UPDATED', payload: appData });
+            } else if (showToastMsg) {
+                showToast('Alterações aplicadas nesta sessão!', 'success');
             }
         }
 
+        function forceSyncAllScreens() {
+            appData.syncTimestamp = Date.now();
+            saveData(false);
+            showToast('Comando de sincronização enviado! Todas as telas conectadas reiniciaram no Slide 1.', 'success');
+        }
+
+        // =====================================================================
+        // CONTROLES DE WORKSPACE E SELETOR DE MODO (EXPOR PARA HTML ONCLICK)
+        // =====================================================================
+        function openWorkspaceModal() {
+            updateWorkspaceLabels();
+            const modal = document.getElementById('modal-workspace');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function applyWorkspaceCode() {
+            const raw = document.getElementById('workspace-code-input').value.trim().toUpperCase();
+            const cleaned = raw.replace(/[^A-Z0-9_-]/g, '');
+            if (!cleaned) {
+                showToast('Digite um código válido (ex: EMPRESA-01).', 'warning');
+                return;
+            }
+            workspaceCode = cleaned;
+            updateWorkspaceLabels();
+
+            // Atualiza parâmetro na URL sem recarregar
+            const url = new URL(window.location.href);
+            url.searchParams.set('room', workspaceCode);
+            window.history.replaceState({}, '', url.toString());
+
+            if (rtdb) {
+                subscribeToWorkspace(workspaceCode);
+            }
+            closeModal('modal-workspace');
+            showToast(`Conectado à sala "${workspaceCode}"!`, 'success');
+        }
+
+        function switchToAdminMode() {
+            closeModal('modal-workspace');
+            const url = new URL(window.location.href);
+            url.searchParams.delete('screen');
+            url.searchParams.set('room', workspaceCode);
+            window.history.replaceState({}, '', url.toString());
+            initAdminMode();
+        }
+
+        function openDisplaySelectorModal() {
+            closeModal('modal-workspace');
+            updateWorkspaceLabels();
+
+            const list = document.getElementById('display-selector-list');
+            if (!appData.screens || !appData.screens.length) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhuma tela encontrada nesta sala ainda.</p>`;
+            } else {
+                list.innerHTML = appData.screens.map(s => `
+                    <button type="button" onclick="startDisplayInThisComputer('${s.id}')" class="w-full p-3.5 rounded-xl bg-slate-950 hover:bg-emerald-500/15 border border-slate-800 hover:border-emerald-500/50 text-left transition flex items-center justify-between group">
+                        <div>
+                            <div class="font-semibold text-sm text-white group-hover:text-emerald-300">${escapeHtml(s.name)}</div>
+                            <div class="text-xs text-slate-400">${escapeHtml(s.description || 'Playlist com ' + s.playlist.length + ' itens')}</div>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium">
+                            Exibir Aqui <i class="fa-solid fa-play ml-1"></i>
+                        </span>
+                    </button>
+                `).join('');
+            }
+
+            const modal = document.getElementById('modal-display-selector');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function startDisplayInThisComputer(screenId) {
+            closeModal('modal-display-selector');
+            const url = new URL(window.location.href);
+            url.searchParams.set('room', workspaceCode);
+            url.searchParams.set('screen', screenId);
+            window.history.replaceState({}, '', url.toString());
+            initPlayerMode(screenId);
+        }
+
+        // =====================================================================
+        // NOTIFICAÇÕES E UTILITÁRIOS
+        // =====================================================================
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1043,37 +1276,68 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Preenche título automaticamente se estiver vazio
             const titleInput = document.getElementById('item-title-input');
             if (!titleInput.value.trim()) {
                 titleInput.value = file.name.replace(/\.[^/.]+$/, "");
             }
 
-            // Arquivos até 1.8MB são convertidos em Base64 (persistem no localStorage).
-            // Arquivos maiores usam Blob URL (instantâneo, sem estourar memória, válido na sessão).
-            const MAX_BASE64_SIZE = 1.8 * 1024 * 1024;
-
-            if (file.size <= MAX_BASE64_SIZE) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
+            if (type === 'image') {
+                // Comprime e redimensiona a imagem via Canvas para caber no banco em nuvem e carregar rápido nos outros PCs
+                compressImageFile(file, 1600, 0.78, (compressedDataUrl, approxKb) => {
                     tempUploadedData = {
-                        url: e.target.result,
+                        url: compressedDataUrl,
                         fileName: file.name,
                         isBlob: false
                     };
-                    showUploadStatus(`Pronto: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                const blobUrl = URL.createObjectURL(file);
-                tempUploadedData = {
-                    url: blobUrl,
-                    fileName: file.name,
-                    isBlob: true
-                };
-                showUploadStatus(`Pronto (Sessão): ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
-                showToast('Arquivo grande carregado via memória rápida (válido enquanto este navegador permanecer aberto).', 'info');
+                    showUploadStatus(`Imagem otimizada p/ rede: ${file.name} (~${approxKb} KB)`);
+                });
+            } else if (type === 'pdf') {
+                // PDFs até 650KB são convertidos em Base64 para sincronizar via nuvem entre PCs
+                const MAX_CLOUD_PDF = 650 * 1024;
+                if (file.size <= MAX_CLOUD_PDF) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        tempUploadedData = {
+                            url: e.target.result,
+                            fileName: file.name,
+                            isBlob: false
+                        };
+                        showUploadStatus(`PDF pronto p/ rede: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showToast('PDF acima de 650 KB. Para sincronizar em vários computadores, hospede o PDF (ex: Google Drive / link direto) e cole a URL acima.', 'warning');
+                    event.target.value = '';
+                }
             }
+        }
+
+        function compressImageFile(file, maxWidth, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    const approxKb = Math.round((dataUrl.length * 3) / 4 / 1024);
+                    callback(dataUrl, approxKb);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function handleTxtUpload(event) {
@@ -1203,13 +1467,12 @@
         // =====================================================================
         function openDisplayWindow(screenId) {
             const url = new URL(window.location.href);
+            url.searchParams.set('room', workspaceCode);
             url.searchParams.set('screen', screenId);
-            // Abre uma nova janela limpa otimizada para arrastar para outro monitor
             const winFeatures = 'noopener,noreferrer,width=1280,height=720,menubar=no,toolbar=no,location=no,status=no';
             const popup = window.open(url.toString(), `SignageDisplay_${screenId}`, winFeatures);
             
             if (!popup) {
-                // Fallback se popup for bloqueado: abre em nova aba padrão
                 window.open(url.toString(), '_blank');
             } else {
                 showToast('Janela de exibição aberta! Arraste-a para o monitor desejado.', 'success');
@@ -1281,12 +1544,12 @@
             startPlayerLoop();
         }
 
-        function handlePlayerDataSync(screenId) {
+        function handlePlayerDataSync(screenId, forceReset = false) {
             if (playerState.screenId !== screenId) return;
             const screen = appData.screens.find(s => s.id === screenId);
             if (!screen) return;
 
-            if (playerState.currentIndex >= screen.playlist.length) {
+            if (forceReset || playerState.currentIndex >= screen.playlist.length) {
                 playerState.currentIndex = 0;
             }
             playerState.elapsedMs = 0;
@@ -1448,6 +1711,7 @@
         function returnToAdmin() {
             const url = new URL(window.location.href);
             url.searchParams.delete('screen');
+            url.searchParams.set('room', workspaceCode);
             window.location.href = url.toString();
         }
 
@@ -1473,6 +1737,38 @@
             window.addEventListener('touchstart', revealHud);
             revealHud();
         }
+
+        // Expor funções no escopo global `window` para os atributos `onclick` / `onchange` do HTML
+        Object.assign(window, {
+            openWorkspaceModal,
+            applyWorkspaceCode,
+            switchToAdminMode,
+            openDisplaySelectorModal,
+            startDisplayInThisComputer,
+            forceSyncAllScreens,
+            exportConfig,
+            importConfig,
+            resetDemoData,
+            openScreenModal,
+            saveScreen,
+            deleteScreen,
+            selectScreen,
+            selectItemType,
+            openItemModal,
+            handleFileUpload,
+            handleTxtUpload,
+            clearTempUpload,
+            savePlaylistItem,
+            moveItem,
+            deleteItem,
+            closeModal,
+            openDisplayWindow,
+            playerNext,
+            playerPrev,
+            playerTogglePause,
+            toggleFullScreen,
+            returnToAdmin
+        });
     </script>
 </body>
 </html>
