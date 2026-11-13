@@ -416,6 +416,13 @@
                     <div>
                         <input type="url" id="item-pdf-url" placeholder="Ou cole o link do PDF: https://exemplo.com/documento.pdf" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1.5">Ajuste do PDF na Tela</label>
+                        <select id="item-pdf-fit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            <option value="Fit">Página Inteira na Tela (Fit - Sem cortes)</option>
+                            <option value="FitH">Ajustar à Largura da Tela (FitH)</option>
+                        </select>
+                    </div>
                     <p class="text-[11px] text-slate-400"><i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> Dica: PDFs até 650 KB são sincronizados diretamente pela nuvem. Para arquivos maiores, use um link direto.</p>
                 </div>
 
@@ -1247,6 +1254,7 @@
                         document.getElementById('item-image-url').value = item.url || '';
                     }
                 } else if (item.type === 'pdf') {
+                    document.getElementById('item-pdf-fit').value = item.fit || 'Fit';
                     if (item.url && (item.url.startsWith('data:') || item.url.startsWith('blob:'))) {
                         tempUploadedData = { url: item.url, fileName: item.fileName || 'Documento.pdf' };
                         showUploadStatus(`Arquivo atual: ${tempUploadedData.fileName}`);
@@ -1398,6 +1406,7 @@
                 const urlInput = document.getElementById('item-pdf-url').value.trim();
                 newItem.url = tempUploadedData ? tempUploadedData.url : urlInput;
                 newItem.fileName = tempUploadedData ? tempUploadedData.fileName : '';
+                newItem.fit = document.getElementById('item-pdf-fit').value;
                 if (!newItem.url) {
                     showToast('Selecione um arquivo PDF ou informe o link direto.', 'warning');
                     return;
@@ -1638,8 +1647,15 @@
                 `;
             } 
             else if (item.type === 'pdf') {
+                // Adiciona parâmetros de visualização para ocultar barras e ajustar o PDF exatamente ao tamanho do monitor
+                const fitMode = item.fit || 'Fit';
+                const cleanBaseUrl = (item.url || '').split('#')[0];
+                const fittedPdfUrl = `${cleanBaseUrl}#toolbar=0&navpanes=0&scrollbar=0&view=${fitMode}`;
+
                 stage.innerHTML = `
-                    <embed src="${item.url}" type="application/pdf" class="w-full h-full border-0 animate-fade-in" />
+                    <div class="w-full h-full flex items-center justify-center overflow-hidden bg-black animate-fade-in">
+                        <iframe src="${fittedPdfUrl}" class="w-full h-full border-0 block" allowfullscreen></iframe>
+                    </div>
                 `;
             } 
             else if (item.type === 'link') {
