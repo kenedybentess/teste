@@ -83,38 +83,32 @@
                 <p id="login-error" class="hidden text-xs text-rose-400"></p>
                 <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white transition"><i class="fa-solid fa-right-to-bracket mr-1"></i> Entrar</button>
             </form>
-            <button onclick="openRegisterModal()" class="mt-3 w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-medium text-slate-200 transition"><i class="fa-solid fa-user-plus mr-1"></i> Cadastrar novo usuário</button>
             <button onclick="handleChangePassword()" class="mt-3 w-full text-xs text-slate-400 hover:text-indigo-300 transition">Alterar senha</button>
             <p class="mt-4 text-[11px] text-center text-slate-500">Sessão expira ao fechar a aba. Telas em exibição (<span class="font-mono">?screen=</span>) continuam sem login.</p>
         </div>
     </div>
 
 
-    <!-- Modal: Cadastrar usuário (só o admin autoriza, com a senha dele) -->
-    <div id="register-modal" class="fixed inset-0 z-[210] hidden items-center justify-center bg-slate-950/90 backdrop-blur-sm px-4">
-        <div class="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-fade-in">
-            <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-user-plus mr-1 text-indigo-400"></i> Cadastrar novo usuário</h2>
-            <p class="text-xs text-slate-400 mt-1">O novo usuário terá acesso total ao painel. Para autorizar, informe a <strong class="text-slate-200">senha do administrador</strong>.</p>
-            <form onsubmit="return handleRegisterUser(event)" class="mt-4 space-y-3">
-                <div><label class="text-xs font-medium text-slate-300">Nome</label><input id="reg-name" required placeholder="Ex.: Maria Silva" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
-                <div><label class="text-xs font-medium text-slate-300">E-mail do novo usuário</label><input id="reg-email" type="email" required placeholder="usuario@elgin.com.br" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
-                <div><label class="text-xs font-medium text-slate-300">Senha do novo usuário</label><input id="reg-password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
-                <div><label class="text-xs font-medium text-slate-300">Confirmar senha</label><input id="reg-password-confirm" type="password" required minlength="6" placeholder="Repita a senha" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
-                <div><label class="text-xs font-medium text-amber-300">Senha do administrador (autorização)</label><input id="reg-admin-password" type="password" required placeholder="Senha de kenedy.santos@elgin.com.br" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-amber-500/50 text-sm text-white outline-none focus:border-amber-400"></div>
-                <p id="register-error" class="hidden text-xs text-rose-400"></p>
-                <p id="register-success" class="hidden text-xs text-emerald-400"></p>
-                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white transition">Cadastrar usuário</button>
-                <button type="button" onclick="closeRegisterModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-200 transition">Voltar para o login</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Gerenciar usuários (só dentro do painel, já logado) -->
+    <!-- Modal: Usuários -->
     <div id="users-modal" class="fixed inset-0 z-[210] hidden items-center justify-center bg-slate-950/90 backdrop-blur-sm px-4">
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-fade-in">
-            <div class="flex items-center justify-between"><h2 class="font-bold text-lg text-white"><i class="fa-solid fa-users mr-1 text-indigo-400"></i> Usuários cadastrados</h2><button onclick="closeUsersModal()" class="text-slate-400 hover:text-white text-lg leading-none">&times;</button></div>
-            <div id="users-list" class="mt-4 space-y-2 max-h-72 overflow-y-auto"></div>
-            <button onclick="closeUsersModal(); openRegisterModal();" class="mt-4 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white transition"><i class="fa-solid fa-user-plus mr-1"></i> Cadastrar novo usuário</button>
+        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between"><h2 class="font-bold text-lg text-white"><i class="fa-solid fa-users mr-1 text-indigo-400"></i> Usuários cadastrados</h2><button onclick="closeUsersModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button></div>
+            <p class="text-xs text-slate-400 mt-1">Lista lida ao vivo do Firebase (<span class="font-mono">/signage_users/</span>). Só <strong class="text-slate-200">kenedy.santos@elgin.com.br</strong> é admin; os demais são usuários comuns.</p>
+            <button onclick="renderUsersList()" class="mt-3 w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 transition"><i class="fa-solid fa-arrows-rotate mr-1"></i> Atualizar lista</button>
+            <div id="users-list" class="mt-3 space-y-2"></div>
+            <div class="mt-5 pt-4 border-t border-slate-800">
+                <h3 class="text-sm font-semibold text-white"><i class="fa-solid fa-user-plus mr-1 text-indigo-400"></i> Cadastrar novo usuário</h3>
+                <form onsubmit="return handleAddUser(event)" class="mt-3 space-y-3">
+                    <div><label class="text-xs font-medium text-slate-300">Nome</label><input id="new-user-name" required placeholder="Ex.: Maria Silva" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
+                    <div><label class="text-xs font-medium text-slate-300">E-mail</label><input id="new-user-email" type="email" required placeholder="usuario@elgin.com.br" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
+                    <div><label class="text-xs font-medium text-slate-300">Senha</label><input id="new-user-password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
+                    <div><label class="text-xs font-medium text-slate-300">Confirmar senha</label><input id="new-user-password-confirm" type="password" required minlength="6" placeholder="Repita a senha" class="mt-1 w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white outline-none focus:border-indigo-500"></div>
+                    <p id="users-error" class="hidden text-xs text-rose-400"></p>
+                    <p id="users-success" class="hidden text-xs text-emerald-400"></p>
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white transition">Cadastrar usuário</button>
+                </form>
+            </div>
+            <button onclick="closeUsersModal()" class="mt-4 w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-200 transition">Fechar</button>
         </div>
     </div>
 
@@ -168,7 +162,7 @@
                     <button onclick="resetDemoData()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition" title="Restaurar Exemplos Padrão">
                         <i class="fa-solid fa-rotate-left"></i>
                     </button>
-                    <button onclick="openUsersModal()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition flex items-center gap-1.5" title="Gerenciar usuários"><i class="fa-solid fa-users"></i><span class="hidden lg:inline">Usuários</span></button>
+                    <button onclick="openUsersModal()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition flex items-center gap-1.5" title="Ver usuários cadastrados"><i class="fa-solid fa-users"></i><span class="hidden lg:inline">Usuários</span></button>
                     <button onclick="handleLogout()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition" title="Sair (logout)"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </div>
@@ -656,6 +650,7 @@
                 const app = initializeApp(firebaseConfig);
                 rtdb = getDatabase(app);
 
+                await ensureKenedyAdmin();
                 subscribeToWorkspace(workspaceCode);
             } catch (err) {
                 console.warn('Erro ao conectar ao Firebase RTDB, operando em modo local:', err);
@@ -772,106 +767,140 @@
         // INICIALIZAÇÃO DA INTERFACE
         // =====================================================================
 
-        // ================= LOGIN / USUÁRIOS (camada adicionada — não altera o resto) =================
+        // ================= LOGIN + USUÁRIOS (FIREBASE) =================
+        // /signage_users/{email_com__} = { name, email, role: "admin" | "usuario", password }
+        // REGRA: só kenedy.santos@elgin.com.br é admin. Outros entram como "usuario".
         const ADMIN_EMAIL = 'kenedy.santos@elgin.com.br';
         const ADMIN_NAME = 'Kenedy Santos';
         const DEFAULT_ADMIN_PASSWORD = 'Elgin@123';
+        function userKey(email){ return String(email||'').trim().toLowerCase().replace(/[^a-z0-9]/g, '_'); }
         function getAdminPassword(){ try{ return localStorage.getItem('signagepro_admin_password') || DEFAULT_ADMIN_PASSWORD; }catch(e){ return DEFAULT_ADMIN_PASSWORD; } }
-        function getUsers(){ try{ return JSON.parse(localStorage.getItem('signagepro_users') || '[]'); }catch(e){ return []; } }
-        function saveUsers(list){ try{ localStorage.setItem('signagepro_users', JSON.stringify(list)); }catch(e){} }
-        function findUser(email){ const e=(email||'').trim().toLowerCase(); if(e===ADMIN_EMAIL) return {name:ADMIN_NAME,email:ADMIN_EMAIL,password:getAdminPassword(),isAdmin:true}; return getUsers().find(u=>u.email===e) || null; }
-        function isAdminLoggedIn(){ try{ return sessionStorage.getItem('signagepro_session') === 'admin'; }catch(e){ return false; } }
-        function currentUserEmail(){ try{ return sessionStorage.getItem('signagepro_session_user') || ''; }catch(e){ return ''; } }
+        function isAdminLoggedIn(){ try{ return !!sessionStorage.getItem('signagepro_session'); }catch(e){ return false; } }
+        function currentUserRole(){ try{ return sessionStorage.getItem('signagepro_session_role') || ''; }catch(e){ return ''; } }
+        function isCurrentUserAdmin(){ return currentUserRole() === 'admin' && (function(){ try{ return sessionStorage.getItem('signagepro_session_user') === ADMIN_EMAIL; }catch(e){ return false; } })(); }
+        async function getAllUsersFromFirebase(){
+            if(!rtdb) return null;
+            try{ const snap = await get(ref(rtdb, 'signage_users')); return snap.exists() ? (snap.val() || {}) : {}; }
+            catch(e){ console.warn('Falha ao ler usuários no Firebase:', e); return null; }
+        }
+        async function getUserFromFirebase(email){ const all = await getAllUsersFromFirebase(); if(!all) return null; return all[userKey(email)] || null; }
+        async function ensureKenedyAdmin(){
+            if(!rtdb) return null;
+            try{
+                const all = (await getAllUsersFromFirebase()) || {};
+                const kenedyKey = userKey(ADMIN_EMAIL);
+                for(const key of Object.keys(all)){ if(key !== kenedyKey && all[key] && all[key].role === 'admin'){ const u = all[key]; u.role = 'usuario'; await set(ref(rtdb, 'signage_users/' + key), u); } }
+                const existing = all[kenedyKey] || {};
+                const record = { name: ADMIN_NAME, email: ADMIN_EMAIL, role: 'admin', password: existing.password || getAdminPassword(), createdAt: existing.createdAt || Date.now() };
+                await set(ref(rtdb, 'signage_users/' + kenedyKey), record);
+                return record;
+            }catch(e){ console.warn('Não foi possível garantir o admin no Firebase (fallback local):', e); return null; }
+        }
         function showLogin(msg){
             const el = document.getElementById('login-screen');
             if(el){ el.classList.remove('hidden'); el.classList.add('flex'); }
             document.getElementById('admin-app').classList.add('hidden');
             if(msg){ const e=document.getElementById('login-error'); e.textContent=msg; e.classList.remove('hidden'); }
         }
-        function handleLogin(ev){
+        async function handleLogin(ev){
             ev.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value;
-            const user = findUser(email);
-            if(user && pass === user.password){
-                try{ sessionStorage.setItem('signagepro_session','admin'); sessionStorage.setItem('signagepro_session_user', user.email); }catch(e){}
+            const btn = ev.target.querySelector('button[type="submit"]');
+            if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Verificando no Firebase...'; }
+            let user = null;
+            const fb = await getUserFromFirebase(email);
+            if(fb && pass === fb.password) user = fb;
+            else if(!fb && email === ADMIN_EMAIL && pass === getAdminPassword()) user = { name: ADMIN_NAME, email: ADMIN_EMAIL, role: 'admin' };
+            if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-1"></i> Entrar'; }
+            if(user){
+                const role = user.email === ADMIN_EMAIL ? 'admin' : (user.role === 'admin' ? 'usuario' : (user.role || 'usuario'));
+                try{ sessionStorage.setItem('signagepro_session','logged'); sessionStorage.setItem('signagepro_session_user', user.email); sessionStorage.setItem('signagepro_session_role', role); }catch(e){}
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('flex');
                 document.getElementById('login-error').classList.add('hidden');
                 document.getElementById('login-password').value='';
                 initAdminMode();
-                showToast('Bem-vindo(a), ' + user.name.split(' ')[0] + '! Login realizado.', 'success');
+                showToast('Bem-vindo(a), ' + (user.name || user.email).split(' ')[0] + '! Login realizado.', 'success');
                 return false;
             }
             showLogin('E-mail ou senha incorretos.');
             return false;
         }
         function handleLogout(){
-            try{ sessionStorage.removeItem('signagepro_session'); sessionStorage.removeItem('signagepro_session_user'); }catch(e){}
+            try{ sessionStorage.removeItem('signagepro_session'); sessionStorage.removeItem('signagepro_session_user'); sessionStorage.removeItem('signagepro_session_role'); }catch(e){}
             showLogin();
             showToast('Você saiu do painel.', 'info');
         }
-        function handleChangePassword(){
-            const email = currentUserEmail() || ADMIN_EMAIL;
-            const user = findUser(email);
+        async function handleChangePassword(){
             const atual = prompt('Digite a senha atual:');
             if(atual === null) return;
-            if(!user || atual !== user.password){ alert('Senha atual incorreta.'); return; }
+            let email = ''; try{ email = sessionStorage.getItem('signagepro_session_user') || ''; }catch(e){}
+            if(!email) email = prompt('Digite seu e-mail:') || '';
+            email = email.trim().toLowerCase();
+            const fb = await getUserFromFirebase(email);
+            const atualCorreta = fb ? fb.password : (email === ADMIN_EMAIL ? getAdminPassword() : null);
+            if(atualCorreta === null || atual !== atualCorreta){ alert('Senha atual incorreta.'); return; }
             const nova = prompt('Digite a nova senha (mínimo 6 caracteres):');
             if(nova === null) return;
             if(!nova || nova.length < 6){ alert('A nova senha precisa ter no mínimo 6 caracteres.'); return; }
-            if(user.isAdmin){ try{ localStorage.setItem('signagepro_admin_password', nova); }catch(e){} }
-            else { const list=getUsers().map(u=> u.email===user.email ? {...u, password:nova} : u); saveUsers(list); }
-            alert('Senha alterada com sucesso! Use a nova senha no próximo login.');
+            if(email === ADMIN_EMAIL){ try{ localStorage.setItem('signagepro_admin_password', nova); }catch(e){} }
+            if(rtdb && fb){ try{ const rec = fb; rec.password = nova; if(email === ADMIN_EMAIL) rec.role = 'admin'; await set(ref(rtdb, 'signage_users/' + userKey(email)), rec); }catch(e){ console.warn('Senha trocada só localmente, Firebase falhou:', e); } }
+            alert('Senha alterada! Use a nova senha no próximo login.');
         }
-        function openRegisterModal(){
-            const m=document.getElementById('register-modal'); if(!m) return;
-            ['reg-name','reg-email','reg-password','reg-password-confirm','reg-admin-password'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-            const err=document.getElementById('register-error'); if(err) err.classList.add('hidden');
-            const ok=document.getElementById('register-success'); if(ok) ok.classList.add('hidden');
-            m.classList.remove('hidden'); m.classList.add('flex');
+        // ---- Botão Usuários: mostra quem já está cadastrado ----
+        function openUsersModal(){
+            if(!isCurrentUserAdmin()){ alert('Só o administrador pode ver e gerenciar usuários.'); return; }
+            renderUsersList();
+            const m=document.getElementById('users-modal'); if(m){ m.classList.remove('hidden'); m.classList.add('flex'); }
         }
-        function closeRegisterModal(){ const m=document.getElementById('register-modal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
-        function handleRegisterUser(ev){
+        function closeUsersModal(){ const m=document.getElementById('users-modal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
+        async function renderUsersList(){
+            const box=document.getElementById('users-list'); if(!box) return;
+            box.innerHTML='<p class="text-xs text-slate-500 text-center py-2"><i class="fa-solid fa-circle-notch fa-spin"></i> Carregando do Firebase...</p>';
+            const all = (await getAllUsersFromFirebase()) || {};
+            const list = Object.values(all).sort((a,b)=> (b.role === 'admin') - (a.role === 'admin') || String(a.name||'').localeCompare(String(b.name||'')));
+            if(!list.length){ box.innerHTML='<p class="text-xs text-slate-500 text-center py-2">Nenhum usuário no Firebase ainda. O admin será criado ao conectar.</p>'; return; }
+            box.innerHTML = list.map(u=>{
+                const isAdmin = u.email === ADMIN_EMAIL;
+                const badge = isAdmin ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Administrador</span>' : '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Usuário</span>';
+                const del = isAdmin ? '' : '<button onclick="deleteUser(\''+escapeHtml(u.email)+'\')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-xs text-rose-300 transition" title="Remover usuário"><i class="fa-solid fa-trash"></i> Remover</button>';
+                return '<div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800"><div class="min-w-0"><p class="text-sm font-medium text-white truncate">'+escapeHtml(u.name||u.email)+' '+badge+'</p><p class="text-xs text-slate-400 truncate">'+escapeHtml(u.email)+'</p></div>'+del+'</div>';
+            }).join('');
+        }
+        async function handleAddUser(ev){
             ev.preventDefault();
-            const name=document.getElementById('reg-name').value.trim();
-            const email=document.getElementById('reg-email').value.trim().toLowerCase();
-            const pass=document.getElementById('reg-password').value;
-            const confirm=document.getElementById('reg-password-confirm').value;
-            const adminPass=document.getElementById('reg-admin-password').value;
-            const err=document.getElementById('register-error'), ok=document.getElementById('register-success');
+            if(!isCurrentUserAdmin()){ alert('Só o administrador pode cadastrar usuários.'); return false; }
+            const name=document.getElementById('new-user-name').value.trim();
+            const email=document.getElementById('new-user-email').value.trim().toLowerCase();
+            const pass=document.getElementById('new-user-password').value;
+            const conf=document.getElementById('new-user-password-confirm').value;
+            const err=document.getElementById('users-error'), ok=document.getElementById('users-success');
             const fail=(msg)=>{ err.textContent=msg; err.classList.remove('hidden'); ok.classList.add('hidden'); return false; };
-            if(adminPass !== getAdminPassword()) return fail('Senha do administrador incorreta. Só o administrador pode cadastrar usuários.');
             if(!name) return fail('Informe o nome do usuário.');
+            if(email === ADMIN_EMAIL) return fail('Este é o e-mail do administrador. Não é possível cadastrá-lo como usuário comum.');
             if(pass.length < 6) return fail('A senha precisa ter no mínimo 6 caracteres.');
-            if(pass !== confirm) return fail('As senhas não conferem.');
-            if(findUser(email)) return fail('Este e-mail já está cadastrado.');
-            const list=getUsers(); list.push({name, email, password:pass}); saveUsers(list);
-            err.classList.add('hidden'); ok.textContent='Usuário ' + name + ' (' + email + ') cadastrado! Ele já pode entrar na tela de login.'; ok.classList.remove('hidden');
-            ['reg-name','reg-email','reg-password','reg-password-confirm','reg-admin-password'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+            if(pass !== conf) return fail('As senhas não conferem.');
+            if(!rtdb) return fail('Sem conexão com o Firebase. Tente novamente com internet.');
+            const existing = await getUserFromFirebase(email);
+            if(existing) return fail('Este e-mail já está cadastrado.');
+            await set(ref(rtdb, 'signage_users/' + userKey(email)), { name, email, role: 'usuario', password: pass, createdAt: Date.now() });
+            err.classList.add('hidden');
+            ok.textContent='Usuário ' + name + ' (' + email + ') cadastrado! Ele já pode entrar com o próprio e-mail e senha.';
+            ok.classList.remove('hidden');
+            ['new-user-name','new-user-email','new-user-password','new-user-password-confirm'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
             renderUsersList();
             return false;
         }
-        function renderUsersList(){
-            const box=document.getElementById('users-list'); if(!box) return;
-            const users=getUsers();
-            let html='<div class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-950 border border-indigo-500/40"><div><p class="text-sm font-medium text-white">'+ADMIN_NAME+' <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Administrador</span></p><p class="text-xs text-slate-400">'+ADMIN_EMAIL+'</p></div></div>';
-            if(!users.length) html+='<p class="text-xs text-slate-500 text-center py-2">Nenhum outro usuário cadastrado ainda.</p>';
-            users.forEach(u=>{
-                html+='<div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800"><div class="min-w-0"><p class="text-sm font-medium text-white truncate">'+escapeHtml(u.name)+'</p><p class="text-xs text-slate-400 truncate">'+escapeHtml(u.email)+'</p></div><button onclick="deleteUser(\''+escapeHtml(u.email)+'\')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-xs text-rose-300 transition" title="Remover usuário"><i class="fa-solid fa-trash"></i> Remover</button></div>';
-            });
-            box.innerHTML=html;
-        }
-        function deleteUser(email){
-            if(email===ADMIN_EMAIL){ alert('O administrador não pode ser removido.'); return; }
+        async function deleteUser(email){
+            if(email === ADMIN_EMAIL){ alert('O administrador não pode ser removido.'); return; }
+            if(!isCurrentUserAdmin()){ alert('Só o administrador pode remover usuários.'); return; }
             if(!confirm('Remover o usuário '+email+'? Ele perderá o acesso ao painel.')) return;
-            saveUsers(getUsers().filter(u=>u.email!==email));
+            if(rtdb){ await set(ref(rtdb, 'signage_users/' + userKey(email)), null); }
             renderUsersList();
             showToast('Usuário removido.', 'info');
         }
-        function openUsersModal(){ renderUsersList(); const m=document.getElementById('users-modal'); if(m){ m.classList.remove('hidden'); m.classList.add('flex'); } }
-        function closeUsersModal(){ const m=document.getElementById('users-modal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
-        Object.assign(window, { handleLogin, handleLogout, handleChangePassword, openRegisterModal, closeRegisterModal, handleRegisterUser, openUsersModal, closeUsersModal, deleteUser });
+        Object.assign(window, { handleLogin, handleLogout, handleChangePassword, openUsersModal, closeUsersModal, renderUsersList, handleAddUser, deleteUser, ensureKenedyAdmin });
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
